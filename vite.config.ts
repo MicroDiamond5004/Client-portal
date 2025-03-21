@@ -35,10 +35,10 @@ export default defineConfig({
         },
     },
     server: {
-        host: '0.0.0.0',  // Открывает сервер для всех IP
-        port: 49080,       // Указываем порт
-        strictPort: true,  // Если порт занят — не использовать другой
-        cors: true         // Разрешает запросы с других доменов
+        host: '0.0.0.0',
+        port: 5173,  // Новый порт, так как 49080 занят Nginx
+        strictPort: true,
+        cors: true
     },
     
     // plugins: [react(),svgr({
