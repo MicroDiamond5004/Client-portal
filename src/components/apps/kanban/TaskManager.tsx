@@ -7,7 +7,12 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import SimpleBar from 'simplebar-react';
 import { Box } from '@mui/material';
 
-function TaskManager() {
+type TaskManagerProps = {
+  changeView: (isList: boolean) => void,
+}
+
+function TaskManager(props: TaskManagerProps) {
+  const {changeView} = props;
   const { todoCategories, moveTask } = useContext(KanbanDataContext);
   const onDragEnd = (result: { source: any; destination: any; draggableId: any }) => {
     const { source, destination, draggableId } = result;
@@ -32,7 +37,7 @@ function TaskManager() {
 
   return (
     <>
-      <KanbanHeader />
+      <KanbanHeader changeView={(isList) => changeView(isList)}/>
       <SimpleBar>
         <DragDropContext onDragEnd={onDragEnd}>
           <Box display="flex" gap={2}>

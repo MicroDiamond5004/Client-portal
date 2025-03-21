@@ -1,5 +1,5 @@
 
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { IconPencil, IconDotsVertical, IconTrash, IconCalendar } from '@tabler/icons-react';
 import EditTaskModal from './TaskModal/EditTaskModal';
 import { KanbanDataContext } from 'src/context/kanbancontext/index';
@@ -19,6 +19,7 @@ import {
 import BlankCard from '../../shared/BlankCard';
 import dayjs from 'dayjs';
 import { mutate } from 'swr';
+import ModalTicket from '../tickets/modalTicket/modal-ticket';
 
 interface TaskDataProps {
   task: { id: any };
@@ -29,6 +30,7 @@ interface TaskDataProps {
 }
 const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category }: any) => {
   const { setError, todoCategories, setTodoCategories } = useContext(KanbanDataContext);
+  const [isShowModal, setIsShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editedTask, setEditedTask] = useState(task);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -123,6 +125,7 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
                   : 'primary.contrastText';
 
   return (
+    <React.Fragment>
     <Draggable draggableId={String(task?.id)} index={index}>
       {(provided: any) => (
         <Box
@@ -132,7 +135,7 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
           ref={provided.innerRef}
         >
           <BlankCard>
-            <Box px={2} py={1} display="flex" alignItems="center" justifyContent="space-between">
+            <Box px={2} py={1} display="flex" alignItems="center" justifyContent="space-between" onClick={() => setIsShowModal(true)}>
               <Typography fontSize="14px" variant="h6">
                 {editedTask?.task}
               </Typography>
@@ -213,6 +216,8 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
         </Box>
       )}
     </Draggable>
+    <ModalTicket show={isShowModal} close={(isOpen) => setIsShowModal(isOpen)}/>
+    </React.Fragment>
   );
 };
 export default TaskData;

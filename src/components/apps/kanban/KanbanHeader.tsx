@@ -13,10 +13,27 @@ import {
 } from '@mui/material';
 import CustomFormLabel from '../../forms/theme-elements/CustomFormLabel';
 import CustomTextField from '../../forms/theme-elements/CustomTextField';
+import { IconBox, IconBoxMultiple4, IconClipboardList, IconLayoutList, IconList, IconListDetails, IconListTree } from '@tabler/icons-react';
+import { Stack, styled } from '@mui/system';
 
 
+const BoxStyled = styled(Box)(() => ({
+  transition: '0.1s ease-in',
+  cursor: 'pointer',
+  color: 'inherit',
+  backgroundColor: '#5D87FF',
+  '&:hover': {
+    transform: 'scale(1.03)',
+    backgroundColor: '#1245d6',
+  },
+}));
 
-function KanbanHeader() {
+type KandanHeaderProps = {
+  changeView: (isList: boolean) => void,
+}
+
+function KanbanHeader(props: KandanHeaderProps) {
+  const {changeView} = props;
   const { addCategory, setError } = useContext(KanbanDataContext);
   const [show, setShow] = useState(false);
   const [listName, setListName] = useState('');
@@ -42,9 +59,37 @@ function KanbanHeader() {
   return (<>
     <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
       <Typography variant="h5">Improving Work Processes</Typography>
-      <Button variant="contained" onClick={handleShow}>
-        Add List
-      </Button>
+      <Grid size={{
+          lg: 6,
+          sm: 6,
+          xs: 6
+        }}>
+          <Box bgcolor="white" p={0}>
+          <Stack direction="row" gap={2} alignItems="center" justifyContent='flex-end'>
+            <Box>
+              <Typography variant="h4">Вид:</Typography>
+            </Box> 
+            <BoxStyled 
+              onClick={() => changeView(true)}
+              width={38}
+              height={38}
+              bgcolor="primary.main"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Typography
+                color="primary.contrastText"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <IconLayoutList width={22} />
+              </Typography>
+            </BoxStyled>
+          </Stack>
+        </Box>
+      </Grid>
     </Box>
     <Dialog
       open={show}

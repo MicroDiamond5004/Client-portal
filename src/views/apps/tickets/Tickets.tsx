@@ -4,29 +4,57 @@ import TicketListing from 'src/components/apps/tickets/TicketListing';
 import TicketFilter from 'src/components/apps/tickets/TicketFilter';
 import ChildCard from 'src/components/shared/ChildCard';
 import { TicketProvider } from 'src/context/TicketContext';
+import React, { use, useState } from 'react';
+import TaskManager from 'src/components/apps/kanban/TaskManager';
+import { KanbanDataContextProvider } from 'src/context/kanbancontext';
+import BlankCard from 'src/components/shared/BlankCard';
+import { CardContent } from '@mui/material';
 
 const BCrumb = [
   {
     to: '/',
-    title: 'Home',
+    title: 'Главная',
   },
   {
-    title: 'Tickets',
+    title: 'Заказы',
   },
 ];
 
 const TicketList = () => {
-  return (
-    <TicketProvider>
-      <PageContainer title="Tickets App" description="this is Note page">
-        <Breadcrumb title="Tickets app" items={BCrumb} />
-        <ChildCard>
-          <TicketFilter />
-          <TicketListing />
-        </ChildCard>
-      </PageContainer>
-    </TicketProvider>
-  );
+  const [isList, setIsList] = useState(true);
+
+  const KanbanList = () => {
+    return(
+      <KanbanDataContextProvider>
+        <PageContainer title="Заказы" description="this is Kanban App">
+          <Breadcrumb title="Заказы" items={BCrumb} />
+          <BlankCard>
+            <CardContent>
+              <TaskManager changeView={(isList) => setIsList(isList)}/>
+            </CardContent>
+          </BlankCard>
+        </PageContainer>
+      </KanbanDataContextProvider>
+    )
+  }
+
+  const TicketList = () => {
+    return (
+      <TicketProvider>
+      <PageContainer title="Заказы" description="this is Note page">
+          <Breadcrumb title="Заказы" items={BCrumb} />
+          <ChildCard>
+            <TicketFilter/>
+            <TicketListing changeView={(isList) => setIsList(isList)}/>
+          </ChildCard>
+        </PageContainer>
+      </TicketProvider>
+    );
+  }
+  
+  return(
+    isList ? <TicketList/> : <KanbanList/>
+  )  
 };
 
 export default TicketList;

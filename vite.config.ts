@@ -34,8 +34,12 @@ export default defineConfig({
             ],
         },
     },
-
-
+    server: {
+        host: '0.0.0.0',  // Открывает сервер для всех IP
+        port: 49080,       // Указываем порт
+        strictPort: true,  // Если порт занят — не использовать другой
+        cors: true         // Разрешает запросы с других доменов
+    },
     
     // plugins: [react(),svgr({
     //   exportAsDefault: true

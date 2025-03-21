@@ -22,7 +22,7 @@ const Kanban = () => {
         <Breadcrumb title="Kanban app" items={BCrumb} />
         <BlankCard>
           <CardContent>
-            <TaskManager />
+            <TaskManager changeView={(isList) => {}}/>
           </CardContent>
         </BlankCard>
       </PageContainer>

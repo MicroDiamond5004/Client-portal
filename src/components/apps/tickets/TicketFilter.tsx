@@ -1,5 +1,7 @@
-import { Box, Grid2 as Grid, Typography, styled } from '@mui/material';
-import { useContext } from "react";
+import { Box, Button, Grid2 as Grid, Typography, styled } from '@mui/material';
+import { Stack } from '@mui/system';
+import { IconList, IconListDetails } from '@tabler/icons-react';
+import React, { useContext } from "react";
 import { TicketContext } from "src/context/TicketContext";
 
 const BoxStyled = styled(Box)(() => ({
@@ -22,7 +24,8 @@ const TicketFilter = () => {
 
 
   return (
-    (<Grid container spacing={3} textAlign="center">
+    (
+      <Grid container spacing={3} textAlign="center">
       <Grid
         size={{
           lg: 3,
@@ -34,7 +37,7 @@ const TicketFilter = () => {
           sx={{ backgroundColor: 'primary.light', color: 'primary.main' }}
         >
           <Typography variant="h3">{tickets.length}</Typography>
-          <Typography variant="h6">Total Tickets</Typography>
+          <Typography variant="h6">Все</Typography>
         </BoxStyled>
       </Grid>
       <Grid
@@ -48,7 +51,7 @@ const TicketFilter = () => {
           sx={{ backgroundColor: 'warning.light', color: 'warning.main' }}
         >
           <Typography variant="h3">{pendingC}</Typography>
-          <Typography variant="h6">Pending Tickets</Typography>
+          <Typography variant="h6">В Ожидании</Typography>
         </BoxStyled>
       </Grid>
       <Grid
@@ -62,7 +65,7 @@ const TicketFilter = () => {
           sx={{ backgroundColor: 'success.light', color: 'success.main' }}
         >
           <Typography variant="h3">{openC}</Typography>
-          <Typography variant="h6">Open Tickets</Typography>
+          <Typography variant="h6">Действующие</Typography>
         </BoxStyled>
       </Grid>
       <Grid
@@ -76,7 +79,7 @@ const TicketFilter = () => {
           sx={{ backgroundColor: 'error.light', color: 'error.main' }}
         >
           <Typography variant="h3">{closeC}</Typography>
-          <Typography variant="h6">Closed Tickets</Typography>
+          <Typography variant="h6">Завершенные</Typography>
         </BoxStyled>
       </Grid>
     </Grid>)

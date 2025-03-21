@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { format } from 'date-fns';
 import {
@@ -20,20 +20,37 @@ import {
   Pagination,
   useTheme,
   TableContainer,
+  Button,
 } from '@mui/material';
-import { IconTrash } from '@tabler/icons-react';
+import { IconBackground, IconList, IconTrash } from '@tabler/icons-react';
 import { TicketType } from 'src/types/apps/ticket';
 import { TicketContext } from 'src/context/TicketContext';
+import { Grid, styled } from '@mui/system';
+import ModalTicket from './modalTicket/modal-ticket';
 
+const BoxStyled = styled(Box)(() => ({
+  transition: '0.1s ease-in',
+  cursor: 'pointer',
+  color: 'inherit',
+  backgroundColor: '#5D87FF',
+  '&:hover': {
+    transform: 'scale(1.03)',
+    backgroundColor: '#1245d6',
+  },
+}));
 
-const TicketListing = () => {
+type TicketListingProps = {
+  changeView: (isList: boolean) => void,
+}
+
+const TicketListing = (props: TicketListingProps) => {
+  const [isShowModal, setIsShowModal] = useState(false);
+
+  const {changeView} = props;
   const { tickets, deleteTicket, searchTickets, ticketSearch, filter }: any =
     useContext(TicketContext);
 
-
-
   const theme = useTheme();
-
 
   const getVisibleTickets = (tickets: TicketType[], filter: string, ticketSearch: string) => {
     switch (filter) {
@@ -70,13 +87,12 @@ const TicketListing = () => {
         throw new Error(`Unknown filter: ${filter}`);
     }
   };
+
   const visibleTickets = getVisibleTickets(
     tickets,
     filter,
     ticketSearch.toLowerCase()
   );
-
-
 
 
   const ticketBadge = (ticket: TicketType) => {
@@ -92,42 +108,84 @@ const TicketListing = () => {
   };
 
   return (
-    <Box mt={4}>
-      <Box sx={{ maxWidth: '260px', ml: 'auto' }} mb={3}>
-        <TextField
-          size="small"
-          label="Search"
-          fullWidth
-          onChange={(e) => searchTickets(e.target.value)}
-        />
-      </Box>
+    <React.Fragment>
+    <Grid container mt={5}>
+      <Grid size={{
+          lg: 6,
+          sm: 6,
+          xs: 6
+        }}>
+          <Stack direction="row" alignItems="center">
+            <Box sx={{ minWidth: '47%'}}>
+              <TextField
+                size="small"
+                label="Поиск"
+                fullWidth
+                onChange={(e) => searchTickets(e.target.value)}
+              />
+            </Box>
+          </Stack>
+        </Grid>
+        <Grid size={{
+          lg: 6,
+          sm: 6,
+          xs: 6
+        }}>
+          <Box bgcolor="white" p={0}>
+          <Stack direction="row" gap={2} alignItems="center" justifyContent='flex-end'>
+            <Box>
+              <Typography variant="h4">Вид:</Typography>
+            </Box> 
+            <BoxStyled 
+              onClick={() => changeView(false)}
+              width={38}
+              height={38}
+              bgcolor="primary.main"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Typography
+                color="primary.contrastText"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <IconList width={22} />
+              </Typography>
+            </BoxStyled>
+          </Stack>
+        </Box>
+      </Grid>
+    </Grid>
+    <Box mt={1}>
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>
-                <Typography variant="h6">Id</Typography>
+                <Typography variant="h6">Номер заказа</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="h6">Ticket</Typography>
+                <Typography variant="h6">Билеты</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="h6">Assigned To</Typography>
+                <Typography variant="h6">Клиент</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="h6">Status</Typography>
+                <Typography variant="h6">Статус</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="h6">Date</Typography>
+                <Typography variant="h6">Дата</Typography>
               </TableCell>
               <TableCell align="right">
-                <Typography variant="h6">Action</Typography>
+                <Typography variant="h6">Действие</Typography>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {visibleTickets.map((ticket: any) => (
-              <TableRow key={ticket.Id} hover>
+              <TableRow key={ticket.Id} hover onClick={() => setIsShowModal(true)}>
                 <TableCell>{ticket.Id}</TableCell>
                 <TableCell>
                   <Box>
@@ -188,7 +246,8 @@ const TicketListing = () => {
         <Pagination count={10} color="primary" />
       </Box>
     </Box>
-  );
+    <ModalTicket show={isShowModal} close={(isOpen) => setIsShowModal(isOpen)}/>
+    </React.Fragment>);
 };
 
 export default TicketListing;

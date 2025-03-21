@@ -20,7 +20,8 @@ const AppDD = () => {
   };
 
   return (<>
-    <Box>
+  <React.Fragment></React.Fragment>
+    {/* <Box>
       <Button
         aria-label="show 11 new notifications"
         color="inherit"
@@ -39,7 +40,7 @@ const AppDD = () => {
       {/* ------------------------------------------- */}
       {/* Message Dropdown */}
       {/* ------------------------------------------- */}
-      <Menu
+      {/* <Menu
         id="msgs-menu"
         anchorEl={anchorEl2}
         keepMounted
@@ -107,8 +108,8 @@ const AppDD = () => {
           </Grid>
         </Grid>
       </Menu>
-    </Box>
-    <Button color="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} variant="text" to="/apps/chats" component={Link}>
+    // </Box> */}
+    {/* <Button color="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} variant="text" to="/apps/chats" component={Link}>
       Chat
     </Button>
     <Button color="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} variant="text" to="/apps/calendar" component={Link}>
@@ -116,7 +117,7 @@ const AppDD = () => {
     </Button>
     <Button color="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} variant="text" to="/apps/email" component={Link}>
       Email
-    </Button>
+    </Button> */}
   </>);
 };
 
