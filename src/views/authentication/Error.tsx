@@ -13,19 +13,19 @@ const Error = () => (
     <Container maxWidth="md">
       <img src={ErrorImg} alt="404" />
       <Typography align="center" variant="h1" mb={4}>
-        Opps!!!
+        Уупс!!!
       </Typography>
       <Typography align="center" variant="h4" mb={4}>
-        This page you are looking for could not be found.
+        Извините, мы не смогли найти эту страницу!
       </Typography>
       <Button
         color="primary"
         variant="contained"
         component={Link}
-        to="/dashboards/modern"
+        to="/"
         disableElevation
       >
-        Go Back to Home
+        Вернуться к билетам
       </Button>
     </Container>
   </Box>

@@ -23,10 +23,11 @@ import {
   Button,
 } from '@mui/material';
 import { IconBackground, IconList, IconTrash } from '@tabler/icons-react';
-import { TicketType } from 'src/types/apps/ticket';
 import { TicketContext } from 'src/context/TicketContext';
 import { Grid, styled } from '@mui/system';
 import ModalTicket from './modalTicket/modal-ticket';
+import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import { ALL } from 'dns';
 
 const BoxStyled = styled(Box)(() => ({
   transition: '0.1s ease-in',
@@ -39,6 +40,50 @@ const BoxStyled = styled(Box)(() => ({
   },
 }));
 
+export const AllStatus = {
+  NEW: 'Новый заказ',
+  PENDING: 'Принято в работу',
+  BOOKED: 'Забронировано',
+  FORMED: 'Оформлено',
+  CLOSED: 'Завершено',
+}
+
+export const getStatus = (ticket: ELMATicket): string => {
+  let status = 'Не определен';
+  switch(ticket.__status?.status) {
+    // Новый заказ
+    case 1:
+      status = AllStatus.NEW;
+      break;
+    //  В работе
+    case 2:
+      status = AllStatus.PENDING;
+      break;
+    // Ожидание
+    case 3:
+      status = AllStatus.PENDING;
+      break;
+    // Создание бронирования
+    case 4:
+      status = ticket.otvet_klientu ? AllStatus.BOOKED : AllStatus.PENDING;
+      break;
+    // Выписка
+    case 5:
+      status = AllStatus.BOOKED;
+      break;
+    // Завершено
+    case 6:
+      status = AllStatus.FORMED;
+      break;
+    // Снято
+    case 7:
+      status = AllStatus.CLOSED;
+      break;
+  }
+
+  return status;
+}
+
 type TicketListingProps = {
   changeView: (isList: boolean) => void,
 }
@@ -47,41 +92,41 @@ const TicketListing = (props: TicketListingProps) => {
   const [isShowModal, setIsShowModal] = useState(false);
 
   const {changeView} = props;
-  const { tickets, deleteTicket, searchTickets, ticketSearch, filter }: any =
+  const { tickets, searchTickets, ticketSearch, filter }: any =
     useContext(TicketContext);
 
   const theme = useTheme();
 
-  const getVisibleTickets = (tickets: TicketType[], filter: string, ticketSearch: string) => {
+  const getVisibleTickets = (tickets: ELMATicket[], filter: string, ticketSearch: string) => {
     switch (filter) {
       case 'total_tickets':
         return tickets.filter(
-          (c) => !c.deleted && c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
+          (c) => !c.__deletedAt && c.__name?.toLocaleLowerCase().includes(ticketSearch),
         );
 
       case 'Pending':
         return tickets.filter(
           (c) =>
-            !c.deleted &&
-            c.Status === 'Pending' &&
-            c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
+            !c.__deletedAt &&
+            c.__name?.split(' ')[0].toLocaleUpperCase() === 'Подготовка' &&
+            c.__name?.toLocaleLowerCase().includes(ticketSearch),
         );
 
-      case 'Closed':
-        return tickets.filter(
-          (c) =>
-            !c.deleted &&
-            c.Status === 'Closed' &&
-            c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
-        );
+      // case 'Closed':
+      //   return tickets.filter(
+      //     (c) =>
+      //       !c.deleted &&
+      //       c.Status === 'Closed' &&
+      //       c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
+      //   );
 
-      case 'Open':
-        return tickets.filter(
-          (c) =>
-            !c.deleted &&
-            c.Status === 'Open' &&
-            c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
-        );
+      // case 'Open':
+      //   return tickets.filter(
+      //     (c) =>
+      //       !c.deleted &&
+      //       c.Status === 'Open' &&
+      //       c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
+      //   );
 
       default:
         throw new Error(`Unknown filter: ${filter}`);
@@ -94,15 +139,14 @@ const TicketListing = (props: TicketListingProps) => {
     ticketSearch.toLowerCase()
   );
 
-
-  const ticketBadge = (ticket: TicketType) => {
-    return ticket.Status === 'Open'
+  const ticketBadge = (ticket: ELMATicket) => {
+    return ticket.__name === 'Open'
       ? theme.palette.success.light
-      : ticket.Status === 'Closed'
+      : ticket.__name === 'Closed'
         ? theme.palette.error.light
-        : ticket.Status === 'Pending'
+        : ticket.__name === 'Pending'
           ? theme.palette.warning.light
-          : ticket.Status === 'Moderate'
+          : ticket.__name === 'Moderate'
             ? theme.palette.primary.light
             : 'primary';
   };
@@ -170,9 +214,6 @@ const TicketListing = (props: TicketListingProps) => {
                 <Typography variant="h6">Билеты</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="h6">Клиент</Typography>
-              </TableCell>
-              <TableCell>
                 <Typography variant="h6">Статус</Typography>
               </TableCell>
               <TableCell>
@@ -184,55 +225,45 @@ const TicketListing = (props: TicketListingProps) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {visibleTickets.map((ticket: any) => (
-              <TableRow key={ticket.Id} hover onClick={() => setIsShowModal(true)}>
-                <TableCell>{ticket.Id}</TableCell>
+            {visibleTickets.map((ticket: ELMATicket) => (
+              <TableRow key={ticket.__id} hover onClick={() => setIsShowModal(true)}>
+                <TableCell>{ticket.nomer_zakaza}</TableCell>
                 <TableCell>
                   <Box>
                     <Typography variant="h6" fontWeight={600} noWrap>
-                      {ticket.ticketTitle}
+                      ФИО ПАССАЖИРОВ
                     </Typography>
                     <Typography
                       color="textSecondary"
-                      noWrap
-                      sx={{ maxWidth: '250px' }}
+                      sx={{ maxWidth: '400px', display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                        overflow: "hidden"}}
                       variant="subtitle2"
                       fontWeight={400}
                     >
-                      {ticket.ticketDescription}
+                      {ticket.otvet_klientu1 ? `✈️${ticket.otvet_klientu1?.split('✈️')[1]}` : null}
                     </Typography>
                   </Box>
                 </TableCell>
-                <TableCell>
-                  <Stack direction="row" gap="10px" alignItems="center">
-                    <Avatar
-                      src={ticket.thumb}
-                      alt={ticket.thumb}
-                      sx={{
-                        borderRadius: '100%',
-                        width: '35',
-                      }}
-                    />
-                    <Typography variant="h6">{ticket.AgentName}</Typography>
-                  </Stack>
-                </TableCell>
+                
                 <TableCell>
                   <Chip
                     sx={{
                       backgroundColor: ticketBadge(ticket),
                     }}
                     size="small"
-                    label={ticket.Status}
+                    label={getStatus(ticket)}
                   />
                 </TableCell>
                 <TableCell>
                   <Typography variant="subtitle1">
-                    {format(new Date(ticket.Date), 'E, MMM d')}
+                    {format(new Date(ticket.__updatedAt ?? ticket.__createdAt ?? new Date()), 'E, MMM d')}
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Tooltip title="Delete Ticket">
-                    <IconButton onClick={() => deleteTicket(ticket.Id)}>
+                    <IconButton onClick={() => {}}>
                       <IconTrash size="18" />
                     </IconButton>
                   </Tooltip>
@@ -251,3 +282,4 @@ const TicketListing = (props: TicketListingProps) => {
 };
 
 export default TicketListing;
+
