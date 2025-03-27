@@ -20,6 +20,7 @@ import BlankCard from '../../shared/BlankCard';
 import dayjs from 'dayjs';
 import { mutate } from 'swr';
 import ModalTicket from '../tickets/modalTicket/modal-ticket';
+import { AllTickets } from 'src/mocks/tickets/get-tickets';
 
 interface TaskDataProps {
   task: { id: any };
@@ -216,7 +217,7 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
         </Box>
       )}
     </Draggable>
-    <ModalTicket show={isShowModal} close={(isOpen) => setIsShowModal(isOpen)}/>
+    <ModalTicket show={isShowModal} ticket={AllTickets[0]} close={(isOpen) => setIsShowModal(isOpen)}/>
     </React.Fragment>
   );
 };

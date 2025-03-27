@@ -22,12 +22,13 @@ import {
   TableContainer,
   Button,
 } from '@mui/material';
-import { IconBackground, IconList, IconTrash } from '@tabler/icons-react';
+import { IconArrowAutofitContent, IconArrowCapsule, IconArrowRightBar, IconArrowRightTail, IconArrowRightToArc, IconArrowsDiagonal, IconArrowsDiagonal2, IconArrowsLeft, IconArrowsRightDown, IconArrowsTransferUp, IconArrowsUp, IconArrowUp, IconBackground, IconInbox, IconList, IconMailOpened, IconTrash } from '@tabler/icons-react';
 import { TicketContext } from 'src/context/TicketContext';
 import { Grid, styled } from '@mui/system';
 import ModalTicket from './modalTicket/modal-ticket';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { ALL } from 'dns';
+import getAllTicketsData from 'src/mocks/tickets/get-tickets';
 
 const BoxStyled = styled(Box)(() => ({
   transition: '0.1s ease-in',
@@ -95,6 +96,8 @@ const TicketListing = (props: TicketListingProps) => {
   const { tickets, searchTickets, ticketSearch, filter }: any =
     useContext(TicketContext);
 
+    const [currentTicket, setIsCurrentTicket] = useState<ELMATicket>(tickets[0]);
+
   const theme = useTheme();
 
   const getVisibleTickets = (tickets: ELMATicket[], filter: string, ticketSearch: string) => {
@@ -104,12 +107,34 @@ const TicketListing = (props: TicketListingProps) => {
           (c) => !c.__deletedAt && c.__name?.toLocaleLowerCase().includes(ticketSearch),
         );
 
-      case 'Pending':
+      case AllStatus.NEW:
         return tickets.filter(
           (c) =>
-            !c.__deletedAt &&
-            c.__name?.split(' ')[0].toLocaleUpperCase() === 'Подготовка' &&
-            c.__name?.toLocaleLowerCase().includes(ticketSearch),
+            !c.__deletedAt && getStatus(c) === AllStatus.NEW
+        );
+
+      case AllStatus.PENDING:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.PENDING
+        );
+
+      case AllStatus.BOOKED:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.BOOKED
+        );
+
+      case AllStatus.FORMED:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.FORMED
+        );
+
+      case AllStatus.CLOSED:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.CLOSED
         );
 
       // case 'Closed':
@@ -139,17 +164,18 @@ const TicketListing = (props: TicketListingProps) => {
     ticketSearch.toLowerCase()
   );
 
-  const ticketBadge = (ticket: ELMATicket) => {
-    return ticket.__name === 'Open'
-      ? theme.palette.success.light
-      : ticket.__name === 'Closed'
-        ? theme.palette.error.light
-        : ticket.__name === 'Pending'
-          ? theme.palette.warning.light
-          : ticket.__name === 'Moderate'
-            ? theme.palette.primary.light
-            : 'primary';
-  };
+  // const ticketBadge = (ticket: ELMATicket) => {
+  //   return ticket.__status?.status === 1
+  //     ? theme.palette.success.light
+  //     : ticket.__status?.status === 2
+  //       ? theme.palette.error.light
+  //       : ticket.__status?.status === 3
+  //         ? theme.palette.warning.light
+  //         : ticket.__status?.status === 4
+  //           ? theme.palette.primary.light
+  //           : 'primary';
+  // };
+
 
   return (
     <React.Fragment>
@@ -211,7 +237,7 @@ const TicketListing = (props: TicketListingProps) => {
                 <Typography variant="h6">Номер заказа</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="h6">Билеты</Typography>
+                <Typography variant="h6">Информация</Typography>
               </TableCell>
               <TableCell>
                 <Typography variant="h6">Статус</Typography>
@@ -225,14 +251,46 @@ const TicketListing = (props: TicketListingProps) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {visibleTickets.map((ticket: ELMATicket) => (
-              <TableRow key={ticket.__id} hover onClick={() => setIsShowModal(true)}>
+            {visibleTickets.map((ticket: ELMATicket) => {
+              const status = getStatus(ticket);
+
+              let colorStatus = 'black';
+              let backgroundStatus = 'grey';
+
+              switch(status) {
+                case AllStatus.NEW:
+                  colorStatus = 'warning.main';
+                  backgroundStatus = 'warning.light';
+                  break;
+                case AllStatus.PENDING:
+                  colorStatus = 'success.main';
+                  backgroundStatus = 'success.light';
+                  break;
+                case AllStatus.BOOKED:
+                  colorStatus = 'darkpink';
+                  backgroundStatus = 'pink';
+                  break;
+                case AllStatus.FORMED:
+                  colorStatus = 'brown';
+                  backgroundStatus = '#a52a2a1f';
+                  break;
+                case AllStatus.FORMED:
+                  colorStatus = 'error.main';
+                  backgroundStatus = 'error.light';
+                  break;
+              }
+              
+              return(
+              <TableRow key={ticket.__id} hover onClick={() => {
+                  setIsShowModal(true);
+                  setIsCurrentTicket(ticket);
+                }}>
                 <TableCell>{ticket.nomer_zakaza}</TableCell>
                 <TableCell>
                   <Box>
-                    <Typography variant="h6" fontWeight={600} noWrap>
+                    {(ticket.__status?.status || 0) > 3 && <Typography variant="h6" fontWeight={600} noWrap>
                       ФИО ПАССАЖИРОВ
-                    </Typography>
+                    </Typography>}
                     <Typography
                       color="textSecondary"
                       sx={{ maxWidth: '400px', display: "-webkit-box",
@@ -242,7 +300,7 @@ const TicketListing = (props: TicketListingProps) => {
                       variant="subtitle2"
                       fontWeight={400}
                     >
-                      {ticket.otvet_klientu1 ? `✈️${ticket.otvet_klientu1?.split('✈️')[1]}` : null}
+                      {ticket.otvet_klientu1 ? `✈️${ticket.otvet_klientu1?.split('✈️')[1]}` : <React.Fragment><Typography fontWeight={600} noWrap>Запрос: </Typography>{ticket.zapros}</React.Fragment>}
                     </Typography>
                   </Box>
                 </TableCell>
@@ -250,10 +308,10 @@ const TicketListing = (props: TicketListingProps) => {
                 <TableCell>
                   <Chip
                     sx={{
-                      backgroundColor: ticketBadge(ticket),
+                      backgroundColor: backgroundStatus
                     }}
                     size="small"
-                    label={getStatus(ticket)}
+                    label={status}
                   />
                 </TableCell>
                 <TableCell>
@@ -262,14 +320,16 @@ const TicketListing = (props: TicketListingProps) => {
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Tooltip title="Delete Ticket">
+                  <Tooltip title="Открыть">
                     <IconButton onClick={() => {}}>
-                      <IconTrash size="18" />
+                      <IconArrowsDiagonal size="22" />
+                      <Typography variant="button" marginLeft='10px'>Показать</Typography>
                     </IconButton>
                   </Tooltip>
                 </TableCell>
               </TableRow>
-            ))}
+            )
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -277,7 +337,7 @@ const TicketListing = (props: TicketListingProps) => {
         <Pagination count={10} color="primary" />
       </Box>
     </Box>
-    <ModalTicket show={isShowModal} close={(isOpen) => setIsShowModal(isOpen)}/>
+    <ModalTicket show={isShowModal} ticket={currentTicket} close={(isOpen) => setIsShowModal(isOpen)}/>
     </React.Fragment>);
 };
 

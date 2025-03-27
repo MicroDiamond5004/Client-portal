@@ -176,7 +176,7 @@ export type ELMATicket = {
     itogovaya_stoimost: {
         cents: number;
         currency: string;
-    } | {};
+    };
     ssylka_na_kartochku: string;
 };
 
