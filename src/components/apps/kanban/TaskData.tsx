@@ -1,10 +1,7 @@
 
-import React, { useContext, useEffect, useState } from 'react';
-import { IconPencil, IconDotsVertical, IconTrash, IconCalendar } from '@tabler/icons-react';
+import React, {  useEffect, useState } from 'react';
+import { IconPencil, IconDotsVertical, IconCalendar, IconArrowsDiagonal } from '@tabler/icons-react';
 import EditTaskModal from './TaskModal/EditTaskModal';
-import { KanbanDataContext } from 'src/context/kanbancontext/index';
-import { Draggable } from '@hello-pangea/dnd';
-import { patchFetcher } from "src/api/globalFetcher";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import {
@@ -18,22 +15,19 @@ import {
 } from '@mui/material';
 import BlankCard from '../../shared/BlankCard';
 import dayjs from 'dayjs';
-import { mutate } from 'swr';
 import ModalTicket from '../tickets/modalTicket/modal-ticket';
-import { AllTickets } from 'src/mocks/tickets/get-tickets';
+import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 
 interface TaskDataProps {
-  task: { id: any };
-  onDeleteTask: () => void;
+  task: ELMATicket;
   index: number;
   category: any;
 
 }
-const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category }: any) => {
-  const { setError, todoCategories, setTodoCategories } = useContext(KanbanDataContext);
+const TaskData: React.FC<TaskDataProps> = ({ task, index, category }: any) => {
   const [isShowModal, setIsShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editedTask, setEditedTask] = useState(task);
+  const [editedTask, setEditedTask] = useState<ELMATicket>(task);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleShowEditModal = () => {
@@ -50,36 +44,34 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
     setAnchorEl(null);
   };
 
-  const handleDeleteClick = () => onDeleteTask(task.id);
-
-  const handleSaveEditedTask = async (editedTaskData: { id: any }) => {
-    try {
-      const response = await mutate('/api/kanban/edit-task', patchFetcher("/api/kanban/edit-task", {
-        taskId: editedTaskData.id,
-        newData: editedTaskData,
-      }), false);
-      if (response.status === 200) {
-        setEditedTask(editedTaskData);
-        let remainingTodos = todoCategories.map((item) => {
-          if (item.name === category.name) {
-            let updatedChild = item.child.map((task) => {
-              if (task.id === editedTaskData.id) {
-                return { ...task, editedTaskData }
-              } return task
-            });
-            return { id: item.id, name: item.name, child: updatedChild }
-          } else {
-            return item
-          }
-        });
-        setTodoCategories(remainingTodos);
-      } else {
-        throw new Error("Failed to edit task");
-      }
-    } catch (error: any) {
-      setError(error.message);
-    }
-  };
+  // const handleSaveEditedTask = async (editedTaskData: { id: any }) => {
+  //   try {
+  //     const response = await mutate('/api/kanban/edit-task', patchFetcher("/api/kanban/edit-task", {
+  //       taskId: editedTaskData.id,
+  //       newData: editedTaskData,
+  //     }), false);
+  //     if (response.status === 200) {
+  //       setEditedTask(editedTaskData);
+  //       let remainingTodos = todoCategories.map((item) => {
+  //         if (item.name === category.name) {
+  //           let updatedChild = item.child.map((task) => {
+  //             if (task.id === editedTaskData.id) {
+  //               return { ...task, editedTaskData }
+  //             } return task
+  //           });
+  //           return { id: item.id, name: item.name, child: updatedChild }
+  //         } else {
+  //           return item
+  //         }
+  //       });
+  //       setTodoCategories(remainingTodos);
+  //     } else {
+  //       throw new Error("Failed to edit task");
+  //     }
+  //   } catch (error: any) {
+  //     setError(error.message);
+  //   }
+  // };
 
   // Function to format the date as 'DD MMM' (Day and Month)
   const formatDate = (date: string | undefined) => {
@@ -106,50 +98,48 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
   }, [editedTask])
 
 
-  const taskDate = formatDate(editedTask?.date); // Get formatted task date
+  const taskDate = formatDate(editedTask.__updatedAt ?? editedTask.__createdAt ?? ''); // Get formatted task date
 
-  const backgroundColor =
-    editedTask?.taskProperty === 'Design'
-      ? 'success.main'
-      : editedTask?.taskProperty === 'Development'
-        ? 'warning.main'
-        : editedTask?.taskProperty === 'Mobile'
-          ? 'primary.main'
-          : editedTask?.taskProperty === 'UX Stage'
-            ? 'warning.main'
-            : editedTask?.taskProperty === 'Research'
-              ? 'secondary.main'
-              : editedTask?.taskProperty === 'Data Science'
-                ? 'error.main'
-                : editedTask?.taskProperty === 'Branding'
-                  ? 'success.main'
-                  : 'primary.contrastText';
+  const backgroundColor ='success.main';
+  //   editedTask?.taskProperty === 'Design'
+  //     ? 'success.main'
+  //     : editedTask?.taskProperty === 'Development'
+  //       ? 'warning.main'
+  //       : editedTask?.taskProperty === 'Mobile'
+  //         ? 'primary.main'
+  //         : editedTask?.taskProperty === 'UX Stage'
+  //           ? 'warning.main'
+  //           : editedTask?.taskProperty === 'Research'
+  //             ? 'secondary.main'
+  //             : editedTask?.taskProperty === 'Data Science'
+  //               ? 'error.main'
+  //               : editedTask?.taskProperty === 'Branding'
+  //                 ? 'success.main'
+  //                 : 'primary.contrastText';
 
   return (
     <React.Fragment>
-    <Draggable draggableId={String(task?.id)} index={index}>
-      {(provided: any) => (
-        <Box
+    <Box onClick={() => setIsShowModal(true)}>
+      {[1].map((provided: any, index) => (
+        <Box key={index}
           mb={3}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
           ref={provided.innerRef}
         >
           <BlankCard>
-            <Box px={2} py={1} display="flex" alignItems="center" justifyContent="space-between" onClick={() => setIsShowModal(true)}>
-              <Typography fontSize="14px" variant="h6">
-                {editedTask?.task}
+            <Box px={2} py={1} display="flex" alignItems="center" justifyContent="space-between">
+              <Typography fontWeight={600} variant="h5">
+                {editedTask.nomer_zakaza}
               </Typography>
               <Box>
                 <IconButton
                   aria-label="more"
                   aria-controls="long-menu"
                   aria-haspopup="true"
-                  onClick={handleClick}
+                  onClick={() => {}}
                 >
-                  <IconDotsVertical size="1rem" />
+                  <IconArrowsDiagonal size="1.25rem" />
                 </IconButton>
-                <Menu
+                {/* <Menu
                   id="long-menu"
                   anchorEl={anchorEl}
                   keepMounted
@@ -162,23 +152,16 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
                     </ListItemIcon>
                     <ListItemText> Edit</ListItemText>
                   </MenuItem>
-                  <MenuItem onClick={handleDeleteClick}>
-                    <ListItemIcon>
-                      <IconTrash size="1.2rem" />{' '}
-                    </ListItemIcon>
-                    <ListItemText> Delete</ListItemText>
-                  </MenuItem>
-                </Menu>
-                <EditTaskModal
+                </Menu> */}
+                {/* <EditTaskModal
                   show={showEditModal}
                   onHide={handleCloseEditModal}
                   task={task}
                   editedTask={editedTask}
-                  onSave={handleSaveEditedTask}
-                />
+                /> */}
               </Box>
             </Box>
-            <Box>
+            {/* <Box>
               {editedTask?.taskImage && (
                 <img
                   src={editedTask?.taskImage}
@@ -188,12 +171,28 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
                   style={{ maxWidth: '100%', height: 'auto' }}
                 />
               )}
-            </Box>
-            {editedTask?.taskText && (
+            </Box> */}
+
+            {/* {(ticket.__status?.status || 0) > 3 && <Typography variant="h6" fontWeight={600} noWrap>
+              ФИО ПАССАЖИРОВ
+            </Typography>}
+            <Typography
+              color="textSecondary"
+              sx={{ maxWidth: '400px', display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 2,
+                overflow: "hidden"}}
+              variant="subtitle2"
+              fontWeight={400}
+            >
+              {ticket.otvet_klientu1 ? `✈️${ticket.otvet_klientu1?.split('✈️')[1]}` : <React.Fragment><Typography fontWeight={600} noWrap>Запрос: </Typography>{ticket.zapros}</React.Fragment>} */}
+            
               <Box px={2} py={1}>
-                <Typography variant="body2">{editedTask?.taskText}</Typography>
+              {(editedTask.__status?.status || 0) > 3 && <><Typography fontWeight={600} noWrap>
+                  ФИО ПАССАЖИРОВ
+                </Typography><br/></>}
+                  {editedTask.otvet_klientu1 ? `✈️${editedTask.otvet_klientu1?.split('✈️')[1]}` : <React.Fragment><Typography fontWeight={600} noWrap>Запрос: </Typography>{editedTask.zapros}</React.Fragment>}
               </Box>
-            )}
             <Box display="flex" alignItems="center" justifyContent="space-between" px={2} py={1}>
               <Stack direction="row" gap={1}>
                 <IconCalendar size="1rem" />
@@ -202,7 +201,7 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
               <Box>
                 <Chip
                   size="small"
-                  label={editedTask?.taskProperty}
+                  label={'Покупка'}
                   sx={{
                     backgroundColor,
                     color: 'white',
@@ -215,9 +214,9 @@ const TaskData: React.FC<TaskDataProps> = ({ task, onDeleteTask, index, category
             </Box>
           </BlankCard>
         </Box>
-      )}
-    </Draggable>
-    <ModalTicket show={isShowModal} ticket={AllTickets[0]} close={(isOpen) => setIsShowModal(isOpen)}/>
+      ))}
+    </Box>
+    <ModalTicket show={isShowModal} ticket={task} close={(isOpen) => setIsShowModal(isOpen)}/>
     </React.Fragment>
   );
 };

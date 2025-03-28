@@ -34,7 +34,7 @@ type KandanHeaderProps = {
 
 function KanbanHeader(props: KandanHeaderProps) {
   const {changeView} = props;
-  const { addCategory, setError } = useContext(KanbanDataContext);
+  const { setError } = useContext(KanbanDataContext);
   const [show, setShow] = useState(false);
   const [listName, setListName] = useState('');
 
@@ -44,21 +44,20 @@ function KanbanHeader(props: KandanHeaderProps) {
   const handleShow = () => setShow(true);
 
   //Handles Add a new category.
-  const handleSave = async () => {
-    try {
-      addCategory(listName);
-      setListName('');
-      setShow(false);
-    } catch (error: any) {
-      setError(error.message);
-    }
-  };
+  // const handleSave = async () => {
+  //   try {
+  //     setListName('');
+  //     setShow(false);
+  //   } catch (error: any) {
+  //     setError(error.message);
+  //   }
+  // };
 
   const isAddButtonDisabled = listName.trim().length === 0;
 
   return (<>
     <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-      <Typography variant="h5">Improving Work Processes</Typography>
+      <Typography variant="h5">Все Заказы</Typography>
       <Grid size={{
           lg: 6,
           sm: 6,
@@ -117,19 +116,19 @@ function KanbanHeader(props: KandanHeaderProps) {
           </Grid>
         </Grid>
       </DialogContent>
-      <DialogActions>
+      {/* <DialogActions>
         <Button variant="outlined" onClick={handleClose} color="error">
           Cancel
         </Button>
         <Button
           variant="contained"
-          onClick={handleSave}
+          // onClick={handleSave}
           color="primary"
           disabled={isAddButtonDisabled}
         >
           Add List
         </Button>
-      </DialogActions>
+      </DialogActions> */}
     </Dialog>
   </>);
 }

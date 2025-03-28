@@ -11,9 +11,11 @@ import { KanbanDataContext } from 'src/context/kanbancontext/index';
 import { postFetcher } from "src/api/globalFetcher";
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { mutate } from 'swr';
+import { AllStatus } from '../tickets/TicketListing';
+import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 
 function CategoryTaskList({ id }: any) {
-  const { todoCategories, deleteCategory, clearAllTasks, setTodoCategories } =
+  const { todoCategories, setTodoCategories } =
     useContext(KanbanDataContext);
 
   const category = todoCategories.find((cat) => cat.id === id) as any;
@@ -57,124 +59,124 @@ function CategoryTaskList({ id }: any) {
     setShowModal(false);
   };
   //  Shows the modal for editing a category.
-  const handleShowEditCategoryModal = () => {
-    handleClose();
-    setShowEditCategoryModal(true);
-  };
-  //Closes the modal for editing a category.
-  const handleCloseEditCategoryModal = () => setShowEditCategoryModal(false);
+  // const handleShowEditCategoryModal = () => {
+  //   handleClose();
+  //   setShowEditCategoryModal(true);
+  // };
+  // //Closes the modal for editing a category.
+  // const handleCloseEditCategoryModal = () => setShowEditCategoryModal(false);
 
-  const handleUpdateCategory = async (
-    updatedName: SetStateAction<string | any>
-  ) => {
-    try {
-      const response = await mutate('/api/TodoData/updateCategory', postFetcher("/api/TodoData/updateCategory", {
-        categoryId: id,
-        categoryName: updatedName,
-      }), false);
-      if (response?.status === 200) {
-        setNewCategoryName(updatedName);
-      } else {
-        throw new Error("Failed to update category");
-      }
-    } catch (error) {
-      console.error("Error updating category:", error);
-    }
-  };
+  // const handleUpdateCategory = async (
+  //   updatedName: SetStateAction<string | any>
+  // ) => {
+  //   try {
+  //     const response = await mutate('/api/TodoData/updateCategory', postFetcher("/api/TodoData/updateCategory", {
+  //       categoryId: id,
+  //       categoryName: updatedName,
+  //     }), false);
+  //     if (response?.status === 200) {
+  //       setNewCategoryName(updatedName);
+  //     } else {
+  //       throw new Error("Failed to update category");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating category:", error);
+  //   }
+  // };
 
-  const handleAddTask = async () => {
-    let counter = 0;
-    function generateUniqueNumber() {
-      const timestamp = Date.now(); // Current timestamp in milliseconds
-      counter = (counter + 1) % 1000; // Ensures counter resets after 1000
-      return `${timestamp}${counter.toString().padStart(3, '0')}`; // Example: 1694081234567001
-    }
-    try {
-      const response = await mutate("/api/TodoData/addTask", postFetcher("/api/TodoData/addTask", {
-        categoryId: id,
-        newTaskData: {
-          ...newTaskData,
-          id: generateUniqueNumber(),
-        },
-      }), false);
+  // const handleAddTask = async () => {
+  //   let counter = 0;
+  //   function generateUniqueNumber() {
+  //     const timestamp = Date.now(); // Current timestamp in milliseconds
+  //     counter = (counter + 1) % 1000; // Ensures counter resets after 1000
+  //     return `${timestamp}${counter.toString().padStart(3, '0')}`; // Example: 1694081234567001
+  //   }
+  //   try {
+  //     const response = await mutate("/api/TodoData/addTask", postFetcher("/api/TodoData/addTask", {
+  //       categoryId: id,
+  //       newTaskData: {
+  //         ...newTaskData,
+  //         id: generateUniqueNumber(),
+  //       },
+  //     }), false);
 
-      if (response.status === 200) {
-        handleCloseModal();
-        setNewTaskData({
-          task: '',
-          taskText: '',
-          taskProperty: '',
-          date: new Date().toISOString().split('T')[0],
-          taskImage: 'https://adminmart.github.io/template_api/images/website-template/endeavor/endeavor-nextjs-14-website-template.jpg',
-        });
-        let newUpdatedValue = todoCategories.map((item) => {
-          if (item.id === id) {
-            return {
-              ...item, child: [...item.child, {
-                ...newTaskData,
-                id: generateUniqueNumber(),
+  //     if (response.status === 200) {
+  //       handleCloseModal();
+  //       setNewTaskData({
+  //         task: '',
+  //         taskText: '',
+  //         taskProperty: '',
+  //         date: new Date().toISOString().split('T')[0],
+  //         taskImage: 'https://adminmart.github.io/template_api/images/website-template/endeavor/endeavor-nextjs-14-website-template.jpg',
+  //       });
+  //       let newUpdatedValue = todoCategories.map((item) => {
+  //         if (item.id === id) {
+  //           return {
+  //             ...item, child: [...item.child, {
+  //               ...newTaskData,
+  //               id: generateUniqueNumber(),
 
-              }]
-            }
-          } else {
-            return item
-          }
-        });
-        setTodoCategories(newUpdatedValue);
+  //             }]
+  //           }
+  //         } else {
+  //           return item
+  //         }
+  //       });
+  //       setTodoCategories(newUpdatedValue);
 
-      } else {
-        throw new Error("Failed to add task");
-      }
-    } catch (error) {
-      console.error("Error adding task:", error);
-    }
-  };
+  //     } else {
+  //       throw new Error("Failed to add task");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error adding task:", error);
+  //   }
+  // };
 
   // Clears all tasks from the current category.
-  const handleClearAll = () => {
-    clearAllTasks(id);
-    setAllTasks([]);
-    let remainingTodos = todoCategories.map((item) => {
-      if (item.name === category.name) {
-        return { id: item.id, name: item.name, child: [] }
-      } else {
-        return item
-      }
-    });
-    setTodoCategories(remainingTodos);
-  };
+  // const handleClearAll = () => {
 
-  // Deletes a specific task.
-  const handleDeleteTask = (taskId: number | any, category: any) => {
-    // deleteTodo(taskId);
-    setAllTasks((prevTasks: any[]) =>
-      prevTasks.filter((task: { id: number }) => task.id !== taskId)
-    );
-    let remainingTodos = todoCategories.map((item) => {
-      if (item.name === category.name) {
-        let updatedChild = item.child.filter((task: { id: number }) => task.id !== taskId);
-        return { id: item.id, name: item.name, child: updatedChild }
-      } else {
-        return item
-      }
-    });
-    setTodoCategories(remainingTodos);
-  };
+  //   setAllTasks([]);
+  //   let remainingTodos = todoCategories.map((item) => {
+  //     if (item.name === category.name) {
+  //       return { id: item.id, name: item.name, child: [] }
+  //     } else {
+  //       return item
+  //     }
+  //   });
+  //   setTodoCategories(remainingTodos);
+  // };
 
-  //Handles the deletion of the current category.
-  const handleDeleteClick = () => {
-    setShowContainer(false);
-    deleteCategory(id);
-  };
+  // // Deletes a specific task.
+  // const handleDeleteTask = (taskId: number | any, category: any) => {
+  //   // deleteTodo(taskId);
+  //   setAllTasks((prevTasks: any[]) =>
+  //     prevTasks.filter((task: { id: number }) => task.id !== taskId)
+  //   );
+  //   let remainingTodos = todoCategories.map((item) => {
+  //     if (item.name === category.name) {
+  //       let updatedChild = item.child.filter((task: { id: number }) => task.id !== taskId);
+  //       return { id: item.id, name: item.name, child: updatedChild }
+  //     } else {
+  //       return item
+  //     }
+  //   });
+  //   setTodoCategories(remainingTodos);
+  // };
+
+  // //Handles the deletion of the current category.
+  // const handleDeleteClick = () => {
+  //   setShowContainer(false);
+  //   deleteCategory(id);
+  // };
 
   const backgroundColor = category
-    ? category.name === 'Todo'
+    ? category.name === AllStatus.NEW
       ? 'primary.light'
-      : category.name === 'Progress'
+      : category.name === AllStatus.PENDING
         ? 'secondary.light'
-        : category.name === 'Pending'
+        : category.name === AllStatus.BOOKED
           ? 'warning.light'
-          : category.name === 'Done'
+          : category.name === AllStatus.FORMED
             ? 'success.light'
             : 'primary.light'
     : 'primary.light';
@@ -190,7 +192,7 @@ function CategoryTaskList({ id }: any) {
               </Typography>
               <Stack direction="row">
                 <Box>
-                  {category.name === 'Todo' && (
+                  {/* {category.name === 'Todo' && (
                     <>
                       <Tooltip title="Add Task">
                         <IconButton onClick={handleShowModal}>
@@ -206,31 +208,25 @@ function CategoryTaskList({ id }: any) {
                         updateTasks={() => setAllTasks([...allTasks, newTaskData])}
                       />
                     </>
-                  )}
+                  )} */}
                   <EditCategoryModal
                     showModal={showEditCategoryModal}
-                    handleCloseModal={handleCloseEditCategoryModal}
                     initialCategoryName={newCategoryName}
-                    handleUpdateCategory={handleUpdateCategory}
                   />
                 </Box>
-                <Tooltip title="Menu">
+                {/* <Tooltip title="Menu">
                   <IconButton onClick={handleClick}>
                     <IconDotsVertical size="1rem" />
                   </IconButton>
                 </Tooltip>
                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-                  <MenuItem onClick={handleShowEditCategoryModal}>Edit</MenuItem>
-                  <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
-                  <MenuItem onClick={handleClearAll}>Clear All</MenuItem>
-                </Menu>
+                </Menu> */}
               </Stack>
             </Box>
-            {allTasks?.map((task: { id: any }, index: number) => (
+            {allTasks?.map((task: ELMATicket, index: number) => (
               <TaskData
-                key={task?.id || index}
+                key={task?.__id || index}
                 task={task}
-                onDeleteTask={() => handleDeleteTask(task.id, category)}
                 index={index} category={category} />
             ))}
           </Box>

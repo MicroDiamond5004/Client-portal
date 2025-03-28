@@ -13,7 +13,7 @@ type TaskManagerProps = {
 
 function TaskManager(props: TaskManagerProps) {
   const {changeView} = props;
-  const { todoCategories, moveTask } = useContext(KanbanDataContext);
+  const { todoCategories } = useContext(KanbanDataContext);
   const onDragEnd = (result: { source: any; destination: any; draggableId: any }) => {
     const { source, destination, draggableId } = result;
 
@@ -32,8 +32,10 @@ function TaskManager(props: TaskManagerProps) {
     const destinationIndex = destination.index;
 
     // Call moveTask function from context
-    moveTask(draggableId, sourceCategoryId, destinationCategoryId, sourceIndex, destinationIndex);
+    // moveTask(draggableId, sourceCategoryId, destinationCategoryId, sourceIndex, destinationIndex);
   };
+
+  console.log(todoCategories);
 
   return (
     <>
