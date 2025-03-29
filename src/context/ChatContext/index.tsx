@@ -4,6 +4,9 @@ import React from "react";
 import useSWR from 'swr';
 import { ChatsType, MessageType } from '../../types/apps/chat';
 import { getFetcher, postFetcher } from 'src/api/globalFetcher';
+import getAllTicketsData from 'src/mocks/tickets/get-tickets';
+import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import { useSearchParams } from 'react-router';
 
 
 // Define context props interface
@@ -53,17 +56,33 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [error, setError] = useState<string>('');
 
     const { data: ChatsData, isLoading: isChatsLoading, error: Chatserror, mutate } = useSWR('/api/data/chat/ChatData', getFetcher);
+    const { result: secondData } = getAllTicketsData();
 
+    const [searchParams, setSearchParams] = useSearchParams();
     // Fetch chat data from the API
     useEffect(() => {
-        if (ChatsData) {
+        if (ChatsData && secondData) {
             setLoading(isChatsLoading);
             const chatsData = ChatsData.data;
-            if (chatData.length === 0) {
-                let specificChat = chatsData[0];
-                setSelectedChat(specificChat);
+
+            const currentData = secondData.result.map((ticket) => {
+                return {...chatsData[Math.floor(Math.random() * 1000) % 10], name: ticket.nomer_zakaza, id: Number(ticket.nomer_zakaza)}
+            });
+
+            const urlId = searchParams.get("item");
+            const currentId = chatData.find((chat) => chat.id === Number(urlId)) ? urlId : chatData[0]?.id ?? 0;
+            console.log(currentId);
+
+            if (activeChatId !== Number(currentId) && chatData) {
+                setActiveChatId(Number(currentId));
+                const currentChat = chatData.find((chat) => chat.id === Number(currentId)) ?? currentData[0]
+                if (currentChat) {
+                    setSearchParams({ item: currentChat.id })
+                }
+                setSelectedChat(currentChat);
             }
-            setChatData(chatsData);
+
+            setChatData(currentData);
         } else if (Chatserror) {
             setError(Chatserror)
             setLoading(isChatsLoading);

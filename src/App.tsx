@@ -1,10 +1,10 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { ThemeSettings } from './theme/Theme';
 import RTL from './layouts/full/shared/customizer/RTL';
-import { RouterProvider } from 'react-router';
+import { RouterProvider, useLocation, useNavigate } from 'react-router';
 import router from './routes/Router';
 import { CustomizerContext } from 'src/context/CustomizerContext';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 
 
 
@@ -15,7 +15,6 @@ function App() {
 
 
   return (
-
     <ThemeProvider theme={theme}>
       <RTL direction={activeDir}>
         <CssBaseline />

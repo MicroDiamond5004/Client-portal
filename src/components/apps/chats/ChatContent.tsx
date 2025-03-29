@@ -49,7 +49,7 @@ const ChatContent: React.FC<ChatContentProps> = ({
               >
                 {/* <IconMenu2 stroke={1.5} onClick={toggleChatSidebar} /> */}
               </Box>
-              <ListItem key={selectedChat.id} dense disableGutters>
+              <ListItem key={selectedChat.name} dense disableGutters>
                 <ListItemAvatar>
                   <Badge
                     color={
@@ -110,9 +110,9 @@ const ChatContent: React.FC<ChatContentProps> = ({
                 }}
               >
                 <Box p={3}>
-                  {selectedChat.messages.map((chat: any) => {
+                  {selectedChat.messages.map((chat: any, index: number) => {
                     return (
-                      <Box key={chat.id + chat.createdAt}>
+                      <Box key={index + chat.createdAt}>
                         {selectedChat.id === chat.senderId ? (
                           <Box display="flex">
                             <ListItemAvatar>

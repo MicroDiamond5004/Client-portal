@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import {
   Avatar,
   List,
@@ -26,8 +26,11 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import { IconChevronDown, IconSearch } from '@tabler/icons-react';
 import user1 from 'src/assets/images/profile/user-1.jpg';
 import { ChatContext } from 'src/context/ChatContext';
+import { useSearchParams } from 'react-router';
 
 const ChatListing = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const {
     chatData,
     chatSearch,
@@ -36,6 +39,7 @@ const ChatListing = () => {
     setActiveChatId,
     activeChatId,
   } = useContext(ChatContext);
+  
 
   const filteredChats = chatData.filter((chat) =>
     chat.name.toLowerCase().includes(chatSearch.toLowerCase()) || []
@@ -45,6 +49,7 @@ const ChatListing = () => {
     let displayText = '';
 
     const lastMessage = conversation.messages[conversation.messages.length - 1];
+    
     if (lastMessage) {
       const sender = lastMessage.senderId === conversation.id ? 'You: ' : '';
       const message = lastMessage.type === 'image' ? 'Sent a photo' : lastMessage.msg;
@@ -66,10 +71,11 @@ const ChatListing = () => {
   };
 
   const handleChatSelect = (chat: ChatsType) => {
+    setSearchParams({ item: chat.name });
     const chatId =
       typeof chat.id === "string" ? parseInt(chat.id, 10) : chat.id;
     setSelectedChat(chat);
-    setActiveChatId(chatId);
+    setActiveChatId(chatId);  
   };
 
 
@@ -98,9 +104,9 @@ const ChatListing = () => {
         </Badge>
         <Box>
           <Typography variant="body1" fontWeight={600}>
-            John Deo
+            Константин Козлов
           </Typography>
-          <Typography variant="body2">Marketing Manager</Typography>
+          <Typography variant="body2">Контрагент</Typography>
         </Box>
       </Box>
       {/* ------------------------------------------- */}
@@ -128,7 +134,7 @@ const ChatListing = () => {
       {/* Contact List */}
       {/* ------------------------------------------- */}
       <List sx={{ px: 0 }}>
-        <Box px={2.5} pb={1}>
+        {/* <Box px={2.5} pb={1}>
           <Button
             id="basic-button"
             aria-controls={open ? 'basic-menu' : undefined}
@@ -152,12 +158,12 @@ const ChatListing = () => {
             <MenuItem onClick={handleClose}>Sort By Unread</MenuItem>
             <MenuItem onClick={handleClose}>Mark as all Read</MenuItem>
           </Menu>
-        </Box>
+        </Box> */}
         <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '600px' }}>
           {filteredChats && filteredChats.length ? (
             filteredChats.map((chat) => (
               <ListItemButton
-                key={chat.id}
+                key={chat.name + chat.id}
                 onClick={() => handleChatSelect(chat)}
                 sx={{
                   mb: 0.5,
@@ -168,32 +174,16 @@ const ChatListing = () => {
                 selected={activeChatId === chat.id}
               >
                 <ListItemAvatar>
-                  <Badge
-                    color={
-                      chat.status === 'online'
-                        ? 'success'
-                        : chat.status === 'busy'
-                          ? 'error'
-                          : chat.status === 'away'
-                            ? 'warning'
-                            : 'secondary'
-                    }
-                    variant="dot"
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'right',
-                    }}
-                    overlap="circular"
-                  >
-                    <Avatar alt="Remy Sharp" src={chat.thumb} sx={{ width: 42, height: 42 }} />
-                  </Badge>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
+                <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
                       {chat.name}
                     </Typography>
-                  }
+                </ListItemAvatar>
+                <ListItemText
+                  // primary={
+                    // <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
+                      /* {chat.name} */
+                    /* </Typography> */
+                  // }
                   secondary={getDetails(chat)}
                   secondaryTypographyProps={{
                     noWrap: true,

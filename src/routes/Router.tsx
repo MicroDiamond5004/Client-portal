@@ -42,8 +42,8 @@ const Router = [
     element: <FullLayout />,
     children: [
       { path: '/', element: <Navigate to="/apps/tickets" /> },
-      { path: '/apps/chats', element: <Chats /> },
-      { path: '/apps/tickets', element: <Tickets /> },
+      { path: '/apps/chats/?', element: <Chats /> },
+      { path: '/apps/tickets/?', element: <Tickets /> },
       { path: '/apps/calendar', element: <Calendar /> },
       { path: '/pages/account-settings', element: <AccountSetting /> },
       { path: '*', element: <Navigate to="/auth/404" /> },

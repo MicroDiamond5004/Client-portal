@@ -29,6 +29,7 @@ import ModalTicket from './modalTicket/modal-ticket';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { ALL } from 'dns';
 import getAllTicketsData from 'src/mocks/tickets/get-tickets';
+import { useSearchParams } from 'react-router';
 
 const BoxStyled = styled(Box)(() => ({
   transition: '0.1s ease-in',
@@ -51,7 +52,7 @@ export const AllStatus = {
 
 export const getStatus = (ticket: ELMATicket): string => {
   let status = 'Не определен';
-  switch(ticket.__status?.status) {
+  switch(ticket?.__status?.status) {
     // Новый заказ
     case 1:
       status = AllStatus.NEW;
@@ -79,7 +80,7 @@ export const getStatus = (ticket: ELMATicket): string => {
     // Снято
     case 7:
       status = AllStatus.CLOSED;
-      break;
+      break; 
   }
 
   return status;
@@ -91,12 +92,28 @@ type TicketListingProps = {
 
 const TicketListing = (props: TicketListingProps) => {
   const [isShowModal, setIsShowModal] = useState(false);
-
+  const [searchParams, setSearchParams] = useSearchParams();
   const {changeView} = props;
   const { tickets, searchTickets, ticketSearch, filter }: any =
     useContext(TicketContext);
 
-    const [currentTicket, setIsCurrentTicket] = useState<ELMATicket>(tickets[0]);
+  const [currentTicket, setCurrentTicket] = useState<ELMATicket>();
+
+  useEffect(() => {
+    if (searchParams.get('item') && (currentTicket?.nomer_zakaza !== searchParams.get('item'))) {
+      const ticket = tickets.find((ticket: ELMATicket) => ticket?.nomer_zakaza === searchParams.get('item'));
+      if (ticket) {
+        setCurrentTicket(ticket);
+        setIsShowModal(true);
+      }
+    } else {
+      setSearchParams({ item: currentTicket?.nomer_zakaza || tickets[0]?.nomer_zakaza });
+    }
+
+    if (!isShowModal) {
+      setSearchParams({});
+    }
+  }, [currentTicket, isShowModal, tickets])
 
   const theme = useTheme();
 
@@ -283,7 +300,7 @@ const TicketListing = (props: TicketListingProps) => {
               return(
               <TableRow key={ticket.__id} hover onClick={() => {
                   setIsShowModal(true);
-                  setIsCurrentTicket(ticket);
+                  setCurrentTicket(ticket);
                 }}>
                 <TableCell>{ticket.nomer_zakaza}</TableCell>
                 <TableCell>
@@ -337,7 +354,7 @@ const TicketListing = (props: TicketListingProps) => {
         <Pagination count={10} color="primary" />
       </Box>
     </Box>
-    <ModalTicket show={isShowModal} ticket={currentTicket} close={(isOpen) => setIsShowModal(isOpen)}/>
+    <ModalTicket show={isShowModal} ticket={currentTicket ?? tickets[0]} close={(isOpen) => setIsShowModal(isOpen)}/>
     </React.Fragment>);
 };
 

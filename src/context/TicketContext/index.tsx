@@ -39,6 +39,8 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }, [ticketsData, ticketsError, isTicketsLoading]);
 
+    
+
     // Delete a ticket with the specified ID from the server and update the tickets state
     // const deleteTicket = async (id: number) => {
     //     try {

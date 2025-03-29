@@ -1,10 +1,12 @@
-import { Dialog, DialogContent, DialogTitle, Typography } from "@mui/material"
-import { Grid } from "@mui/system"
+import { Dialog, DialogContent, DialogTitle, IconButton, Tooltip, Typography } from "@mui/material"
+import { Box, Grid, styled, useTheme } from "@mui/system"
 import React, { useState } from "react"
 import CustomFormLabel from "src/components/forms/theme-elements/CustomFormLabel"
 import CustomTextField from "src/components/forms/theme-elements/CustomTextField"
 import { ELMATicket } from "src/mocks/tickets/ticket.type"
 import { AllStatus, getStatus } from "../TicketListing"
+import { IconMessage } from "@tabler/icons-react"
+import { useNavigate } from "react-router"
 
 type ModalTicketProps = {
     show: boolean,
@@ -15,9 +17,34 @@ type ModalTicketProps = {
 const ModalTicket = (props: ModalTicketProps) => {
     const {show, close, ticket} = props;
 
+    const navigate = useNavigate();
+
+    const theme = useTheme();
+
+    const IconButtonStyled = styled(IconButton)(() => ({
+        padding: '5px 10px',
+        gap: '10px',
+        borderRadius: `${10}px`,
+        marginBottom: '0px',
+        color:
+           `white !important`,
+        backgroundColor: theme.palette.primary.main,
+        '&:hover': {
+          backgroundColor: theme.palette.primary.light,
+        },
+        '&.Mui-selected': {
+          
+          '&:hover': {
+            backgroundColor: '',
+            color: 'white',
+          },
+        },
+      }));
+
     type GetTicketFieldType = {
       ticket: ELMATicket;
     }
+
     
     const GetTicketFields = (props: GetTicketFieldType) => {
       const {ticket} = props;
@@ -107,6 +134,13 @@ const ModalTicket = (props: ModalTicketProps) => {
                 }}>
                 {/* Task title */}
                 <GetTicketFields ticket={ticket}/>
+                <br/>
+                <Box display='flex' justifyContent='flex-start' minWidth='100px'>
+                  <IconButtonStyled onClick={() => navigate(`/apps/chats?item=${ticket.nomer_zakaza}`)}>
+                    <IconMessage size="22" />
+                    <Typography variant="button" marginLeft='10px'>ПЕРЕЙТИ В ЧАТ ЗАКАЗА</Typography>
+                  </IconButtonStyled>
+                </Box>
               </Grid>
             </Grid>
         </DialogContent>
