@@ -178,6 +178,7 @@ export type ELMATicket = {
         currency: string;
     };
     ssylka_na_kartochku: string;
+    isChanged: boolean | null;
 };
 
 export type TicketsData = {

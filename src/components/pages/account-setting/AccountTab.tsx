@@ -74,7 +74,7 @@ const AccountTab = () => {
   return (
     (<Grid container spacing={3}>
       {/* Change Profile */}
-      <Grid
+      {/* <Grid
         size={{
           xs: 12,
           lg: 6
@@ -107,9 +107,9 @@ const AccountTab = () => {
               </Box>
             </Box>
           </CardContent>
-        </BlankCard>
-      </Grid>
-      {/*  Change Password */}
+        </BlankCard> 
+      </Grid>*/}
+      {/*  Change Password 
       <Grid
         size={{
           xs: 12,
@@ -137,7 +137,6 @@ const AccountTab = () => {
                 fullWidth
                 type="password"
               />
-              {/* 2 */}
               <CustomFormLabel htmlFor="text-npwd">New Password</CustomFormLabel>
               <CustomTextField
                 id="text-npwd"
@@ -146,7 +145,6 @@ const AccountTab = () => {
                 fullWidth
                 type="password"
               />
-              {/* 3 */}
               <CustomFormLabel htmlFor="text-conpwd">Confirm Password</CustomFormLabel>
               <CustomTextField
                 id="text-conpwd"
@@ -158,15 +156,15 @@ const AccountTab = () => {
             </form>
           </CardContent>
         </BlankCard>
-      </Grid>
+      </Grid> */}
       {/* Edit Details */}
       <Grid size={12}>
         <BlankCard>
           <CardContent>
             <Typography variant="h5" mb={1}>
-              Personal Details
+              Настройки профиля
             </Typography>
-            <Typography color="textSecondary" mb={3}>To change your personal detail , edit and save from here</Typography>
+            <Typography color="textSecondary" mb={3}>Вы можете поменять логин и пароль здесь</Typography>
             <form>
               <Grid container spacing={3}>
                 <Grid
@@ -180,13 +178,14 @@ const AccountTab = () => {
                     }}
                     htmlFor="text-name"
                   >
-                    Your Name
+                    Имя
                   </CustomFormLabel>
                   <CustomTextField
                     id="text-name"
                     value="Mathew Anderson"
                     variant="outlined"
                     fullWidth
+                    disabled={true}
                   />
                 </Grid>
                 <Grid
@@ -201,21 +200,21 @@ const AccountTab = () => {
                     }}
                     htmlFor="text-store-name"
                   >
-                    Store Name
+                    Компания
                   </CustomFormLabel>
                   <CustomTextField
                     id="text-store-name"
                     value="Maxima Studio"
                     variant="outlined"
                     fullWidth
+                    disabled={true}
                   />
                 </Grid>
-                <Grid
+                {/* <Grid
                   size={{
                     xs: 12,
                     sm: 6
                   }}>
-                  {/* 3 */}
                   <CustomFormLabel
                     sx={{
                       mt: 0,
@@ -237,13 +236,12 @@ const AccountTab = () => {
                       </MenuItem>
                     ))}
                   </CustomSelect>
-                </Grid>
-                <Grid
+                </Grid> */}
+                {/* <Grid
                   size={{
                     xs: 12,
                     sm: 6
                   }}>
-                  {/* 4 */}
                   <CustomFormLabel
                     sx={{
                       mt: 0,
@@ -265,28 +263,7 @@ const AccountTab = () => {
                       </MenuItem>
                     ))}
                   </CustomSelect>
-                </Grid>
-                <Grid
-                  size={{
-                    xs: 12,
-                    sm: 6
-                  }}>
-                  {/* 5 */}
-                  <CustomFormLabel
-                    sx={{
-                      mt: 0,
-                    }}
-                    htmlFor="text-email"
-                  >
-                    Email
-                  </CustomFormLabel>
-                  <CustomTextField
-                    id="text-email"
-                    value="info@modernize.com"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
+                </Grid> */}
                 <Grid
                   size={{
                     xs: 12,
@@ -299,17 +276,77 @@ const AccountTab = () => {
                     }}
                     htmlFor="text-phone"
                   >
-                    Phone
+                    Телефон
                   </CustomFormLabel>
                   <CustomTextField
                     id="text-phone"
-                    value="+91 12345 65478"
+                    value="+7(999)-999-99-99"
+                    variant="outlined"
+                    fullWidth
+                    disabled={true}
+                  />
+                </Grid>
+                <Grid
+                  size={{
+                    xs: 12,
+                    sm: 12
+                  }}>
+                  <CustomFormLabel
+                    sx={{
+                      mt: 0,
+                    }}
+                    htmlFor="text-email"
+                  >
+                    Логин (Email)
+                  </CustomFormLabel>
+                  <CustomTextField
+                    id="text-email"
+                    value="yourmail@mail.ru"
                     variant="outlined"
                     fullWidth
                   />
                 </Grid>
-                <Grid size={12}>
-                  {/* 7 */}
+                <Grid
+                  size={{
+                    xs: 12,
+                    sm: 12
+                  }}>
+                  <CustomFormLabel
+                    sx={{
+                      mt: 0,
+                    }}
+                    htmlFor="text-password"
+                  >
+                    Пароль
+                  </CustomFormLabel>
+                  <CustomTextField
+                    id="text-password"
+                    value="*********"
+                    variant="outlined"
+                    fullWidth
+                  />
+                </Grid>
+                {false && <Grid
+                  size={{
+                    xs: 12,
+                    sm: 12
+                  }}>
+                  <CustomFormLabel
+                    sx={{
+                      mt: 0,
+                    }}
+                    htmlFor="text-password-2"
+                  >
+                    Повторите пароль
+                  </CustomFormLabel>
+                  <CustomTextField
+                    id="text-email"
+                    value="yourmail@mail.ru"
+                    variant="outlined"
+                    fullWidth
+                  />
+                </Grid>}
+                {/* <Grid size={12}>
                   <CustomFormLabel
                     sx={{
                       mt: 0,
@@ -324,7 +361,7 @@ const AccountTab = () => {
                     variant="outlined"
                     fullWidth
                   />
-                </Grid>
+                </Grid> */}
               </Grid>
             </form>
           </CardContent>

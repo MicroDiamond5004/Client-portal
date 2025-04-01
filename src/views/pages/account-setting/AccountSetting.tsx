@@ -80,17 +80,17 @@ const AccountSetting = () => {
                 <Tab
                   iconPosition="start"
                   icon={<IconUserCircle size="22" />}
-                  label="Account"
+                  label="Аккаунт"
                   {...a11yProps(0)}
                 />
 
                 <Tab
                   iconPosition="start"
                   icon={<IconBell size="22" />}
-                  label="Notifications"
+                  label="Уведомления"
                   {...a11yProps(1)}
                 />
-                <Tab
+                {/* <Tab
                   iconPosition="start"
                   icon={<IconArticle size="22" />}
                   label="Bills"
@@ -101,7 +101,7 @@ const AccountSetting = () => {
                   icon={<IconLock size="22" />}
                   label="Security"
                   {...a11yProps(3)}
-                />
+                /> */}
               </Tabs>
             </Box>
             <Divider />

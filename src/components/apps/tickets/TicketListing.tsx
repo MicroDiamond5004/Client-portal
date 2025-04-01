@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useContext, useEffect, useState } from 'react';
+import './ticket.css';
 
 import { format } from 'date-fns';
 import {
@@ -27,7 +28,7 @@ import { TicketContext } from 'src/context/TicketContext';
 import { Grid, styled } from '@mui/system';
 import ModalTicket from './modalTicket/modal-ticket';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
-import { ALL } from 'dns';
+import { ALL, setServers } from 'dns';
 import getAllTicketsData from 'src/mocks/tickets/get-tickets';
 import { useSearchParams } from 'react-router';
 
@@ -88,6 +89,7 @@ export const getStatus = (ticket: ELMATicket): string => {
 
 type TicketListingProps = {
   changeView: (isList: boolean) => void,
+  // updateSearchParametrs: (tickets: ELMATicket[], currentTicket: ELMATicket | undefined, isShowModal: boolean) => void,
 }
 
 const TicketListing = (props: TicketListingProps) => {
@@ -99,21 +101,34 @@ const TicketListing = (props: TicketListingProps) => {
 
   const [currentTicket, setCurrentTicket] = useState<ELMATicket>();
 
+  const updateSearchParametrs = (tickets: ELMATicket[], currentTicket: ELMATicket | undefined, isShowModal: boolean = false) => {
+    if (isShowModal) {
+      setSearchParams({item: (currentTicket?.nomer_zakaza || tickets[0]?.nomer_zakaza || '')});
+    }
+  };
+
   useEffect(() => {
     if (searchParams.get('item') && (currentTicket?.nomer_zakaza !== searchParams.get('item'))) {
-      const ticket = tickets.find((ticket: ELMATicket) => ticket?.nomer_zakaza === searchParams.get('item'));
-      if (ticket) {
-        setCurrentTicket(ticket);
-        setIsShowModal(true);
+      if (searchParams.get('item')) {
+        const ticket = tickets.find((ticket: ELMATicket) => ticket?.nomer_zakaza === searchParams.get('item'));
+        if (ticket) {
+          if (searchParams.get('type')) {
+            setSearchParams({item: searchParams.get('item') || ''})
+          }
+          setCurrentTicket(ticket);
+          setIsShowModal(true);
+          ticket.isChanged = false;
+        } else if (tickets.length > 0) {
+          setSearchParams({});
+        }
       }
-    } else {
-      setSearchParams({ item: currentTicket?.nomer_zakaza || tickets[0]?.nomer_zakaza });
     }
+  }, [currentTicket, tickets])
 
-    if (!isShowModal) {
-      setSearchParams({});
-    }
-  }, [currentTicket, isShowModal, tickets])
+  const handlerCloseModal = (isOpen: boolean) => {
+    setIsShowModal(isOpen);
+    setSearchParams({});
+  }
 
   const theme = useTheme();
 
@@ -296,12 +311,16 @@ const TicketListing = (props: TicketListingProps) => {
                   backgroundStatus = 'error.light';
                   break;
               }
+
+              const clickTicletHandler = () => {
+                updateSearchParametrs(tickets, ticket, true);
+                if (ticket.isChanged) {
+                  ticket.isChanged = false;
+                }
+              }
               
               return(
-              <TableRow key={ticket.__id} hover onClick={() => {
-                  setIsShowModal(true);
-                  setCurrentTicket(ticket);
-                }}>
+              <TableRow className={ticket.isChanged ? "gradient-background" : ''} key={ticket.__id} hover onClick={clickTicletHandler}>
                 <TableCell>{ticket.nomer_zakaza}</TableCell>
                 <TableCell>
                   <Box>
@@ -325,7 +344,7 @@ const TicketListing = (props: TicketListingProps) => {
                 <TableCell>
                   <Chip
                     sx={{
-                      backgroundColor: backgroundStatus
+                      backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus
                     }}
                     size="small"
                     label={status}
@@ -338,7 +357,7 @@ const TicketListing = (props: TicketListingProps) => {
                 </TableCell>
                 <TableCell align="right">
                   <Tooltip title="Открыть">
-                    <IconButton onClick={() => {}}>
+                    <IconButton sx={{color: ticket.isChanged ? '#FFF' : 'inherit'}} onClick={() => {}}>
                       <IconArrowsDiagonal size="22" />
                       <Typography variant="button" marginLeft='10px'>Показать</Typography>
                     </IconButton>
@@ -354,7 +373,7 @@ const TicketListing = (props: TicketListingProps) => {
         <Pagination count={10} color="primary" />
       </Box>
     </Box>
-    <ModalTicket show={isShowModal} ticket={currentTicket ?? tickets[0]} close={(isOpen) => setIsShowModal(isOpen)}/>
+    <ModalTicket show={isShowModal} ticket={currentTicket ?? tickets[0]} close={handlerCloseModal}/>
     </React.Fragment>);
 };
 

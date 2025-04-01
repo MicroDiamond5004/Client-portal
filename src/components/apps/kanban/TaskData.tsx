@@ -17,14 +17,16 @@ import BlankCard from '../../shared/BlankCard';
 import dayjs from 'dayjs';
 import ModalTicket from '../tickets/modalTicket/modal-ticket';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import { useSearchParams } from 'react-router';
 
 interface TaskDataProps {
   task: ELMATicket;
   index: number;
   category: any;
-
+  tickets: ELMATicket[];
+  openModalTicket: (id: string) => void;
 }
-const TaskData: React.FC<TaskDataProps> = ({ task, index, category }: any) => {
+const TaskData = ({ task, index, category, tickets, openModalTicket }: TaskDataProps) => {
   const [isShowModal, setIsShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editedTask, setEditedTask] = useState<ELMATicket>(task);
@@ -93,11 +95,6 @@ const TaskData: React.FC<TaskDataProps> = ({ task, index, category }: any) => {
     }
   };
 
-  useEffect(() => {
-
-  }, [editedTask])
-
-
   const taskDate = formatDate(editedTask.__updatedAt ?? editedTask.__createdAt ?? ''); // Get formatted task date
 
   const backgroundColor ='success.main';
@@ -117,15 +114,25 @@ const TaskData: React.FC<TaskDataProps> = ({ task, index, category }: any) => {
   //                 ? 'success.main'
   //                 : 'primary.contrastText';
 
+  const handleTicketClick = () => {
+    const id = editedTask.nomer_zakaza;
+    if (id) {
+      openModalTicket(id);
+      if (editedTask.isChanged) {
+        editedTask.isChanged = false;
+      }
+    }
+  }
+
   return (
     <React.Fragment>
-    <Box onClick={() => setIsShowModal(true)}>
+    <Box onClick={handleTicketClick}>
       {[1].map((provided: any, index) => (
         <Box key={index}
           mb={3}
           ref={provided.innerRef}
         >
-          <BlankCard>
+          <BlankCard className={editedTask.isChanged ? 'gradient-background' : 'inherit'}>
             <Box px={2} py={1} display="flex" alignItems="center" justifyContent="space-between">
               <Typography fontWeight={600} variant="h5">
                 {editedTask.nomer_zakaza}
@@ -216,7 +223,6 @@ const TaskData: React.FC<TaskDataProps> = ({ task, index, category }: any) => {
         </Box>
       ))}
     </Box>
-    <ModalTicket show={isShowModal} ticket={task} close={(isOpen) => setIsShowModal(isOpen)}/>
     </React.Fragment>
   );
 };

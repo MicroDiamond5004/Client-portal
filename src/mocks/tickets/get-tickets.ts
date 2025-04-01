@@ -1,3 +1,4 @@
+import checkChanges from "./check-changes/check-change";
 import { ELMATicket, TicketsData } from "./ticket.type";
 
 // https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list
@@ -2361,7 +2362,8 @@ const response: any = {
           "dopolnitelnyi_kod_bronirovaniya": null,
           "modifikator_dlya_otveta_na_zapros": "1.СОЧМРВ A4-6110  G5 07ИЮЛ25 2155   2300   1:05 222 LT                \n2.МРВСОЧ A4-6119  G5 14ИЮЛ25 1010   1115   1:05     LT\n\n\n01.СОЧАЯТ IO-1825  B9 02ИЮН25 0600   0800   2:00 154 ЛАЙТ              \n02.АЯТСОЧ IO-1826  B9 20ИЮН25 0900   1100   2:00     ЛАЙТ\n\n01.МХЛВНК UT-560   W9 13ИЮН25 0600   0910   3:10 298 MN               \n02.ВНКМХЛ UT-559   W1 20ИЮН25 2355 1 0255   3:00     MN",
           "nomer_a_pasporta_ov_dlya_proverki": "Данные паспортов: DISNEY/WALT\n\tПаспорта не найдены\n\nДанные паспортов: MALKOVICH/JOHN\n\tПаспорта не найдены\n\nДанные паспортов: MOUSE/MINNIE\n\tТип: Заграничный - 222333/444\n\n",
-          "aktualizirovannoe_opisanie_dannye_po_broni": null
+          "aktualizirovannoe_opisanie_dannye_po_broni": null,
+          "isChanged": checkChanges(),
         },
         {
           "fio": [],

@@ -1,38 +1,39 @@
 
-import { SetStateAction, useContext, useEffect, useState } from 'react';
-import { IconPlus, IconDotsVertical } from '@tabler/icons-react';
+import { useContext, useEffect, useState } from 'react';
 import TaskData from './TaskData';
 import EditCategoryModal from './TaskModal/EditCategoryModal';
-import AddNewTaskModal from './TaskModal/AddNewTaskModal';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import { KanbanDataContext } from 'src/context/kanbancontext/index';
 
-import { postFetcher } from "src/api/globalFetcher";
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import { mutate } from 'swr';
-import { AllStatus } from '../tickets/TicketListing';
+import { Box,  Stack,  Typography } from '@mui/material';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import { AllStatus } from '../tickets/TicketListing';
+import { useSearchParams } from 'react-router';
+import ModalTicket from '../tickets/modalTicket/modal-ticket';
 
-function CategoryTaskList({ id }: any) {
+type CategoryTAskListProps = {
+  id: string,
+  openTicketModal: (id: string) => void;
+}
+
+function CategoryTaskList({ id, openTicketModal }: CategoryTAskListProps) {
   const { todoCategories, setTodoCategories } =
     useContext(KanbanDataContext);
-
   const category = todoCategories.find((cat) => cat.id === id) as any;
 
   const [allTasks, setAllTasks] = useState(category ? category.child : []);
   const [showModal, setShowModal] = useState(false);
+
   const [newCategoryName, setNewCategoryName] = useState(category.name);
   const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
   const [showContainer, setShowContainer] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleClick = (event: any) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  // const handleClick = (event: any) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
+  // const handleClose = () => {
+  //   setAnchorEl(null);
+  // };
 
   // Find the category and update tasks
   useEffect(() => {
@@ -42,22 +43,19 @@ function CategoryTaskList({ id }: any) {
     }
   }, [todoCategories, id]);
 
-  const [newTaskData, setNewTaskData]: any = useState({
-    task: '',
-    taskText: '',
-    taskProperty: '',
-    date: new Date().toISOString().split('T')[0],
-    taskImage: 'https://adminmart.github.io/template_api/images/website-template/endeavor/endeavor-nextjs-14-website-template.jpg',
-  });
+  // const [newTaskData, setNewTaskData]: any = useState({
+  //   task: '',
+  //   taskText: '',
+  //   taskProperty: '',
+  //   date: new Date().toISOString().split('T')[0],
+  //   taskImage: 'https://adminmart.github.io/template_api/images/website-template/endeavor/endeavor-nextjs-14-website-template.jpg',
+  // });
 
   //Shows the modal for adding a new task.
-  const handleShowModal = () => {
-    setShowModal(true);
+  const handleShowModal = (id: string) => {
+    openTicketModal(id);
   };
   // Closes the modal
-  const handleCloseModal = (): any => {
-    setShowModal(false);
-  };
   //  Shows the modal for editing a category.
   // const handleShowEditCategoryModal = () => {
   //   handleClose();
@@ -225,9 +223,12 @@ function CategoryTaskList({ id }: any) {
             </Box>
             {allTasks?.map((task: ELMATicket, index: number) => (
               <TaskData
+                tickets={allTasks}
                 key={task?.__id || index}
                 task={task}
-                index={index} category={category} />
+                index={index} category={category} 
+                openModalTicket={handleShowModal}
+                />
             ))}
           </Box>
         )}

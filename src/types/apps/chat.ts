@@ -17,7 +17,6 @@ export interface ChatsType {
   id: number | string;
   name: string;
   status: string;
-  thumb: string;
   recent: boolean;
   excerpt: string;
   chatHistory?: any[];
