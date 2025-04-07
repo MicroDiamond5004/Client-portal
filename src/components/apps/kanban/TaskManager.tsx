@@ -9,6 +9,7 @@ import { Box } from '@mui/material';
 import ModalTicket from '../tickets/modalTicket/modal-ticket';
 import { useSearchParams } from 'react-router';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import { ChatProvider } from 'src/context/ChatContext';
 
 type TaskManagerProps = {
   changeView: (isList: boolean) => void,

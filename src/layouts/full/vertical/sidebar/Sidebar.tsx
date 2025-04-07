@@ -20,8 +20,6 @@ const Sidebar = () => {
   const MiniSidebarWidth = config.miniSidebarWidth;
   const SidebarWidth = config.sidebarWidth;
 
-
-
   const theme = useTheme();
   const toggleWidth =
     isCollapse == "mini-sidebar" && !isSidebarHover

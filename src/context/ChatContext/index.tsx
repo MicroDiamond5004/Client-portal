@@ -61,6 +61,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [searchParams, setSearchParams] = useSearchParams();
     // Fetch chat data from the API
     useEffect(() => {
+        console.log(ChatsData, secondData, 'PFITTTT');
         if (ChatsData && secondData) {
             setLoading(isChatsLoading);
             const chatsData = ChatsData.data;

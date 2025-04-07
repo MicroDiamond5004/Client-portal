@@ -62,7 +62,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
           right: '0',
           background: (theme) => theme.palette.background.paper,
           boxShadow: lgUp ? null : (theme) => theme.shadows[8],
-          position: lgUp ? 'relative' : 'absolute',
+          position: 'relative',
           borderColor: (theme) => theme.palette.divider,
         }}
         p={3}

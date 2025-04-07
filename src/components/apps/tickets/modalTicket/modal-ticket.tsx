@@ -1,12 +1,20 @@
-import { Dialog, DialogContent, DialogTitle, IconButton, Tooltip, Typography } from "@mui/material"
+import { Avatar, Dialog, DialogContent, DialogTitle, Divider, IconButton, ListItemAvatar, TextareaAutosize, TextField, Tooltip, Typography } from "@mui/material"
 import { Box, Grid, styled, useTheme } from "@mui/system"
-import React, { useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import CustomFormLabel from "src/components/forms/theme-elements/CustomFormLabel"
 import CustomTextField from "src/components/forms/theme-elements/CustomTextField"
 import { ELMATicket } from "src/mocks/tickets/ticket.type"
 import { AllStatus, getStatus } from "../TicketListing"
-import { IconMessage } from "@tabler/icons-react"
+import { IconMessage, IconPlus } from "@tabler/icons-react"
 import { useNavigate } from "react-router"
+import { ChatContext, ChatProvider } from "src/context/ChatContext"
+import { formatDistanceToNowStrict } from "date-fns"
+import AppCard from "src/components/shared/AppCard"
+import ChatContent from "../../chats/ChatContent"
+import ChatMsgSent from "../../chats/ChatMsgSent"
+import MiniChat from "../mini-chat/mini-chat"
+import { ChatsType } from "src/types/apps/chat"
+import addTicket from "src/api/ELMA-api/add-ticket"
 
 type ModalTicketProps = {
     show: boolean,
@@ -16,6 +24,51 @@ type ModalTicketProps = {
 
 const ModalTicket = (props: ModalTicketProps) => {
     const {show, close, ticket} = props;
+    const textRef = useRef<HTMLTextAreaElement>(null);
+
+    const selectedChat: ChatsType = {
+      id: String(Math.random),
+      name: ticket?.nomer_zakaza || '',
+      status: 'UPLOAD',
+      recent: true,
+      excerpt: '',
+      chatHistory: [],
+      messages: [
+        { 
+          createdAt: new Date(),
+          msg: 'HIIII',
+          senderId: String(Math.random),
+          type: 'text',
+          attachment: [{}],
+          id: String(Math.random),
+        },
+        { 
+          createdAt: new Date(),
+          msg: 'HELLLOOO',
+          senderId: String(Math.random),
+          type: 'text',
+          attachment: [{}],
+          id: String(Math.random),
+        },
+        { 
+          createdAt: new Date(),
+          msg: '11111111111111',
+          senderId: String(Math.random),
+          type: 'text',
+          attachment: [{}],
+          id: String(Math.random),
+        },
+        { 
+          createdAt: new Date(),
+          msg: '2222222222',
+          senderId: String(Math.random),
+          type: 'text',
+          attachment: [{}],
+          id: String(Math.random),
+        } 
+          ]
+    }
+    const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -54,13 +107,13 @@ const ModalTicket = (props: ModalTicketProps) => {
         case AllStatus.NEW:
           return(
             <React.Fragment>
-              <Typography fontWeight={600}>Запрос: <Typography variant="caption"> {ticket.zapros}</Typography></Typography>
+              <Typography mt={0} variant="caption">{ticket.zapros}</Typography><br />
             </React.Fragment>
           )
           case AllStatus.PENDING:
             return(
               <React.Fragment>
-              <Typography fontWeight={600}>Запрос: <Typography variant="caption"> {ticket.zapros}</Typography></Typography>
+              <Typography mt={0} variant="caption">{ticket.zapros}</Typography><br />
               <br/>
               <Typography mt={0} fontWeight={600}>Маршрут и стоимость: <Typography mt={0} variant="caption">{ticket.otvet_klientu}</Typography></Typography>
             </React.Fragment>
@@ -68,7 +121,7 @@ const ModalTicket = (props: ModalTicketProps) => {
           case AllStatus.BOOKED:
             return(
               <React.Fragment>
-              <Typography fontWeight={600} noWrap>Запрос:<Typography mt={0} variant="caption"> {ticket.zapros}</Typography></Typography>
+              <Typography mt={0} variant="caption">{ticket.zapros}</Typography><br />
               <br/>
               <Typography mt={0} fontWeight={600}>ФИО КЛИЕНТОВ: <Typography mt={0} variant="caption"> NAME LASTNAME</Typography></Typography>
               <br/>
@@ -84,7 +137,7 @@ const ModalTicket = (props: ModalTicketProps) => {
           case AllStatus.FORMED:
             return(
               <React.Fragment>
-              <Typography fontWeight={600} noWrap>Запрос:<Typography mt={0} variant="caption"> {ticket.zapros}</Typography></Typography>
+              <Typography mt={0} variant="caption">{ticket.zapros}</Typography><br />
               <br/>
               <Typography mt={0} fontWeight={600}>ФИО КЛИЕНТОВ: <Typography mt={0} variant="caption"> NAME LASTNAME</Typography></Typography>
               <br/>
@@ -100,7 +153,7 @@ const ModalTicket = (props: ModalTicketProps) => {
           case AllStatus.CLOSED:
             return(
               <React.Fragment>
-              <Typography fontWeight={600} noWrap>Запрос:<Typography mt={0} variant="caption"> {ticket.zapros}</Typography></Typography>
+              <Typography mt={0} variant="caption">{ticket.zapros}</Typography><br />
               <br/>
               <Typography mt={0} fontWeight={600}>ФИО КЛИЕНТОВ: <Typography mt={0} variant="caption"> NAME LASTNAME</Typography></Typography>
               <br/>
@@ -116,6 +169,30 @@ const ModalTicket = (props: ModalTicketProps) => {
       }
     } 
 
+    const handlerOnClickAdd = () => {
+      // Здесь будет создаваться экземпляр заказа новоого
+      if (textRef) {
+        const newTicket = structuredClone(ticket);
+        newTicket.zapros = textRef?.current?.value ?? '';
+        newTicket.__updatedBy = null;
+        newTicket.__createdAt = String(new Date());
+        newTicket.__id = String(Math.random());
+        newTicket.otvet_klientu = null;
+        newTicket.otvet_klientu1 = null;
+        newTicket.otvet_klientu3 = null;
+        newTicket.taim_limit = null;
+        if (newTicket.__status?.status) {
+          newTicket.__status.status = 1;
+        }
+        //
+        addTicket(newTicket);
+        close(false);
+      }
+    }
+
+    console.log(ticket);
+      console.log(selectedChat);
+
     return (
         <Dialog
           open={show}
@@ -125,22 +202,37 @@ const ModalTicket = (props: ModalTicketProps) => {
           PaperProps={{ component: "form" }}
         >
           <DialogTitle id="alert-dialog-title">Заказ {ticket?.nomer_zakaza}</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{minWidth: '300px'}}>
             <Grid container spacing={3}>
               <Grid
                 size={{
-                  xs: 8,
-                  sm: 8
+                  xs: 12,
+                  sm: 12
                 }}>
                 {/* Task title */}
-                <GetTicketFields ticket={ticket}/>
+                {ticket?.zapros ? <GetTicketFields ticket={ticket}/> : <>
+                  <Box padding={0}>
+                    <Typography>Запрос:</Typography>
+                    <TextField multiline inputRef={textRef} fullWidth sx={{'& textarea': {
+                      padding: 0,
+                    },}}></TextField>
+                  </Box>
+                  <Box mt={2}>
+                    <IconButtonStyled sx={{width: '100%'}} onClick={handlerOnClickAdd}>
+                        <IconPlus size="22" />
+                        <Typography variant="button">СОЗДАТЬ</Typography>
+                    </IconButtonStyled>
+                  </Box>
+                  </>}
                 <br/>
-                <Box display='flex' justifyContent='flex-start' minWidth='100px'>
+                {ticket?.zapros && selectedChat.messages && <MiniChat selectedChat={selectedChat} />}
+                {ticket?.zapros && <Box mt={3} display='flex' justifyContent='flex-start' minWidth='100px'>
                   <IconButtonStyled onClick={() => navigate(`/apps/chats?item=${ticket.nomer_zakaza}`)}>
                     <IconMessage size="22" />
                     <Typography variant="button" marginLeft='10px'>ПЕРЕЙТИ В ЧАТ ЗАКАЗА</Typography>
+
                   </IconButtonStyled>
-                </Box>
+                </Box>}
               </Grid>
             </Grid>
         </DialogContent>

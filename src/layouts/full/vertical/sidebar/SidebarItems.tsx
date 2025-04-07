@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Menuitems from './MenuItems';
 import { useLocation } from 'react-router';
 import { Box, List, useMediaQuery } from '@mui/material';
@@ -9,18 +9,29 @@ import NavCollapse from './NavCollapse';
 import NavGroup from './NavGroup/NavGroup';
 
 import { CustomizerContext } from 'src/context/CustomizerContext';
+import { uniqueId } from 'lodash';
+import { IconPlus } from '@tabler/icons-react';
+import ModalTicket from 'src/components/apps/tickets/modalTicket/modal-ticket';
 
 const SidebarItems = () => {
   const { pathname } = useLocation();
   const pathDirect = pathname;
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const { isSidebarHover, isCollapse, isMobileSidebar, setIsMobileSidebar } = useContext(CustomizerContext);
+  const [open, setIsOpen] = useState(false);
+
+  console.log(open);
 
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const hideMenu: any = lgUp ? isCollapse == "mini-sidebar" && !isSidebarHover : '';
 
-
-
+  const addItem =  {
+    id: uniqueId(),
+    title: 'Добавить новый заказ',
+    icon: IconPlus,
+    href: '/apps/tickets?add=new',
+  };
+  
   return (
     <Box sx={{ px: 3 }}>
       <List sx={{ pt: 0 }} className="sidebarNav">
@@ -53,6 +64,8 @@ const SidebarItems = () => {
             );
           }
         })}
+          <NavItem item={addItem} key={addItem.id} pathDirect={'/er'} hideMenu={hideMenu}
+            onClick={() => setIsMobileSidebar(!isMobileSidebar)} />
       </List>
     </Box>
   );

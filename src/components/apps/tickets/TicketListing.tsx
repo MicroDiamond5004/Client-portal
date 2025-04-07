@@ -23,7 +23,7 @@ import {
   TableContainer,
   Button,
 } from '@mui/material';
-import { IconArrowAutofitContent, IconArrowCapsule, IconArrowRightBar, IconArrowRightTail, IconArrowRightToArc, IconArrowsDiagonal, IconArrowsDiagonal2, IconArrowsLeft, IconArrowsRightDown, IconArrowsTransferUp, IconArrowsUp, IconArrowUp, IconBackground, IconInbox, IconList, IconMailOpened, IconTrash } from '@tabler/icons-react';
+import { IconArrowAutofitContent, IconArrowCapsule, IconArrowRightBar, IconArrowRightTail, IconArrowRightToArc, IconArrowsDiagonal, IconArrowsDiagonal2, IconArrowsLeft, IconArrowsRightDown, IconArrowsTransferUp, IconArrowsUp, IconArrowUp, IconBackground, IconInbox, IconList, IconMailOpened, IconPlus, IconTrash } from '@tabler/icons-react';
 import { TicketContext } from 'src/context/TicketContext';
 import { Grid, styled } from '@mui/system';
 import ModalTicket from './modalTicket/modal-ticket';
@@ -122,12 +122,30 @@ const TicketListing = (props: TicketListingProps) => {
           setSearchParams({});
         }
       }
+    } else if (tickets && searchParams.get('add') && searchParams.get('add') === 'new' && !isShowModal) {
+      const allSortedTickets = tickets.sort((a: ELMATicket, b: ELMATicket) => Number((b?.nomer_zakaza || '1')) - Number((a?.nomer_zakaza || '0')));
+      setCurrentTicket({
+        ...allSortedTickets[0],
+        'nomer_zakaza': String(Number(allSortedTickets[0]?.nomer_zakaza) + 1),
+        'zapros': null,
+      }); 
+      if (Number(tickets[0]?.nomer_zakaza) + 1) {
+        setIsShowModal(true);
+        console.log('fff');
+      }
     }
   }, [currentTicket, tickets])
 
   const handlerCloseModal = (isOpen: boolean) => {
+    // if (currentTicket && !currentTicket.zapros) {
+    //   setCurrentTicket((previosTicket) => {
+    //     const newTicket = tickets.find((ticket: ELMATicket) => ticket.nomer_zakaza === previosTicket?.nomer_zakaza);
+    //     if (newTicket) {
+    //       return newTicket;
+    //     }
+    // })
     setIsShowModal(isOpen);
-    setSearchParams({});
+    setSearchParams({});  
   }
 
   const theme = useTheme();
@@ -235,6 +253,32 @@ const TicketListing = (props: TicketListingProps) => {
         }}>
           <Box bgcolor="white" p={0}>
           <Stack direction="row" gap={2} alignItems="center" justifyContent='flex-end'>
+            <BoxStyled mr={3}
+              onClick={() => setSearchParams({...searchParams, add: 'new'})}
+              width={'auto'}
+              padding={'0 10px'}
+              height={38}
+              bgcolor="primary.main"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            > 
+              <Typography
+                color="primary.contrastText"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              > СОЗДАТЬ ЗАКАЗ
+              </Typography>
+              <Typography
+                ml={1}
+                color="primary.contrastText"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              > <IconPlus size={22}/>
+              </Typography>
+            </BoxStyled>
             <Box>
               <Typography variant="h4">Вид:</Typography>
             </Box> 

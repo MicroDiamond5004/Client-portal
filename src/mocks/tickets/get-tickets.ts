@@ -1,8 +1,10 @@
+import fetchByURL from "src/api/ELMA-api/elma-api";
 import checkChanges from "./check-changes/check-change";
 import { ELMATicket, TicketsData } from "./ticket.type";
+import { ApiRoutes } from "src/api/ELMA-api/api-routes";
 
 // https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list
-// METHOD: POST
+// // METHOD: POST
 //  {
 //   "active": true,
 //   "fields": {
@@ -12,9 +14,7 @@ import { ELMATicket, TicketsData } from "./ticket.type";
 //   "size": 1
 // }
 
-
-
-const response: any = {
+export const ELMAresponse: any = {
     "success": true,
     "error": "",
     "result": {
@@ -4094,10 +4094,10 @@ const response: any = {
     }
   }
 
-export const AllTickets: ELMATicket[] = response.result.result;
+export const AllTickets: ELMATicket[] = ELMAresponse.result.result;
 
-const getAllTicketsData = ():TicketsData => {
-    const TicketData: TicketsData = response;
+const getAllTicketsData = (): TicketsData => {
+    const TicketData: TicketsData = ELMAresponse;
     return TicketData;
 }
 

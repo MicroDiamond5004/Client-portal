@@ -1,109 +1,29 @@
-import React, { useContext, useRef } from 'react';
-import {
-  Typography,
-  Divider,
-  Avatar,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  IconButton,
-  Box,
-  Stack,
-  Badge,
-  useMediaQuery,
-  Theme
-} from '@mui/material';
-import { IconDotsVertical, IconMenu2, IconPhone, IconVideo } from '@tabler/icons-react';
-import { formatDistanceToNowStrict } from 'date-fns';
-import ChatInsideSidebar from './ChatInsideSidebar';
-import { ChatContext } from "src/context/ChatContext";
-import SimpleBar from 'simplebar-react';
+import { Box } from "@mui/system";
+import { ChatProvider } from "src/context/ChatContext";
+import ChatContent from "../../chats/ChatContent";
+import { Avatar, Divider, ListItemAvatar, Typography } from "@mui/material";
+import ChatMsgSent from "../../chats/ChatMsgSent";
+import { IconMenu2 } from "@tabler/icons-react";
+import { formatDistanceToNowStrict } from "date-fns";
+import { ChatsType } from "src/types/apps/chat";
+import SimpleBar from "simplebar-react";
+import { useRef } from "react";
 
+function MiniChat({selectedChat}: any) {
+    const mainBoxRef = useRef<HTMLElement>(null);
+    const inBoxRef = useRef<HTMLElement>(null);
 
-
-interface ChatContentProps {
-  toggleChatSidebar: () => void;
-}
-
-const ChatContent: React.FC<ChatContentProps> = ({
-  toggleChatSidebar,
-}: any) => {
-  const [open, setOpen] = React.useState(true);
-  const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up("lg"));
-
-  const mainBoxRef = useRef<HTMLElement>(null);
-  const inBoxRef = useRef<HTMLElement>(null);
-
-  const { selectedChat }: any = useContext(ChatContext);
-
-  console.log(selectedChat);
-
-  return (
+    return (
+    <Box flexGrow={1} border={'1px solid #000'}>
     <SimpleBar>
       <Box sx={{display: 'flex', flexWrap: 'wrap'}}>
         {selectedChat ? (
           <Box width={'100%'}> 
             {/* ------------------------------------------- */}
-            {/* Header Part */}
-            {/* ------------------------------------------- */}
-            <Box>
-              <Box display="flex" alignItems="center" p={2}>
-                <Box
-                  sx={{
-                    display: { xs: "block", md: "block", lg: "block" },
-                    mr: "10px",
-                  }}
-                >
-                  {/* <IconMenu2 stroke={1.5} onClick={toggleChatSidebar} /> */}
-                </Box>
-                <ListItem key={selectedChat.name} dense disableGutters>
-                  <ListItemAvatar>
-                    <Badge
-                      color={
-                        selectedChat.status === "online"
-                          ? "success"
-                          : selectedChat.status === "busy"
-                            ? "error"
-                            : selectedChat.status === "away"
-                              ? "warning"
-                              : "secondary"
-                      }
-                      variant="dot"
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "right",
-                      }}
-                      overlap="circular"
-                    >
-                      <Avatar alt={selectedChat.name} src={selectedChat.thumb} sx={{ width: 40, height: 40 }} />
-                    </Badge>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Typography variant="h5">{selectedChat.name}</Typography>
-                    }
-                    secondary={selectedChat.status}
-                  />
-                </ListItem>
-                <Stack direction={"row"}>
-                  <IconButton aria-label="phone">
-                    <IconPhone stroke={1.5} />
-                  </IconButton>
-                  <IconButton aria-label="video">
-                    <IconVideo stroke={1.5} />
-                  </IconButton>
-                  <IconButton aria-label="sidebar" onClick={() => setOpen(!open)}>
-                    <IconDotsVertical stroke={1.5} />
-                  </IconButton>
-                </Stack>
-              </Box>
-              <Divider />
-            </Box>
-            {/* ------------------------------------------- */}
             {/* Chat Content */}
             {/* ------------------------------------------- */}
 
-            <Box sx={{display: 'flex', width: 'auto', overflow: 'auto'}} ref={mainBoxRef}>
+            <Box sx={{display: 'flex', width: 'auto', overflow: 'hidden'}} ref={mainBoxRef}>
               {/* ------------------------------------------- */}
               {/* Chat msges */}
               {/* ------------------------------------------- */}
@@ -111,7 +31,7 @@ const ChatContent: React.FC<ChatContentProps> = ({
               <Box>
                 <Box
                   sx={{
-                    height: "650px",
+                    height: "auto",
                     overflow: "auto",
                     maxHeight: "800px",
                     width: mainBoxRef && inBoxRef && ((mainBoxRef.current?.clientWidth || 0) - (inBoxRef.current?.clientWidth || 0)) > 300 ?
@@ -119,7 +39,7 @@ const ChatContent: React.FC<ChatContentProps> = ({
                   }}
                 >
                   <Box p={3}>
-                    {selectedChat.messages.map((chat: any, index: number) => {
+                    {selectedChat?.messages?.slice(selectedChat?.messages.length - 3, selectedChat?.messages.length).map((chat: any, index: number) => {
                       return (
                         <Box key={index + chat.createdAt}>
                           {selectedChat.id === chat.senderId ? (
@@ -243,38 +163,15 @@ const ChatContent: React.FC<ChatContentProps> = ({
               {/* ------------------------------------------- */}
               {/* Chat right sidebar Content */}
               {/* ------------------------------------------- */}
-              {open ? (
-                <Box display="flex" flexShrink="0px" ref={inBoxRef}>
-                  <ChatInsideSidebar
-                    isInSidebar={lgUp ? open : open}
-                    chat={selectedChat}
-                  />
-                </Box>
-              ) : (
-                ""
-              )}
             </Box>
           </Box>
-        ) : (
-          <Box display="flex" alignItems="center" p={2} pb={1} pt={1}>
-            {/* ------------------------------------------- */}
-            {/* if No Chat Content */}
-            {/* ------------------------------------------- */}
-            <Box
-              sx={{
-                display: { xs: "flex", md: "flex", lg: "flex" },  
-                mr: "10px",
-              }}
-            >
-              <IconMenu2 stroke={1.5} onClick={toggleChatSidebar} />
-            </Box>
-            <Typography variant="h4">Select Chat</Typography>
-          </Box>
-        )}
+        ) : (<></>)}
       </Box>
     </SimpleBar>
-  );
-};
+      <Divider />
+      <ChatMsgSent />
+    </Box>
+    )
+}
 
-export default ChatContent;
-
+export default MiniChat;

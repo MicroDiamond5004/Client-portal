@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import CustomFormLabel from '../../forms/theme-elements/CustomFormLabel';
 import CustomTextField from '../../forms/theme-elements/CustomTextField';
-import { IconBox, IconBoxMultiple4, IconClipboardList, IconLayoutList, IconList, IconListDetails, IconListTree } from '@tabler/icons-react';
+import { IconBox, IconBoxMultiple4, IconClipboardList, IconLayoutList, IconList, IconListDetails, IconListTree, IconPlus } from '@tabler/icons-react';
 import { Stack, styled } from '@mui/system';
 
 
@@ -65,6 +65,32 @@ function KanbanHeader(props: KandanHeaderProps) {
         }}>
           <Box bgcolor="white" p={0}>
           <Stack direction="row" gap={2} alignItems="center" justifyContent='flex-end'>
+            <BoxStyled mr={3}
+              onClick={() => {}}
+              width={'auto'}
+              padding={'0 10px'}
+              height={38}
+              bgcolor="primary.main"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            > 
+              <Typography
+                color="primary.contrastText"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              > СОЗДАТЬ ЗАКАЗ
+              </Typography>
+              <Typography
+                ml={1}
+                color="primary.contrastText"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              > <IconPlus size={22}/>
+              </Typography>
+            </BoxStyled>
             <Box>
               <Typography variant="h4">Вид:</Typography>
             </Box> 

@@ -63,6 +63,7 @@ import {
   // IconBorderStyle2,
   // IconAppWindow,
   IconNotebook,
+  IconPlus,
   // IconFileCheck,
   // IconChartHistogram,
   // IconChartPie2,
