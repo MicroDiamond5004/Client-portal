@@ -14,7 +14,7 @@ function MiniChat({selectedChat}: any) {
     const inBoxRef = useRef<HTMLElement>(null);
 
     return (
-    <Box flexGrow={1} border={'1px solid #000'}>
+    <Box flexGrow={1} border={'1px solid #e5eaef'}>
     <SimpleBar>
       <Box sx={{display: 'flex', flexWrap: 'wrap'}}>
         {selectedChat ? (

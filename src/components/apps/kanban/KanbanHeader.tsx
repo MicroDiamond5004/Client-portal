@@ -30,10 +30,11 @@ const BoxStyled = styled(Box)(() => ({
 
 type KandanHeaderProps = {
   changeView: (isList: boolean) => void,
+  addTask: (isNew: boolean) => void,
 }
 
 function KanbanHeader(props: KandanHeaderProps) {
-  const {changeView} = props;
+  const {changeView, addTask} = props;
   const { setError } = useContext(KanbanDataContext);
   const [show, setShow] = useState(false);
   const [listName, setListName] = useState('');
@@ -66,7 +67,7 @@ function KanbanHeader(props: KandanHeaderProps) {
           <Box bgcolor="white" p={0}>
           <Stack direction="row" gap={2} alignItems="center" justifyContent='flex-end'>
             <BoxStyled mr={3}
-              onClick={() => {}}
+              onClick={() => addTask(true)}
               width={'auto'}
               padding={'0 10px'}
               height={38}

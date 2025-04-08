@@ -15,6 +15,7 @@ import ChatMsgSent from "../../chats/ChatMsgSent"
 import MiniChat from "../mini-chat/mini-chat"
 import { ChatsType } from "src/types/apps/chat"
 import addTicket from "src/api/ELMA-api/add-ticket"
+import ModalDetails from "./modal-datails/modal-details"
 
 type ModalTicketProps = {
     show: boolean,
@@ -200,9 +201,10 @@ const ModalTicket = (props: ModalTicketProps) => {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
           PaperProps={{ component: "form" }}
+          className="dialog-container"
         >
-          <DialogTitle id="alert-dialog-title">Заказ {ticket?.nomer_zakaza}</DialogTitle>
-          <DialogContent sx={{minWidth: '300px'}}>
+          {/* <DialogTitle id="alert-dialog-title">Заказ {ticket?.nomer_zakaza}</DialogTitle> */}
+          <DialogContent sx={{width: `${window.innerWidth * (ticket?.zapros ? 0.85 : window.innerWidth > 500 ? 0.4 : 0.85)}px`}}>
             <Grid container spacing={3}>
               <Grid
                 size={{
@@ -210,7 +212,9 @@ const ModalTicket = (props: ModalTicketProps) => {
                   sm: 12
                 }}>
                 {/* Task title */}
-                {ticket?.zapros ? <GetTicketFields ticket={ticket}/> : <>
+                
+                {/* <GetTicketFields ticket={ticket}/> */}
+                {ticket?.zapros ? <ModalDetails ticket={ticket} onClose={() => close(false)}/> : <>
                   <Box padding={0}>
                     <Typography>Запрос:</Typography>
                     <TextField multiline inputRef={textRef} fullWidth sx={{'& textarea': {
@@ -224,15 +228,15 @@ const ModalTicket = (props: ModalTicketProps) => {
                     </IconButtonStyled>
                   </Box>
                   </>}
-                <br/>
-                {ticket?.zapros && selectedChat.messages && <MiniChat selectedChat={selectedChat} />}
+                {/* <br/> */}
+                {/* {ticket?.zapros && selectedChat.messages && <MiniChat selectedChat={selectedChat} />}
                 {ticket?.zapros && <Box mt={3} display='flex' justifyContent='flex-start' minWidth='100px'>
                   <IconButtonStyled onClick={() => navigate(`/apps/chats?item=${ticket.nomer_zakaza}`)}>
                     <IconMessage size="22" />
                     <Typography variant="button" marginLeft='10px'>ПЕРЕЙТИ В ЧАТ ЗАКАЗА</Typography>
 
                   </IconButtonStyled>
-                </Box>}
+                </Box>} */}
               </Grid>
             </Grid>
         </DialogContent>

@@ -8,7 +8,8 @@ import { Box,  Stack,  Typography } from '@mui/material';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { AllStatus } from '../tickets/TicketListing';
 import { useSearchParams } from 'react-router';
-import ModalTicket from '../tickets/modalTicket/modal-ticket';
+import ModalTicket from '../tickets/modal-ticket/modal-ticket';
+import sortAllTickets from '../tickets/sort-tickets/sort-tickets';
 
 type CategoryTAskListProps = {
   id: string,
@@ -221,7 +222,7 @@ function CategoryTaskList({ id, openTicketModal }: CategoryTAskListProps) {
                 </Menu> */}
               </Stack>
             </Box>
-            {allTasks?.map((task: ELMATicket, index: number) => (
+            {sortAllTickets(allTasks)?.map((task: ELMATicket, index: number) => (
               <TaskData
                 tickets={allTasks}
                 key={task?.__id || index}

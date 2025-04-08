@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import BlankCard from '../../shared/BlankCard';
 import dayjs from 'dayjs';
-import ModalTicket from '../tickets/modalTicket/modal-ticket';
+import ModalTicket from '../tickets/modal-ticket/modal-ticket';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { useSearchParams } from 'react-router';
 

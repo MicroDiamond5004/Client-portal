@@ -26,11 +26,13 @@ import {
 import { IconArrowAutofitContent, IconArrowCapsule, IconArrowRightBar, IconArrowRightTail, IconArrowRightToArc, IconArrowsDiagonal, IconArrowsDiagonal2, IconArrowsLeft, IconArrowsRightDown, IconArrowsTransferUp, IconArrowsUp, IconArrowUp, IconBackground, IconInbox, IconList, IconMailOpened, IconPlus, IconTrash } from '@tabler/icons-react';
 import { TicketContext } from 'src/context/TicketContext';
 import { Grid, styled } from '@mui/system';
-import ModalTicket from './modalTicket/modal-ticket';
+import ModalTicket from './modal-ticket/modal-ticket';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { ALL, setServers } from 'dns';
 import getAllTicketsData from 'src/mocks/tickets/get-tickets';
 import { useSearchParams } from 'react-router';
+import sortAllTickets from './sort-tickets/sort-tickets';
+import formatToRussianDate from 'src/help-functions/format-to-date';
 
 const BoxStyled = styled(Box)(() => ({
   transition: '0.1s ease-in',
@@ -123,7 +125,7 @@ const TicketListing = (props: TicketListingProps) => {
         }
       }
     } else if (tickets && searchParams.get('add') && searchParams.get('add') === 'new' && !isShowModal) {
-      const allSortedTickets = tickets.sort((a: ELMATicket, b: ELMATicket) => Number((b?.nomer_zakaza || '1')) - Number((a?.nomer_zakaza || '0')));
+      const allSortedTickets = sortAllTickets(tickets);
       setCurrentTicket({
         ...allSortedTickets[0],
         'nomer_zakaza': String(Number(allSortedTickets[0]?.nomer_zakaza) + 1),
@@ -327,7 +329,7 @@ const TicketListing = (props: TicketListingProps) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {visibleTickets.map((ticket: ELMATicket) => {
+            {sortAllTickets(visibleTickets).map((ticket: ELMATicket) => {
               const status = getStatus(ticket);
 
               let colorStatus = 'black';
@@ -396,7 +398,7 @@ const TicketListing = (props: TicketListingProps) => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="subtitle1">
-                    {format(new Date(ticket.__updatedAt ?? ticket.__createdAt ?? new Date()), 'E, MMM d')}
+                    {formatToRussianDate(ticket.__updatedAt || ticket.__createdAt, 'eeee, dd MMMM')}
                   </Typography>
                 </TableCell>
                 <TableCell align="right">

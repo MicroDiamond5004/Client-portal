@@ -24,7 +24,9 @@ import Logo from 'src/layouts/full/shared/logo/Logo';
 
 const InvoiceDetail = () => {
   const { invoices } = useContext(InvoiceContext);
-  const [selectedInvoice, setSelectedInvoice]: any = useState(null);
+  const [selectedInvoice, setSelectedInvoice]: any = useState(invoices[0]);
+
+  console.log(invoices);
 
   useEffect(() => {
     // Set the first invoice as the default selected invoice initially
@@ -77,8 +79,9 @@ const InvoiceDetail = () => {
           <Chip size="small" color="secondary" variant="outlined" label={orderDate}></Chip>
         </Box>
       </Box>
-
-      <Logo />
+      <Box >
+        <Logo />
+      </Box>
       <Box textAlign="right">
         {selectedInvoice.status === 'Shipped' ? (
           <Chip size="small" color="primary" label={selectedInvoice.status} />
@@ -128,7 +131,7 @@ const InvoiceDetail = () => {
         </Paper>
       </Grid>
     </Grid>
-    <Paper variant="outlined">
+    {/* <Paper variant="outlined">
       <TableContainer>
         <Table>
           <TableHead>
@@ -185,8 +188,8 @@ const InvoiceDetail = () => {
           </TableBody>
         </Table>
       </TableContainer>
-    </Paper>
-    <Box p={3} bgcolor="primary.light" mt={3}>
+    </Paper> */}
+    {/* <Box p={3} bgcolor="primary.light" mt={3}>
       <Box display="flex" justifyContent="end" gap={3} mb={3}>
         <Typography variant="body1" fontWeight={600}>
           Sub Total:
@@ -211,7 +214,7 @@ const InvoiceDetail = () => {
           {selectedInvoice.grandTotal}
         </Typography>
       </Box>
-    </Box>
+    </Box> */}
     <Box display="flex" alignItems="center" gap={1} mt={3} justifyContent="end">
       <Button
         variant="contained"

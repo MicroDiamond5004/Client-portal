@@ -6,10 +6,11 @@ import CategoryTaskList from './CategoryTaskList';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import SimpleBar from 'simplebar-react';
 import { Box } from '@mui/material';
-import ModalTicket from '../tickets/modalTicket/modal-ticket';
+import ModalTicket from '../tickets/modal-ticket/modal-ticket';
 import { useSearchParams } from 'react-router';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { ChatProvider } from 'src/context/ChatContext';
+import getBiggestTicketNumber from '../tickets/get-big-ticket/get-big-ticket';
 
 type TaskManagerProps = {
   changeView: (isList: boolean) => void,
@@ -20,7 +21,8 @@ function TaskManager(props: TaskManagerProps) {
   const { todoCategories } = useContext(KanbanDataContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [openTicket, setOpenTicket] = useState<ELMATicket>();
-  const [showModal, setShowModal] = useState(false);  
+  const [showModal, setShowModal] = useState(false);
+  const [isNew, setIsNew] = useState(false);
 
   useEffect(() => {
     const item = searchParams.get('item');
@@ -33,7 +35,18 @@ function TaskManager(props: TaskManagerProps) {
         ticket.isChanged = false;
       }
     }
+    if (todoCategories[0]?.child[0] && searchParams.get('add') && searchParams.get('add') === 'new') {
+      // Получить самый большой номер заказа
+      setOpenTicket({
+        ...todoCategories[0]?.child[0],
+        zapros: null,
+        nomer_zakaza: String(Number(getBiggestTicketNumber(todoCategories)) + 1),
+      });
+      setShowModal(true);
+    }
   }, [searchParams, todoCategories]);
+
+  console.log(openTicket, openTicket?.zapros);
   
   //Shows the modal for adding a new task.
   const handleShowModal = (id: string) => {
@@ -75,13 +88,12 @@ function TaskManager(props: TaskManagerProps) {
     // moveTask(draggableId, sourceCategoryId, destinationCategoryId, sourceIndex, destinationIndex);
   };
 
-  console.log(todoCategories);
-
-
-
   return (
     <>
-      <KanbanHeader changeView={(isList) => changeView(isList)}/>
+      <KanbanHeader addTask={(isCurrentNew) => {
+        setIsNew(isCurrentNew);
+        setSearchParams({type: 'kanban', add: 'new'});
+      }} changeView={(isList) => changeView(isList)}/>
       <SimpleBar>
         <Box>
           <Box display="flex" gap={2}>

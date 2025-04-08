@@ -2,7 +2,7 @@
 // @ts-ignore
 import React, { useContext, useState } from 'react';
 import Menuitems from './MenuItems';
-import { useLocation } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
 import { Box, List, useMediaQuery } from '@mui/material';
 import NavItem from './NavItem';
 import NavCollapse from './NavCollapse';
@@ -11,7 +11,7 @@ import NavGroup from './NavGroup/NavGroup';
 import { CustomizerContext } from 'src/context/CustomizerContext';
 import { uniqueId } from 'lodash';
 import { IconPlus } from '@tabler/icons-react';
-import ModalTicket from 'src/components/apps/tickets/modalTicket/modal-ticket';
+import ModalTicket from 'src/components/apps/tickets/modal-ticket/modal-ticket';
 
 const SidebarItems = () => {
   const { pathname } = useLocation();
@@ -19,17 +19,20 @@ const SidebarItems = () => {
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const { isSidebarHover, isCollapse, isMobileSidebar, setIsMobileSidebar } = useContext(CustomizerContext);
   const [open, setIsOpen] = useState(false);
+  const [searchParams] = useSearchParams();
 
   console.log(open);
 
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const hideMenu: any = lgUp ? isCollapse == "mini-sidebar" && !isSidebarHover : '';
 
+  const href = searchParams.get('type') ? '/apps/tickets?type=kanban&add=new' : '/apps/tickets?add=new';
+
   const addItem =  {
     id: uniqueId(),
     title: 'Добавить новый заказ',
     icon: IconPlus,
-    href: '/apps/tickets?add=new',
+    href,
   };
   
   return (

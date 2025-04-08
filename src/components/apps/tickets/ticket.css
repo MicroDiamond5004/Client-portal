@@ -18,3 +18,7 @@
 .gradient-background td div span {
     color: green !important;
 }
+
+.dialog-container form {
+    max-width: 100%;
+}
