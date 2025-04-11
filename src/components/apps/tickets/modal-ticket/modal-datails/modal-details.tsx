@@ -20,6 +20,7 @@ import { AllStatus, getStatus } from '../../TicketListing';
 import formatToRussianDate from 'src/help-functions/format-to-date';
 import MiniChat from '../../mini-chat/mini-chat';
 import React from 'react';
+import { ChatsType } from 'src/types/apps/chat';
 
 type ModalTicketProps = {
     ticket: ELMATicket;

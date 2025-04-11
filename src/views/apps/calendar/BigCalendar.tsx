@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   CardContent,
   Button,
@@ -15,7 +15,6 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import moment from 'moment';
-import Events from './EventData';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import dayjs from 'dayjs';
 import './Calendar.css';
@@ -24,6 +23,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { IconCheck } from '@tabler/icons-react';
 import BlankCard from 'src/components/shared/BlankCard';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
+import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import getEvents, { EventType } from './EventData';
+import getAllTicketsData from 'src/mocks/tickets/get-tickets';
+import { isSameDay } from 'date-fns';
 
 moment.locale('en-GB');
 const localizer = momentLocalizer(moment);
@@ -47,8 +50,17 @@ const BCrumb = [
 ];
 
 
-const BigCalendar = ({isBreadcrumb}:{isBreadcrumb:boolean}) => {
+const BigCalendar = () => {
+  const allticketsData = getAllTicketsData();
+  const tickets = allticketsData.result.result;
+  const [Events, setEvents] = useState(getEvents(tickets));
   const [calevents, setCalEvents] = React.useState<any>(Events);
+  const [currentEvent, setCurrentEvent] = useState<EventType | null>(null);
+
+  useEffect(() => {
+    setEvents(getEvents(tickets));
+  }, [tickets])
+
   const [open, setOpen] = React.useState<boolean>(false);
   const [title, setTitle] = React.useState<string>("");
   const [slot, setSlot] = React.useState<EvType>();
@@ -85,78 +97,81 @@ const BigCalendar = ({isBreadcrumb}:{isBreadcrumb:boolean}) => {
       value: "warning",
     },
   ];
-  const addNewEventAlert = (slotInfo: EvType) => {
-    setOpen(true);
-    setSlot(slotInfo);
-    setStart(dayjs(slotInfo.start));
-    setEnd(dayjs(slotInfo.end));
-  };
+  
+  // const addNewEventAlert = (slotInfo: EvType) => {
+  //   setOpen(true);
+  //   setSlot(slotInfo);
+  //   setStart(dayjs(slotInfo.start));
+  //   setEnd(dayjs(slotInfo.end));
+  // };
 
 
   const editEvent = (event: any) => {
+    console.log(event.start, calevents);
+    
     const newEditEvent = calevents.find(
-      (elem: any) => elem.title === event.title
+      (elem: EventType) => elem.start?.find((date) => isSameDay(date, event.start))
     );
 
-    setTitle(newEditEvent.title);
-    setColor(newEditEvent.color);
-    setStart(dayjs(newEditEvent.start));
-    setEnd(dayjs(newEditEvent.end));
-    setUpdate(event);
-    setOpen(true);
+    console.log(newEditEvent, calevents);
+
+    if (newEditEvent) {
+      setCurrentEvent(newEditEvent);
+    //   setStart(dayjs(newEditEvent.start[0]));
+    // setEnd(dayjs(newEditEvent.end[0]));
+    // setUpdate(event);
+    }
+
+    setOpen(true);  
   };
 
-  const updateEvent = (e: any) => {
-    e.preventDefault();
-    setCalEvents(
-      calevents.map((elem: EvType) => {
-        if (elem.title === update.title) {
-          return { ...elem, title, start: start?.toISOString(), end: end?.toISOString(), color };
-        }
-        return elem;
-      })
-    );
-    setOpen(false);
-    setTitle("");
-    setStart(dayjs());
-    setEnd(dayjs());
-    setUpdate(null);
-  };
+  // const updateEvent = (e: any) => {
+  //   e.preventDefault();
+  //   setCalEvents(
+  //     calevents.map((elem: EvType) => {
+  //       if (elem.title === update.title) {
+  //         return { ...elem, title, start: start?.toISOString(), end: end?.toISOString(), color };
+  //       }
+  //       return elem;
+  //     })
+  //   );
+  //   setOpen(false);
+  //   setTitle("");
+  //   setStart(dayjs());
+  //   setEnd(dayjs());
+  //   setUpdate(null);
+  // };
   const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) =>
     setTitle(e.target.value);
   const selectinputChangeHandler = (id: string) => setColor(id);
 
   // When submitting or updating the event
-  const submitHandler = (e: React.ChangeEvent<any>) => {
-    e.preventDefault();
-    const newEvents = [...calevents];
-    newEvents.push({
-      title,
-      start: start ? start.toISOString() : "",
-      end: end ? end.toISOString() : "",
-      color,
-    });
-    setCalEvents(newEvents);
-    setOpen(false);
-    setTitle("");
-    setStart(dayjs());
-    setEnd(dayjs());
-  };
+  // const submitHandler = (e: React.ChangeEvent<any>) => {
+  //   e.preventDefault();
+  //   const newEvents = [...calevents];
+  //   newEvents.push({
+  //     title,
+  //     start: start ? start.toISOString() : "",
+  //     end: end ? end.toISOString() : "",
+  //     color,
+  //   });
+  //   setCalEvents(newEvents);
+  //   setOpen(false);
+  //   setTitle("");
+  //   setStart(dayjs());
+  //   setEnd(dayjs());
+  // };
 
-  const deleteHandler = (event: EvType) => {
-    const updatecalEvents = calevents.filter(
-      (ind: EvType) => ind.title !== event.title
-    );
-    setCalEvents(updatecalEvents);
-  };
+  // const deleteHandler = (event: EvType) => {
+  //   const updatecalEvents = calevents.filter(
+  //     (ind: EvType) => ind.title !== event.title
+  //   );
+  //   setCalEvents(updatecalEvents);
+  // };
 
   const handleClose = () => {
     // eslint-disable-line newline-before-return
     setOpen(false);
-    setTitle("");
-    setStart(dayjs());
-    setEnd(dayjs());
-    setUpdate(null);
   };
 
   const eventColors = (event: EvType) => {
@@ -167,27 +182,27 @@ const BigCalendar = ({isBreadcrumb}:{isBreadcrumb:boolean}) => {
     return { className: `event-default` };
   };
 
-  const handleStartChange = (newValue: any) => {
-    if (newValue instanceof Date) {
-      // Convert the native Date object to a dayjs object
-      setStart(dayjs(newValue));
-    } else {
-      setStart(newValue);
-    }
-  };
+  // const handleStartChange = (newValue: any) => {
+  //   if (newValue instanceof Date) {
+  //     // Convert the native Date object to a dayjs object
+  //     setStart(dayjs(newValue));
+  //   } else {
+  //     setStart(newValue);
+  //   }
+  // };
 
-  const handleEndChange = (newValue: any) => {
-    if (newValue instanceof Date) {
-      // Convert the native Date object to a dayjs object
-      setEnd(dayjs(newValue));
-    } else {
-      setEnd(newValue);
-    }
-  };
+  // const handleEndChange = (newValue: any) => {
+  //   if (newValue instanceof Date) {
+  //     // Convert the native Date object to a dayjs object
+  //     setEnd(dayjs(newValue));
+  //   } else {
+  //     setEnd(newValue);
+  //   }
+  // };
 
   return (
     <PageContainer title="Calendar" description="this is Calendar">
-      {isBreadcrumb ? <Breadcrumb title="Calendar" items={BCrumb} /> : null}
+      {/* {isBreadcrumb ? <Breadcrumb title="Calendar" items={BCrumb} /> : null} */}
       <BlankCard>
         {/* ------------------------------------------- */}
         {/* Calendar */}
@@ -202,7 +217,7 @@ const BigCalendar = ({isBreadcrumb}:{isBreadcrumb:boolean}) => {
             localizer={localizer}
             style={{ height: "calc(100vh - 350px" }}
             onSelectEvent={(event: any) => editEvent(event)}
-            onSelectSlot={(slotInfo: any) => addNewEventAlert(slotInfo)}
+            onSelectSlot={(slotInfo: any) => editEvent(slotInfo)}
             eventPropGetter={(event: any) => eventColors(event)}
           />
         </CardContent>
@@ -211,23 +226,17 @@ const BigCalendar = ({isBreadcrumb}:{isBreadcrumb:boolean}) => {
       {/* ------------------------------------------- */}
       {/* Add Calendar Event Dialog */}
       {/* ------------------------------------------- */}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
-        <form onSubmit={update ? updateEvent : submitHandler}>
+      <Dialog open={open && (currentEvent ? true : false)} onClose={handleClose} fullWidth maxWidth="xs">
+        <form>
           <DialogContent>
             {/* ------------------------------------------- */}
             {/* Add Edit title */}
             {/* ------------------------------------------- */}
             <Typography variant="h4" sx={{ mb: 2 }}>
-              {update ? "Update Event" : "Add Event"}
-            </Typography>
-            <Typography mb={3} variant="subtitle2">
-              {!update
-                ? "To add Event kindly fillup the title and choose the event color and press the add button"
-                : "To Edit/Update Event kindly change the title and choose the event color and press the update button"}
-              {slot?.title}
+              События
             </Typography>
 
-            <TextField
+            {/* <TextField
               id="Event Title"
               placeholder="Enter Event Title"
               variant="outlined"
@@ -235,51 +244,57 @@ const BigCalendar = ({isBreadcrumb}:{isBreadcrumb:boolean}) => {
               label="Event Title"
               value={title}
               sx={{ mb: 3 }}
-              onChange={inputChangeHandler}
-            />
+            /> */}
             {/* ------------------------------------------- */}
             {/* Selection of Start and end date */}
             {/* ------------------------------------------- */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
 
-              <DatePicker
-                value={start}
-                onChange={handleStartChange}
-                slotProps={{
-                  textField: {
-                    label: "Start Date",
-                    fullWidth: true,
-                    sx: { mb: 3 },
-                  },
-                }}
-              />
+              {currentEvent && (currentEvent.timeLimit || currentEvent.vylet) && 
+              (currentEvent.timeLimit || currentEvent.vylet)?.slice(0, 1)?.map((_el, index) => {
 
-              <DatePicker
-                value={end}
-                onChange={handleEndChange}
-                slotProps={{
-                  textField: {
-                    label: "End Date",
-                    fullWidth: true,
-                    sx: { mb: 3 },
-                    error: start && end && start > end,
-                    helperText: start && end && start > end ? "End date must be later than start date" : "",
-                  },
-                }}
-              />
+                return (
+                <>
+                  {currentEvent.timeLimit && currentEvent.timeLimit[index] && <DatePicker
+                  value={dayjs(currentEvent.timeLimit[index])}
+                  slotProps={{
+                    textField: {
+                      label: "Тайм лимит",
+                      fullWidth: true,
+                      sx: { mb: 3 },
+                    },
+                  }}
+                />}
+                { currentEvent.vylet && currentEvent.vylet[index] &&
+                  <DatePicker
+                  value={dayjs(currentEvent.vylet[index])}
+                  slotProps={{
+                    textField: {
+                      label: "Дата вылета",
+                      fullWidth: true,
+                      sx: { mb: 3 },
+                      error: start && end && start > end,
+                      helperText: start && end && start > end ? "End date must be later than start date" : "",
+                    },
+                  }}
+                />
+                }
+              </>);
+              })}
+
 
             </LocalizationProvider>
 
             {/* ------------------------------------------- */}
             {/* Calendar Event Color*/}
             {/* ------------------------------------------- */}
-            <Typography variant="h6" fontWeight={600} my={2}>
+            {/* <Typography variant="h6" fontWeight={600} my={2}>
               Select Event Color
-            </Typography>
+            </Typography> */}
             {/* ------------------------------------------- */}
             {/* colors for event */}
             {/* ------------------------------------------- */}
-            {ColorVariation.map((mcolor) => {
+            {/* {ColorVariation.map((mcolor) => {
               return (
                 <Fab
                   color="primary"
@@ -296,7 +311,7 @@ const BigCalendar = ({isBreadcrumb}:{isBreadcrumb:boolean}) => {
                   {mcolor.value === color ? <IconCheck width={16} /> : ""}
                 </Fab>
               );
-            })}
+            })} */}
           </DialogContent>
           {/* ------------------------------------------- */}
           {/* Action for dialog */}
@@ -309,15 +324,15 @@ const BigCalendar = ({isBreadcrumb}:{isBreadcrumb:boolean}) => {
                 type="submit"
                 color="error"
                 variant="contained"
-                onClick={() => deleteHandler(update)}
+                onClick={() => {}}
               >
-                Delete
+                Билет
               </Button>
             ) : (
               ""
             )}
-            <Button type="submit" disabled={!title} variant="contained">
-              {update ? "Update Event" : "Add Event"}
+            <Button type="submit" onClick={() => handleClose()} variant="contained">
+              Закрыть
             </Button>
           </DialogActions>
           {/* ------------------------------------------- */}

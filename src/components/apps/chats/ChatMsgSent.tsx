@@ -29,6 +29,7 @@ const ChatMsgSent = () => {
     setMsg("");
   };
 
+  console.log(msg);
 
   return (
     <Box p={2}>
