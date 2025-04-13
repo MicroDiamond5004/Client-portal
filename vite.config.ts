@@ -38,10 +38,10 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 5173,  // Новый порт, так как 49080 занят Nginx
-        https: {
-            key: fsOrigin.readFileSync(path.resolve(__dirname, 'certs/localhost-key.pem')),
-            cert: fsOrigin.readFileSync(path.resolve(__dirname, 'certs/localhost.pem')),
-        },
+        // https: {
+        //     key: fsOrigin.readFileSync(path.resolve(__dirname, 'certs/localhost-key.pem')),
+        //     cert: fsOrigin.readFileSync(path.resolve(__dirname, 'certs/localhost.pem')),
+        // },
         strictPort: true,
         cors: true
     },
