@@ -15,6 +15,14 @@ async function deferRender() {
   });
 }
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('✅ Service Worker зарегистрирован'))
+      .catch((err) => console.error('❌ Ошибка регистрации SW:', err));
+  });
+}
+
 deferRender().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <CustomizerContextProvider>

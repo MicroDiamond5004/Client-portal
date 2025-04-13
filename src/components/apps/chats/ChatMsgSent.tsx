@@ -9,6 +9,7 @@ import {
   IconSend,
 } from "@tabler/icons-react";
 import { ChatContext } from "src/context/ChatContext";
+import { sendPushFromClient } from "src/utils/pushManager";
 
 const ChatMsgSent = () => {
   const [msg, setMsg] = React.useState<any>("");
@@ -57,6 +58,7 @@ const ChatMsgSent = () => {
         <IconButton
           aria-label="delete"
           onClick={() => {
+            sendPushFromClient(msg);
             sendMessage(selectedChat?.id || "", msg as any);
             setMsg("");
           }}

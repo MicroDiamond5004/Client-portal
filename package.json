@@ -37,10 +37,13 @@
     "@tiptap/react": "^2.9.1",
     "@tiptap/starter-kit": "^2.9.1",
     "apexcharts": "3.48.0",
+    "body-parser": "^2.2.0",
     "chance": "^1.1.11",
+    "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.13",
     "emoji-picker-react": "^4.12.0",
+    "express": "^5.1.0",
     "formik": "^2.4.5",
     "formik-mui": "^5.0.0-alpha.0",
     "framer-motion": "^10.16.4",
@@ -73,6 +76,7 @@
     "slick-carousel": "^1.8.1",
     "stylis-plugin-rtl": "^2.1.1",
     "swr": "^2.3.0",
+    "web-push": "^3.6.7",
     "yup": "^0.32.11"
   },
   "devDependencies": {
