@@ -21,6 +21,20 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(self.clients.claim())
 })
 
+self.addEventListener('push', function(event) {
+  const data = JSON.parse(event.data?.text()) || 'Push без данных';
+
+  console.log(data, 'dataaaa');
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      // icon: '/icon.png', // если есть иконка
+      tag: `push-${Date.now()}`,
+    })
+  );
+});
+
 self.addEventListener('message', async function (event) {
   const clientId = event.source.id
 
@@ -305,18 +319,4 @@ async function respondWithMock(response) {
 
   return mockedResponse
 }
-
-self.addEventListener('push', function(event) {
-  const data = JSON.parse(event.data?.text()) || 'Push без данных';
-
-  console.log(data, 'dataaaa');
-  
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      // icon: '/icon.png', // если есть иконка
-      tag: 'simple-push-demo',
-    })
-  );
-});
 

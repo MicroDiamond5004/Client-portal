@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import path, { resolve } from 'path';
 import fs from 'fs/promises';
+import fsOrigin from 'fs'
 import svgr from '@svgr/rollup';
 
 // https://vitejs.dev/config/
@@ -37,6 +38,10 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 5173,  // Новый порт, так как 49080 занят Nginx
+        https: {
+            key: fsOrigin.readFileSync(path.resolve(__dirname, 'certs/localhost-key.pem')),
+            cert: fsOrigin.readFileSync(path.resolve(__dirname, 'certs/localhost.pem')),
+        },
         strictPort: true,
         cors: true
     },
