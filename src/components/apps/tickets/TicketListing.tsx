@@ -382,7 +382,7 @@ const TicketListing = (props: TicketListingProps) => {
                       variant="subtitle2"
                       fontWeight={400}
                     >
-                      {ticket.otvet_klientu1 ? `✈️${ticket.otvet_klientu1?.split('✈️')[1]}` : <React.Fragment><Typography fontWeight={600} noWrap>Запрос: </Typography>{ticket.zapros}</React.Fragment>}
+                      {ticket.otvet_klientu1 ? `✈️${ticket.otvet_klientu1?.split('✈️')[1]}` : <React.Fragment>  {ticket.zapros}</React.Fragment>}
                     </Typography>
                   </Box>
                 </TableCell>

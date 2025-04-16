@@ -21,10 +21,10 @@ app.use(bodyParser.json());
 
 // 🎯 Роут для приёма подписки и отправки уведомления
 app.post('/api/send-notification', async (req, res) => {
-  const { subscription, message } = req.body;
+  const { subscription, message, title } = req.body;
 
   const payload = JSON.stringify({
-    title: '🚀 Push из backend!',
+    title: title || '🚀 Push из backend!',
     body: message || 'Нет текста в сообщении',
   });
 

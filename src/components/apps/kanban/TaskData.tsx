@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import ModalTicket from '../tickets/modal-ticket/modal-ticket';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { useSearchParams } from 'react-router';
+import formatToRussianDate from 'src/help-functions/format-to-date';
 
 interface TaskDataProps {
   task: ELMATicket;
@@ -198,12 +199,12 @@ const TaskData = ({ task, index, category, tickets, openModalTicket }: TaskDataP
               {(editedTask.__status?.status || 0) > 3 && <><Typography fontWeight={600} noWrap>
                   ФИО ПАССАЖИРОВ
                 </Typography><br/></>}
-                  {editedTask.otvet_klientu1 ? `✈️${editedTask.otvet_klientu1?.split('✈️')[1]}` : <React.Fragment><Typography fontWeight={600} noWrap>Запрос: </Typography>{editedTask.zapros}</React.Fragment>}
+                  {editedTask.otvet_klientu1 ? `✈️${editedTask.otvet_klientu1?.split('✈️')[1]}` : <React.Fragment>{editedTask.zapros}</React.Fragment>}
               </Box>
             <Box display="flex" alignItems="center" justifyContent="space-between" px={2} py={1}>
               <Stack direction="row" gap={1}>
                 <IconCalendar size="1rem" />
-                <Typography variant="body2">  {taskDate}</Typography>
+                <Typography variant="body2">  {formatToRussianDate(editedTask.__updatedAt ?? editedTask.__createdAt, 'dd MMMM')}</Typography>
               </Stack>
               <Box>
                 <Chip

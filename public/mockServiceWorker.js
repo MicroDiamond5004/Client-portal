@@ -23,13 +23,11 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('push', function(event) {
   const data = JSON.parse(event.data?.text()) || 'Push без данных';
-
-  console.log(data, 'dataaaa');
   
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      // icon: '/icon.png', // если есть иконка
+      icon: './logo-square.png', // если есть иконка
       tag: `push-${Date.now()}`,
     })
   );

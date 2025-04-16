@@ -16,6 +16,7 @@ import MiniChat from "../mini-chat/mini-chat"
 import { ChatsType } from "src/types/apps/chat"
 import addTicket from "src/api/ELMA-api/add-ticket"
 import ModalDetails from "./modal-datails/modal-details"
+import { sendPushFromClient } from "src/utils/pushManager"
 
 type ModalTicketProps = {
     show: boolean,
@@ -222,7 +223,10 @@ const ModalTicket = (props: ModalTicketProps) => {
                     },}}></TextField>
                   </Box>
                   <Box mt={2}>
-                    <IconButtonStyled sx={{width: '100%'}} onClick={handlerOnClickAdd}>
+                    <IconButtonStyled sx={{width: '100%'}} onClick={() => {
+                        handlerOnClickAdd();
+                        sendPushFromClient('На рассмотрении', `Создан новый заказ ${selectedChat?.name}`)
+                      }}>
                         <IconPlus size="22" />
                         <Typography variant="button">СОЗДАТЬ</Typography>
                     </IconButtonStyled>

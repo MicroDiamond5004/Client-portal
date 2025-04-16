@@ -169,7 +169,7 @@ function MiniChat({selectedChat}: any) {
       </Box>
     </SimpleBar>
       <Divider />
-      <ChatMsgSent />
+      <ChatMsgSent currentChat={selectedChat} />
     </Box>
     )
 }

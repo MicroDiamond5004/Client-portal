@@ -10,8 +10,19 @@ import {
 } from "@tabler/icons-react";
 import { ChatContext } from "src/context/ChatContext";
 import { sendPushFromClient } from "src/utils/pushManager";
+import { ChatsType } from "src/types/apps/chat";
 
-const ChatMsgSent = () => {
+type ChatMsgSentProps = {
+  currentChat: ChatsType | null
+}
+
+const ChatMsgSent = (props: ChatMsgSentProps | null = null) => {
+  let currentChat: ChatsType | null = null;
+
+  if (props) {
+    currentChat = props.currentChat;
+  }
+
   const [msg, setMsg] = React.useState<any>("");
 
   const { sendMessage, selectedChat } = useContext(ChatContext);
@@ -58,7 +69,7 @@ const ChatMsgSent = () => {
         <IconButton
           aria-label="delete"
           onClick={() => {
-            sendPushFromClient(msg);
+            sendPushFromClient(msg, `Заказ - ${currentChat?.name || selectedChat?.name}`);
             sendMessage(selectedChat?.id || "", msg as any);
             setMsg("");
           }}

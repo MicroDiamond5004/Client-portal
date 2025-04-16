@@ -7,6 +7,7 @@ import { getFetcher, postFetcher } from 'src/api/globalFetcher';
 import getAllTicketsData from 'src/mocks/tickets/get-tickets';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { useSearchParams } from 'react-router';
+import fetchELMA from 'src/api/ELMA-api/elma-api';
 
 
 // Define context props interface
@@ -98,16 +99,19 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const sendMessage = async (chatId: number | string, message: MessageType) => {
         console.log(chatId, message);
         try {
-            // const data = await fetchELMA('api/feed/targets/work_orders/OrdersNew/01961f9a-cb43-73eb-92c0-6eed1c235dd2/messages', {
-            //     method: 'POST',
-            //     body: {
-            //         body: '<p>тестовое сообщение</p>',
-            //         mentionIds: [],
-            //         files: []
-            //       }
-            //   });
+            const data = await fetchELMA('app/work_orders/OrdersNew/list', {
+                method: 'POST',
+                body: {
+                    "active": true,
+                    "fields": {
+                    "*": true
+                    },
+                    "from": 280,
+                    "size": 2
+                  }  
+              });
 
-            // console.log(data.json(), 'ОТПРАВИЛ!');
+            console.log(data, 'ОТПРАВИЛ!');
               
             // let { data } = await mutate(postFetcher('/api/sendMessage', { chatId, message }));
             // let chat = data.find((chat: any) => chat. === chatId)

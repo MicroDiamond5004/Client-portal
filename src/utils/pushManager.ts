@@ -1,6 +1,6 @@
 const VAPID_PUBLIC_KEY = 'BIyUd7eREfLOnyukFMR9DuezE8uXAnOwp_-Rr7YxIX-RIxm2IRW6uJ90vB1OBn51o0rGAf8k4SQGR-ZfuutHmiE';
 
-export async function sendPushFromClient(message: string) {
+export async function sendPushFromClient(message: string, title: string | null = null) {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     alert('Push уведомления не поддерживаются этим браузером.');
     return;
@@ -18,7 +18,7 @@ export async function sendPushFromClient(message: string) {
 
     console.log('📬 Подписка получена:', subscription);
 
-    const res = await fetch('http://localhost:3001/api/send-notification', {
+    const res = await fetch(`http://${window.location.hostname}:3001/api/send-notification`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,6 +26,7 @@ export async function sendPushFromClient(message: string) {
       body: JSON.stringify({
         subscription,
         message,
+        title
       }),
     });
 
