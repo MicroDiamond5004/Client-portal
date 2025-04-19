@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Theme,
@@ -16,8 +16,9 @@ import {
 import { ChatsType } from 'src/types/apps/chat';
 import { uniq, flatten, random } from 'lodash';
 import { IconDownload } from '@tabler/icons-react';
-import getAllTicketsData from 'src/mocks/tickets/get-tickets';
 import { AllStatus, getStatus } from '../tickets/TicketListing';
+import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import { getUserOrders } from 'src/api/ELMA-api/tickets';
 
 interface chatType {
   isInSidebar?: boolean;
@@ -28,10 +29,12 @@ const drawerWidth = 320;
 
 const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
-  const totalAttachment = uniq(flatten(chat?.messages.map((item) => item.attachment))).length;
-  const totalMedia =
-    uniq(flatten(chat?.messages.map((item) => (item?.type === 'image' ? item.msg : null)))).length -
-    1;
+  // const totalAttachment = uniq(flatten(chat?.messages.map((item) => item.attachment))).length;
+  // const totalMedia =
+  //   uniq(flatten(chat?.messages.map((item) => (item?.type === 'image' ? item.msg : null)))).length -
+  //   1;
+
+  const [AllTickets, setAllTickets] = useState<ELMATicket[]>();
 
   const StyledStack = styled(Stack)(() => ({
     '.showOnHover': {
@@ -42,8 +45,18 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
     },
   }));
 
-  const AllTickets = getAllTicketsData().result.result;
-  const ticket = AllTickets.find((ticket) => ticket.nomer_zakaza === String(chat?.id));
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const userOrders = await getUserOrders();
+      setAllTickets(userOrders?.result?.result);
+      // setLoading(false);
+    };
+
+    fetchOrders();
+  }, []);
+
+
+  const ticket = AllTickets?.find((ticket) => ticket.nomer_zakaza === String(chat?.id));
 
   const randomNames = ['Иван Иванов', 'Михаил Михайлов', 'Юрий Алмазов'];
   const passports = ['XXXXXX', 'YYYYYY', 'ZZZZZZ'];

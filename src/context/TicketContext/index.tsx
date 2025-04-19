@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
-import getAllTicketsData from 'src/mocks/tickets/get-tickets';
-import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import { getUserOrders } from 'src/api/ELMA-api/tickets';
+import { ELMATicket, TicketsData } from 'src/mocks/tickets/ticket.type';
 
 
 export interface TicketContextType {
@@ -19,6 +19,7 @@ export const TicketContext = createContext<TicketContextType>({} as TicketContex
 
 // Provider Component
 export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [curentTicketsData, setCurrentTicketsData] = useState<TicketsData>({result: {result: [], total: 0}, success: false, error: ''})
     const [tickets, setTickets] = useState<ELMATicket[]>([]);
     const [ticketSearch, setTicketSearch] = useState<string>('');
     const [filter, setFilter] = useState<string>('total_tickets');
@@ -26,7 +27,21 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [error, setError] = useState<any>(null);
 
     // Fetch tickets from the API when the component mounts using useEffect
-    const { result: ticketsData, success: isTicketsLoading, error: ticketsError } = getAllTicketsData();
+
+    const { result: ticketsData, success: isTicketsLoading, error: ticketsError } = curentTicketsData;
+    
+    useEffect(() => {
+        const fetchOrders = async () => {
+          const userOrders = await getUserOrders();
+
+          setCurrentTicketsData(userOrders);
+          setLoading(false);
+        };
+    
+        fetchOrders();
+    }, []);
+    
+
     useEffect(() => {
         if (ticketsData) {
             setTickets(ticketsData.result);
@@ -38,8 +53,6 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setLoading(!isTicketsLoading);
         }
     }, [ticketsData, ticketsError, isTicketsLoading]);
-
-    
 
     // Delete a ticket with the specified ID from the server and update the tickets state
     // const deleteTicket = async (id: number) => {

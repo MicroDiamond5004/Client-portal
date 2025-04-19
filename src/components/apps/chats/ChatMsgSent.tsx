@@ -10,22 +10,54 @@ import {
 } from "@tabler/icons-react";
 import { ChatContext } from "src/context/ChatContext";
 import { sendPushFromClient } from "src/utils/pushManager";
-import { ChatsType } from "src/types/apps/chat";
+import { ChatMessage, ChatsType } from "src/types/apps/chat";
+import { ELMATicket } from "src/mocks/tickets/ticket.type";
+import { messages } from "src/layouts/full/vertical/header/data";
+import { sendElmaMessage } from "src/api/ELMA-api/messages";
 
 type ChatMsgSentProps = {
-  currentChat: ChatsType | null
+  currentChat: ChatsType | null,
+  updateChat: ((chat: ChatsType | null) => void),
 }
+
+const sendMessage = async (chatId: string, message: string, orderNumber: string) => {
+    console.log(chatId, message);
+    try {
+        // const data = await fetchELMA('app/work_orders/OrdersNew/list', {
+        //     method: 'POST',
+        //     body: {
+        //         "active": true,
+        //         "fields": {
+        //         "*": true
+        //         },
+        //         "from": 280,
+        //         "size": 2
+        //       }  
+        //   });
+
+        const data = await sendElmaMessage(chatId, message, orderNumber);
+
+        console.log(data, chatId, message, 'ОТПРАВИЛ!');
+          
+        // let { data } = await mutate(postFetcher('/api/sendMessage', { chatId, message }));
+        // let chat = data.find((chat: any) => chat. === chatId)
+        // setSelectedChat(chat);
+    } catch (error) {
+    }
+};
 
 const ChatMsgSent = (props: ChatMsgSentProps | null = null) => {
   let currentChat: ChatsType | null = null;
+  let updateChat: (chat: ChatsType | null) => void;
 
   if (props) {
     currentChat = props.currentChat;
+    updateChat = props.updateChat;
   }
 
   const [msg, setMsg] = React.useState<any>("");
 
-  const { sendMessage, selectedChat } = useContext(ChatContext);
+  const { selectedChat } = useContext(ChatContext);
 
 
   const handleChatMsgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,10 +68,11 @@ const ChatMsgSent = (props: ChatMsgSentProps | null = null) => {
   const onChatMsgSubmit = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!msg.trim() || !selectedChat) return;
-    sendMessage(selectedChat.id, msg.trim() as any);
+    const chat = selectedChat || currentChat;
+    if (!msg.trim() || !chat) return;
+    sendMessage(chat.taskId, msg.trim() as any, selectedChat?.name || currentChat?.name || '');
     setMsg("");
-  };
+  };  
 
   console.log(msg);
 
@@ -48,8 +81,7 @@ const ChatMsgSent = (props: ChatMsgSentProps | null = null) => {
       {/* ------------------------------------------- */}
       {/* sent chat */}
       {/* ------------------------------------------- */}
-      <form
-        onSubmit={onChatMsgSubmit}
+      <Box
         style={{ display: "flex", gap: "10px", alignItems: "center" }}
       >
         {/* ------------------------------------------- */}
@@ -70,8 +102,15 @@ const ChatMsgSent = (props: ChatMsgSentProps | null = null) => {
           aria-label="delete"
           onClick={() => {
             sendPushFromClient(msg, `Заказ - ${currentChat?.name || selectedChat?.name}`);
-            sendMessage(selectedChat?.id || "", msg as any);
+            sendMessage(selectedChat?.taskId || currentChat?.taskId || "", msg as any, selectedChat?.name || currentChat?.name || '');
             setMsg("");
+            console.log(sendMessage);
+            if (currentChat) {
+              const updatedMessages = currentChat.messages;
+              updatedMessages.push({...updatedMessages[updatedMessages.length - 1], id: String(Math.random), createdAt: new Date(), msg})
+              const updatedChat = {...currentChat, messages: updatedMessages}
+              updateChat(updatedChat);
+            }
           }}
           disabled={!msg}
           color="primary"
@@ -84,7 +123,7 @@ const ChatMsgSent = (props: ChatMsgSentProps | null = null) => {
         <IconButton aria-label="delete">
           <IconPaperclip stroke={1.5} size="20" />
         </IconButton>
-      </form>
+      </Box>
     </Box>
   );
 };

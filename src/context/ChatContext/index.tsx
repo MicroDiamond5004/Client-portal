@@ -2,12 +2,20 @@
 import { createContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
 import React from "react";
 import useSWR from 'swr';
-import { ChatsType, MessageType } from '../../types/apps/chat';
+import { ChatMessage, ChatsType, MessageType } from '../../types/apps/chat';
 import { getFetcher, postFetcher } from 'src/api/globalFetcher';
-import getAllTicketsData from 'src/mocks/tickets/get-tickets';
-import { ELMATicket } from 'src/mocks/tickets/ticket.type';
+import { ELMATicket, TicketsData } from 'src/mocks/tickets/ticket.type';
 import { useSearchParams } from 'react-router';
 import fetchELMA from 'src/api/ELMA-api/elma-api';
+import { loginAndFetchMessages } from 'src/api/ELMA-api/login';
+import { getElmaMessages, sendElmaMessage } from 'src/api/ELMA-api/messages';
+import { messages } from 'src/layouts/full/vertical/header/data';
+import { text } from 'stream/consumers';
+import { compareAsc, isAfter } from 'date-fns';
+import { sendPushFromClient } from 'src/utils/pushManager';
+import { stripHtmlAndDecode } from 'src/components/apps/chats/ChatListing';
+import { TicketType } from 'src/types/apps/ticket';
+import { getUserOrders } from 'src/api/ELMA-api/tickets';
 
 
 // Define context props interface
@@ -23,7 +31,7 @@ export interface ChatContextProps {
     setChatSearch: Dispatch<SetStateAction<string>>;
     setSelectedChat: Dispatch<SetStateAction<ChatsType | null>>;
     setActiveChatId: Dispatch<SetStateAction<number | null>>;
-    sendMessage: (chatId: number | string, message: MessageType) => void;
+    sendMessage: (chatId: string, message: string, orderNumber: string) => void;
     setLoading: Dispatch<SetStateAction<boolean>>;
     setError: Dispatch<SetStateAction<string>>;
 }
@@ -56,62 +64,153 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
 
-    const { data: ChatsData, isLoading: isChatsLoading, error: Chatserror, mutate } = useSWR('/api/data/chat/ChatData', getFetcher);
-    const { result: secondData } = getAllTicketsData();
+    const { data: ChatsData, isLoading: isChatsLoading, error: Chatserror } = useSWR('/api/data/chat/ChatData', getFetcher);
+    const [secondData, setSeconData] = useState<TicketsData>()
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+          const userOrders = await getUserOrders();
+          setSeconData(userOrders);
+          setLoading(false);
+        };
+    
+        fetchOrders();
+      }, []);
+
 
     const [searchParams, setSearchParams] = useSearchParams();
+
+    console.log(ChatsData);
+
     // Fetch chat data from the API
     useEffect(() => {
-        console.log(ChatsData, secondData, 'PFITTTT');
-        if (ChatsData && secondData) {
-            setLoading(isChatsLoading);
-            const chatsData = ChatsData.data;
+        let intervalId: NodeJS.Timeout;
+        let prevMessagesMap: Record<string, number> = {}; // key: taskId, value: last message count
+    
+        const fetchData = async () => {
+            setLoading(true);
+    
+            try {
+                if (!ChatsData || !secondData) return;
+    
+                const chatsData = ChatsData.data;
+    
+                const fetchMessagesForTickets = async () => {
+                    return Promise.all(
+                        secondData.result.result.map(async (ticket: any) => {
+                            let messages: ChatMessage[] = [];
+    
+                            if (ticket.__id) {
+                                try {
+                                    const fetchedMessages = await getElmaMessages(ticket.__id);
+                                    const newMessages = fetchedMessages.newMessages;
+                                    const filtered = fetchedMessages?.messages?.filter((m: any) => m.body) ?? [];
+    
+                                    messages = filtered.map((message: any) => ({
+                                        attachment: [],
+                                        createdAt: message.__createdAt,
+                                        id: message.__id,
+                                        msg: message.body,
+                                        senderId: message.author === '543e820c-e836-45f0-b177-057a584463b7' ? '0' : ticket.nomer_zakaza,
+                                        type: 'text'
+                                    }));
 
-            const currentData = secondData.result.map((ticket) => {
-                return {...chatsData[Math.floor(Math.random() * 1000) % 10], name: ticket.nomer_zakaza, id: Number(ticket.nomer_zakaza)}
-            });
-
-            const urlId = searchParams.get("item");
-            const currentId = chatData.find((chat) => chat.id === Number(urlId)) ? urlId : chatData[0]?.id ?? 0;
-            console.log(currentId);
-
-            if (activeChatId !== Number(currentId) && chatData) {
-                setActiveChatId(Number(currentId));
-                const currentChat = chatData.find((chat) => chat.id === Number(currentId)) ?? currentData[0]
-                if (currentChat) {
-                    setSearchParams({ item: currentChat.id })
-                }
-                setSelectedChat(currentChat);
+                                    console.log(filtered);
+    
+                                    messages.sort((a, b) =>
+                                        compareAsc(new Date(a.createdAt), new Date(b.createdAt || ''))
+                                    );
+    
+                                    if (newMessages?.length > 0) {
+                                         // Только новые
+                                        console.log( newMessages,'dddddddddddddddddddddddddddddd')
+                                        newMessages.forEach((msg: any) => {
+                                            sendPushFromClient(stripHtmlAndDecode(msg.body), `Новое сообщение в заказе ${ticket.nomer_zakaza}`);
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error(`Ошибка при получении сообщений для ${ticket.__id}`, error);
+                                }
+                            }
+    
+                            return {
+                                ...chatsData[0],
+                                name: ticket.nomer_zakaza,
+                                id: ticket.nomer_zakaza,
+                                taskId: ticket.__id,
+                                messages
+                            };
+                        })
+                    );
+                };
+    
+                const currentData = await fetchMessagesForTickets();
+                setChatData(currentData);
+            } catch (err) {
+                console.error('Ошибка при загрузке чатов:', err);
+                setError('Ошибка при загрузке чатов');
+            } finally {
+                setLoading(false);
             }
+        };
+    
+        fetchData(); // Первый запуск
+    
+        intervalId = setInterval(fetchData, 10000);
+    
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [secondData, ChatsData]);
+    
 
-            setChatData(currentData);
-        } else if (Chatserror) {
-            setError(Chatserror)
-            setLoading(isChatsLoading);
-            console.log("Failed to fetch the data")
+    useEffect(() => {
+        // синхронизируем выбранный чат с URL
+        if (chatData.length === 0) return;
+    
+        const urlId = searchParams.get("item");
+        const chatFromUrl = chatData.find((chat) => chat.id === urlId);
+    
+        const selected = chatFromUrl ?? chatData[0];
+        if (!selected) return;
+    
+        if (activeChatId !== Number(selected.id)) {
+            setActiveChatId(Number(selected.id));
+            setSelectedChat(selected);
+            setSearchParams({ item: String(selected.id) });
         }
-        else {
-            setLoading(isChatsLoading);
+    }, [searchParams, chatData]);
+
+    useEffect(() => {
+        if (!chatData.length) return;
+    
+        const current = chatData.find((c) => Number(c.id) === activeChatId);
+        if (current) {
+            setSelectedChat(current);
         }
-    }, [ChatsData, Chatserror, isChatsLoading, chatData.length]);
+    }, [chatData, activeChatId]);
+    
+    
 
     // Function to send a message to a chat identified by `chatId` using an API call.
-    const sendMessage = async (chatId: number | string, message: MessageType) => {
+    const sendMessage = async (chatId: string, message: string, orderNumber: string) => {
         console.log(chatId, message);
         try {
-            const data = await fetchELMA('app/work_orders/OrdersNew/list', {
-                method: 'POST',
-                body: {
-                    "active": true,
-                    "fields": {
-                    "*": true
-                    },
-                    "from": 280,
-                    "size": 2
-                  }  
-              });
+            // const data = await fetchELMA('app/work_orders/OrdersNew/list', {
+            //     method: 'POST',
+            //     body: {
+            //         "active": true,
+            //         "fields": {
+            //         "*": true
+            //         },
+            //         "from": 280,
+            //         "size": 2
+            //       }  
+            //   });
 
-            console.log(data, 'ОТПРАВИЛ!');
+            const data = await sendElmaMessage(chatId, message, orderNumber);
+
+            console.log(data, chatId, message, 'ОТПРАВИЛ!');
               
             // let { data } = await mutate(postFetcher('/api/sendMessage', { chatId, message }));
             // let chat = data.find((chat: any) => chat. === chatId)

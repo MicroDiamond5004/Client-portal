@@ -1,4 +1,5 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import DOMPurify from 'dompurify';
 import {
   Typography,
   Divider,
@@ -18,27 +19,28 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import ChatInsideSidebar from './ChatInsideSidebar';
 import { ChatContext } from "src/context/ChatContext";
 import SimpleBar from 'simplebar-react';
+import { ChatMessage, ChatsType } from 'src/types/apps/chat';
 
 
 
 interface ChatContentProps {
-  toggleChatSidebar: () => void;
+  selectedChat: ChatsType | null;
 }
 
 const ChatContent: React.FC<ChatContentProps> = ({
-  toggleChatSidebar,
-}: any) => {
+  selectedChat
+}: ChatContentProps) => {
   const [open, setOpen] = React.useState(true);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up("lg"));
+
+  const {selectedChat: chatFromContext} = useContext(ChatContext);
 
   const mainBoxRef = useRef<HTMLElement>(null);
   const inBoxRef = useRef<HTMLElement>(null);
 
-  const { selectedChat }: any = useContext(ChatContext);
+  // console.log(selectedChat?.id, selectedChat?.messages[0], 'ffffffffffffffffffffffffffffffffffff');
 
-  console.log(selectedChat);
-
-  return (
+  return selectedChat ? (
     <SimpleBar>
       <Box sx={{display: 'flex', flexWrap: 'wrap'}}>
         {selectedChat ? (
@@ -85,7 +87,7 @@ const ChatContent: React.FC<ChatContentProps> = ({
                     secondary={selectedChat.status}
                   />
                 </ListItem>
-                <Stack direction={"row"}>
+                {/* <Stack direction={"row"}>
                   <IconButton aria-label="phone">
                     <IconPhone stroke={1.5} />
                   </IconButton>
@@ -95,7 +97,7 @@ const ChatContent: React.FC<ChatContentProps> = ({
                   <IconButton aria-label="sidebar" onClick={() => setOpen(!open)}>
                     <IconDotsVertical stroke={1.5} />
                   </IconButton>
-                </Stack>
+                </Stack> */}
               </Box>
               <Divider />
             </Box>
@@ -119,7 +121,8 @@ const ChatContent: React.FC<ChatContentProps> = ({
                   }}
                 >
                   <Box p={3}>
-                    {selectedChat.messages.map((chat: any, index: number) => {
+                    {selectedChat.messages?.length > 0 && selectedChat.messages.map((chat: any, index: number) => {
+                      const safeHtml = DOMPurify.sanitize(chat.msg);
                       return (
                         <Box key={index + chat.createdAt}>
                           {selectedChat.id === chat.senderId ? (
@@ -157,8 +160,8 @@ const ChatContent: React.FC<ChatContentProps> = ({
                                       mr: "auto",
                                       maxWidth: "320px",
                                     }}
+                                    dangerouslySetInnerHTML={{ __html: safeHtml }}
                                   >
-                                    {chat.msg}
                                   </Box>
                                 ) : null}
                                 {chat.type === "image" ? (
@@ -214,8 +217,9 @@ const ChatContent: React.FC<ChatContentProps> = ({
                                       ml: "auto",
                                       maxWidth: "320px",
                                     }}
+                                    dangerouslySetInnerHTML={{ __html: safeHtml }}
                                   >
-                                    {chat.msg}
+                                  
                                   </Box>
                                 ) : null}
                                 {chat.type === "image" ? (
@@ -266,15 +270,15 @@ const ChatContent: React.FC<ChatContentProps> = ({
                 mr: "10px",
               }}
             >
-              <IconMenu2 stroke={1.5} onClick={toggleChatSidebar} />
+              <IconMenu2 stroke={1.5} />
             </Box>
             <Typography variant="h4">Select Chat</Typography>
           </Box>
         )}
       </Box>
     </SimpleBar>
-  );
+  ): <></>;
 };
 
-export default ChatContent;
+export default React.memo(ChatContent);
 

@@ -1,5 +1,5 @@
 import { Box } from "@mui/system";
-import { ChatProvider } from "src/context/ChatContext";
+import { ChatContext, ChatProvider } from "src/context/ChatContext";
 import ChatContent from "../../chats/ChatContent";
 import { Avatar, Divider, ListItemAvatar, Typography } from "@mui/material";
 import ChatMsgSent from "../../chats/ChatMsgSent";
@@ -7,11 +7,15 @@ import { IconMenu2 } from "@tabler/icons-react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { ChatsType } from "src/types/apps/chat";
 import SimpleBar from "simplebar-react";
-import { useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
+import { stripHtmlAndDecode } from "../../chats/ChatListing";
 
 function MiniChat({selectedChat}: any) {
     const mainBoxRef = useRef<HTMLElement>(null);
     const inBoxRef = useRef<HTMLElement>(null);
+
+    // const {selectedChat: currentChat, setSelectedChat} = useContext(ChatContext);
+
 
     return (
     <Box flexGrow={1} border={'1px solid #e5eaef'}>
@@ -39,10 +43,11 @@ function MiniChat({selectedChat}: any) {
                   }}
                 >
                   <Box p={3}>
-                    {selectedChat?.messages?.slice(selectedChat?.messages.length - 3, selectedChat?.messages.length).map((chat: any, index: number) => {
+                    {selectedChat?.messages?.slice(0, 3).map((chat: any, index: number) => {
+                      console.log(chat, selectedChat);
                       return (
                         <Box key={index + chat.createdAt}>
-                          {selectedChat.id === chat.senderId ? (
+                          {selectedChat.id === chat.target.__id? (
                             <Box display="flex">
                               <ListItemAvatar>
                                 <Avatar
@@ -52,7 +57,7 @@ function MiniChat({selectedChat}: any) {
                                 />
                               </ListItemAvatar>
                               <Box>
-                                {chat.createdAt ? (
+                                {chat.__createdAt ? (
                                   <Typography
                                     variant="body2"
                                     color="grey.400"
@@ -68,7 +73,7 @@ function MiniChat({selectedChat}: any) {
                                     ago
                                   </Typography>
                                 ) : null}
-                                {chat.type === "text" ? (
+                                {chat.body ? (
                                   <Box
                                     mb={2}
                                     sx={{
@@ -78,7 +83,7 @@ function MiniChat({selectedChat}: any) {
                                       maxWidth: "320px",
                                     }}
                                   >
-                                    {chat.msg}
+                                    {stripHtmlAndDecode(chat.body)}
                                   </Box>
                                 ) : null}
                                 {chat.type === "image" ? (
@@ -125,7 +130,7 @@ function MiniChat({selectedChat}: any) {
                                     ago
                                   </Typography>
                                 ) : null}
-                                {chat.type === "text" ? (
+                                {chat.body ? (
                                   <Box
                                     mb={1}
                                     sx={{
@@ -135,7 +140,7 @@ function MiniChat({selectedChat}: any) {
                                       maxWidth: "320px",
                                     }}
                                   >
-                                    {chat.msg}
+                                    {stripHtmlAndDecode(chat.body)}
                                   </Box>
                                 ) : null}
                                 {chat.type === "image" ? (
@@ -169,7 +174,7 @@ function MiniChat({selectedChat}: any) {
       </Box>
     </SimpleBar>
       <Divider />
-      <ChatMsgSent currentChat={selectedChat} />
+      <ChatMsgSent updateChat={(chat) => {}} currentChat={selectedChat} />
     </Box>
     )
 }

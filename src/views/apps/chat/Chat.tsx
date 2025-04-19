@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Divider, Box } from '@mui/material';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from 'src/components/container/PageContainer';
@@ -8,10 +8,13 @@ import ChatSidebar from 'src/components/apps/chats/ChatSidebar';
 import ChatContent from 'src/components/apps/chats/ChatContent';
 import ChatMsgSent from 'src/components/apps/chats/ChatMsgSent';
 import AppCard from 'src/components/shared/AppCard';
-import { ChatProvider } from 'src/context/ChatContext';
+import { ChatContext, ChatProvider } from 'src/context/ChatContext';
+import { ChatMessage, ChatsType } from 'src/types/apps/chat';
 
 const Chats = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { selectedChat, setSelectedChat } = useContext(ChatContext);
+  
   const BCrumb = [
     {
       to: '/',
@@ -21,8 +24,9 @@ const Chats = () => {
       title: 'Chat',
     },
   ];
+
+
   return (
-    <ChatProvider>
       <PageContainer title="Chat ui" description="this is Chat page">
         <Breadcrumb title="Chat app" items={BCrumb} />
         <AppCard>
@@ -39,13 +43,12 @@ const Chats = () => {
           {/* ------------------------------------------- */}
 
           <Box flexGrow={1}>
-            <ChatContent toggleChatSidebar={() => setMobileSidebarOpen(true)} />
+            <ChatContent selectedChat={selectedChat} />
             <Divider />
-            <ChatMsgSent />
+            <ChatMsgSent currentChat={selectedChat} updateChat={(chat) => setSelectedChat(chat)} />
           </Box>
         </AppCard>
       </PageContainer>
-    </ChatProvider>
   );
 };
 

@@ -25,8 +25,8 @@ import BlankCard from 'src/components/shared/BlankCard';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import getEvents, { EventType } from './EventData';
-import getAllTicketsData from 'src/mocks/tickets/get-tickets';
 import { isSameDay } from 'date-fns';
+import { getUserOrders } from 'src/api/ELMA-api/tickets';
 
 moment.locale('en-GB');
 const localizer = momentLocalizer(moment);
@@ -51,14 +51,26 @@ const BCrumb = [
 
 
 const BigCalendar = () => {
-  const allticketsData = getAllTicketsData();
-  const tickets = allticketsData.result.result;
-  const [Events, setEvents] = useState(getEvents(tickets));
+  const [tickets, setTickets] = useState<ELMATicket[]>();
+  const [Events, setEvents] = useState<EventType[]>();
   const [calevents, setCalEvents] = React.useState<any>(Events);
   const [currentEvent, setCurrentEvent] = useState<EventType | null>(null);
 
   useEffect(() => {
-    setEvents(getEvents(tickets));
+    const fetchOrders = async () => {
+      const userOrders = await getUserOrders();
+      const currentTickets: ELMATicket[] = userOrders.result.result;
+      setTickets(currentTickets);
+      setEvents(getEvents(currentTickets))
+    };
+
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    if (tickets) {
+      setEvents(getEvents(tickets));
+    }
   }, [tickets])
 
   const [open, setOpen] = React.useState<boolean>(false);

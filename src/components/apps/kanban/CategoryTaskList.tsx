@@ -1,5 +1,5 @@
 
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import TaskData from './TaskData';
 import EditCategoryModal from './TaskModal/EditCategoryModal';
 import { KanbanDataContext } from 'src/context/kanbancontext/index';
@@ -237,4 +237,4 @@ function CategoryTaskList({ id, openTicketModal }: CategoryTAskListProps) {
     </>
   );
 }
-export default CategoryTaskList;
+export default React.memo(CategoryTaskList);

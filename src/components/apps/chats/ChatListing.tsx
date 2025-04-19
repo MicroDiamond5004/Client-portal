@@ -28,6 +28,16 @@ import user1 from 'src/assets/images/profile/user-1.jpg';
 import { ChatContext } from 'src/context/ChatContext';
 import { useSearchParams } from 'react-router';
 
+export const stripHtmlAndDecode = (html: string): string => {
+  // Удаляем теги
+  const noTags = html.replace(/<[^>]*>/g, '');
+
+  // Создаём временной элемент, чтобы браузер декодировал сущности
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = noTags;
+  return textarea.value;
+};
+
 const ChatListing = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -44,20 +54,23 @@ const ChatListing = () => {
   const filteredChats = chatData.filter((chat) =>
     chat.name.toLowerCase().includes(chatSearch.toLowerCase()) || []
   );
-
+  
   const getDetails = (conversation: ChatsType) => {
     let displayText = '';
-
+  
     const lastMessage = conversation.messages[conversation.messages.length - 1];
-    
+  
     if (lastMessage) {
       const sender = lastMessage.senderId === conversation.id ? 'You: ' : '';
-      const message = lastMessage.type === 'image' ? 'Sent a photo' : lastMessage.msg;
+      const rawMessage = lastMessage.type === 'image' ? 'Sent a photo' : lastMessage.msg;
+      const message = stripHtmlAndDecode(rawMessage);
       displayText = `${sender}${message}`;
     }
-
+  
     return displayText;
   };
+  
+  
 
   const lastActivity = (chat: ChatsType) => last(chat.messages)?.createdAt;
 
@@ -85,11 +98,9 @@ const ChatListing = () => {
   };
 
 
-  return (
+
+  return chatData ? (
     <div>
-      {/* ------------------------------------------- */}
-      {/* Profile */}
-      {/* ------------------------------------------- */}
       <Box display={'flex'} alignItems="center" gap="10px" p={3}>
         <Badge
           variant="dot"
@@ -109,9 +120,6 @@ const ChatListing = () => {
           <Typography variant="body2">Контрагент</Typography>
         </Box>
       </Box>
-      {/* ------------------------------------------- */}
-      {/* Search */}
-      {/* ------------------------------------------- */}
       <Box px={3} py={1}>
         <TextField
           id="outlined-search"
@@ -130,35 +138,7 @@ const ChatListing = () => {
           onChange={handleSearchChange}
         />
       </Box>
-      {/* ------------------------------------------- */}
-      {/* Contact List */}
-      {/* ------------------------------------------- */}
       <List sx={{ px: 0 }}>
-        {/* <Box px={2.5} pb={1}>
-          <Button
-            id="basic-button"
-            aria-controls={open ? 'basic-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
-            onClick={handleClick}
-            color="inherit"
-          >
-            Recent Chats <IconChevronDown size="16" />
-          </Button>
-          <Menu
-            id="basic-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            MenuListProps={{
-              'aria-labelledby': 'basic-button',
-            }}
-          >
-            <MenuItem onClick={handleClose}>Sort By Time</MenuItem>
-            <MenuItem onClick={handleClose}>Sort By Unread</MenuItem>
-            <MenuItem onClick={handleClose}>Mark as all Read</MenuItem>
-          </Menu>
-        </Box> */}
         <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '600px' }}>
           {filteredChats && filteredChats.length ? (
             filteredChats.map((chat) => (
@@ -179,12 +159,7 @@ const ChatListing = () => {
                     </Typography>
                 </ListItemAvatar>
                 <ListItemText
-                  // primary={
-                    // <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
-                      /* {chat.name} */
-                    /* </Typography> */
-                  // }
-                  secondary={getDetails(chat)}
+                  secondary={getDetails(chat)?.length > 0 ? getDetails(chat) : 'Еще нет сообщений'}
                   secondaryTypographyProps={{
                     noWrap: true,
                   }}
@@ -192,9 +167,7 @@ const ChatListing = () => {
                 />
                 <Box sx={{ flexShrink: '0' }} mt={0.5}>
                   <Typography variant="body2">
-                    {formatDistanceToNowStrict(new Date(lastActivity(chat)), {
-                      addSuffix: false,
-                    })}
+                    {/* {new Date()} */}
                   </Typography>
                 </Box>
               </ListItemButton>
@@ -208,8 +181,7 @@ const ChatListing = () => {
           )}
         </Scrollbar>
       </List>
-    </div>
-  );
+    </div>) : <></>
 };
 
-export default ChatListing;
+export default React.memo(ChatListing);

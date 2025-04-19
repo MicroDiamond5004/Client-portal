@@ -31,14 +31,15 @@ export default function PushManagerComponent() {
              console.log('📬 Подписка:', subscription);
             console.log(PushManager.arguments);
         
-            // Отправь на сервер
-            // fetch('/api/save-subscription', {
-            //   method: 'POST',
-            //   body: JSON.stringify(subscription),
-            //   headers: {
-            //     'Content-Type': 'application/json'
-            //   }
-            // });
+            //  Отправь на сервер
+            fetch('http://${window.location.host}:3001/api/save-subscription/543e820c-e836-45f0-b177-057a584463b7', {
+              method: 'POST',
+              body: JSON.stringify(subscription),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            
             }).catch((error) => {
             console.error('Ошибка при подписке на уведомления:', error);
             });

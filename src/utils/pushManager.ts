@@ -1,3 +1,5 @@
+import { stripHtmlAndDecode } from "src/components/apps/chats/ChatListing";
+
 const VAPID_PUBLIC_KEY = 'BIyUd7eREfLOnyukFMR9DuezE8uXAnOwp_-Rr7YxIX-RIxm2IRW6uJ90vB1OBn51o0rGAf8k4SQGR-ZfuutHmiE';
 
 export async function sendPushFromClient(message: string, title: string | null = null) {
@@ -25,7 +27,7 @@ export async function sendPushFromClient(message: string, title: string | null =
       },
       body: JSON.stringify({
         subscription,
-        message,
+        message: stripHtmlAndDecode(message),
         title
       }),
     });

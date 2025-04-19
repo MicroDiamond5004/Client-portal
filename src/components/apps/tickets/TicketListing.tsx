@@ -29,7 +29,6 @@ import { Grid, styled } from '@mui/system';
 import ModalTicket from './modal-ticket/modal-ticket';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { ALL, setServers } from 'dns';
-import getAllTicketsData from 'src/mocks/tickets/get-tickets';
 import { useSearchParams } from 'react-router';
 import sortAllTickets from './sort-tickets/sort-tickets';
 import formatToRussianDate from 'src/help-functions/format-to-date';
@@ -415,13 +414,12 @@ const TicketListing = (props: TicketListingProps) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <Box my={3} display="flex" justifyContent={'center'}>
+      {/* <Box my={3} display="flex" justifyContent={'center'}>
         <Pagination count={10} color="primary" />
-      </Box>
+      </Box> */}
     </Box>
     <ModalTicket show={isShowModal} ticket={currentTicket ?? tickets[0]} close={handlerCloseModal}/>
     </React.Fragment>);
 };
 
-export default TicketListing;
-
+export default React.memo(TicketListing);

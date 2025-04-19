@@ -19,8 +19,10 @@ import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { AllStatus, getStatus } from '../../TicketListing';
 import formatToRussianDate from 'src/help-functions/format-to-date';
 import MiniChat from '../../mini-chat/mini-chat';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChatsType } from 'src/types/apps/chat';
+import { getElmaMessages } from 'src/api/ELMA-api/messages';
+import { messages } from 'src/layouts/full/vertical/header/data';
 
 type ModalTicketProps = {
     ticket: ELMATicket;
@@ -28,50 +30,39 @@ type ModalTicketProps = {
 }
 
 const ModalDetails = (props: ModalTicketProps) => {
-    const {ticket, onClose} = props;
-
+    const { ticket, onClose } = props;
+  
+    const [currentChats, setCurrentChats] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true); // если нужно знать статус
+  
+    useEffect(() => {
+      const fetchChats = async () => {
+        if (!ticket?.__id) return;
+        try {
+          const response = await getElmaMessages(ticket.__id);
+          setCurrentChats(response.messages);
+        } catch (err) {
+          console.error('Ошибка при загрузке чатов', err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+  
+      fetchChats();
+    }, [ticket?.__id]);
+  
     const selectedChat: ChatsType = {
-        id: String(Math.random),
-        name: ticket?.nomer_zakaza || '',
-        status: 'UPLOAD',
-        recent: true,
-        excerpt: '',
-        chatHistory: [],
-        messages: [
-            { 
-                createdAt: new Date(),
-                msg: 'HIIII',
-                senderId: String(Math.random),
-                type: 'text',
-                attachment: [{}],
-                id: String(Math.random),
-            },
-            { 
-                createdAt: new Date(),
-                msg: 'HELLLOOO',
-                senderId: String(Math.random),
-                type: 'text',
-                attachment: [{}],
-                id: String(Math.random),
-            },
-            { 
-                createdAt: new Date(),
-                msg: '11111111111111',
-                senderId: String(Math.random),
-                type: 'text',
-                attachment: [{}],
-                id: String(Math.random),
-            },
-            { 
-                createdAt: new Date(),
-                msg: '2222222222',
-                senderId: String(Math.random),
-                type: 'text',
-                attachment: [{}],
-                id: String(Math.random),
-            } 
-        ]
-    }
+      id: ticket?.__id ?? '',
+      taskId: ticket?.__id || '',
+      name: ticket?.nomer_zakaza || '',
+      status: 'UPLOAD',
+      recent: true,
+      excerpt: '',
+      chatHistory: [],
+      messages: currentChats,
+    };
+
+    console.log(selectedChat);
 
     const status = getStatus(ticket);
 

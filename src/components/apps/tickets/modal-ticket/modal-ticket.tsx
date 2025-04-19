@@ -14,9 +14,10 @@ import ChatContent from "../../chats/ChatContent"
 import ChatMsgSent from "../../chats/ChatMsgSent"
 import MiniChat from "../mini-chat/mini-chat"
 import { ChatsType } from "src/types/apps/chat"
-import addTicket from "src/api/ELMA-api/add-ticket"
 import ModalDetails from "./modal-datails/modal-details"
 import { sendPushFromClient } from "src/utils/pushManager"
+import { getElmaMessages } from "src/api/ELMA-api/messages"
+import addTicket from "src/api/ELMA-api/tickets"
 
 type ModalTicketProps = {
     show: boolean,
@@ -28,48 +29,36 @@ const ModalTicket = (props: ModalTicketProps) => {
     const {show, close, ticket} = props;
     const textRef = useRef<HTMLTextAreaElement>(null);
 
+    const [currentChats, setCurrentChats] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true); // если нужно знать статус
+      
+    useEffect(() => {
+      const fetchChats = async () => {
+        if (!ticket?.__id) return;
+        try {
+          const response = await getElmaMessages(ticket.__id);
+          setCurrentChats(response.messages);
+        } catch (err) {
+          console.error('Ошибка при загрузке чатов', err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+  
+      fetchChats();
+    }, [ticket?.__id]);
+  
     const selectedChat: ChatsType = {
-      id: String(Math.random),
+      id: ticket?.__id ?? '',
+      taskId: ticket?.__id || '',
       name: ticket?.nomer_zakaza || '',
       status: 'UPLOAD',
       recent: true,
       excerpt: '',
       chatHistory: [],
-      messages: [
-        { 
-          createdAt: new Date(),
-          msg: 'HIIII',
-          senderId: String(Math.random),
-          type: 'text',
-          attachment: [{}],
-          id: String(Math.random),
-        },
-        { 
-          createdAt: new Date(),
-          msg: 'HELLLOOO',
-          senderId: String(Math.random),
-          type: 'text',
-          attachment: [{}],
-          id: String(Math.random),
-        },
-        { 
-          createdAt: new Date(),
-          msg: '11111111111111',
-          senderId: String(Math.random),
-          type: 'text',
-          attachment: [{}],
-          id: String(Math.random),
-        },
-        { 
-          createdAt: new Date(),
-          msg: '2222222222',
-          senderId: String(Math.random),
-          type: 'text',
-          attachment: [{}],
-          id: String(Math.random),
-        } 
-          ]
-    }
+      messages: currentChats,
+    };
+
     const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     const navigate = useNavigate();

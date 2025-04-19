@@ -3,6 +3,7 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
+import { ChatProvider } from 'src/context/ChatContext';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -42,7 +43,7 @@ const Router = [
     element: <FullLayout />,
     children: [
       { path: '/', element: <Navigate to="/apps/tickets" /> },
-      { path: '/apps/chats/?', element: <Chats /> },
+      { path: '/apps/chats/?', element: <ChatProvider><Chats /></ChatProvider> },
       { path: '/apps/tickets/?', element: <Tickets /> },
       { path: '/apps/calendar', element: <Calendar /> },
       { path: '/pages/account-settings', element: <AccountSetting /> },

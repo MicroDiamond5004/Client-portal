@@ -2,8 +2,9 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { TodoCategory } from '../../types/apps/kanban';
 import { deleteFetcher, getFetcher, postFetcher } from 'src/api/globalFetcher';
 import useSWR from 'swr';
-import getAllTicketsData, { AllTickets } from 'src/mocks/tickets/get-tickets';
 import { AllStatus, getStatus } from 'src/components/apps/tickets/TicketListing';
+import { TicketsData } from 'src/mocks/tickets/ticket.type';
+import { getUserOrders } from 'src/api/ELMA-api/tickets';
 
 
 
@@ -34,12 +35,24 @@ interface KanbanContextType {
 export const KanbanDataContext = createContext<KanbanContextType>({} as KanbanContextType);
 
 export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ children }) => {
+    const [curentTicketsData, setCurrentTicketsData] = useState<TicketsData>({result: {result: [], total: 0}, success: false, error: ''})
     const [todoCategories, setTodoCategories] = useState<TodoCategory[]>([]);
     const [error, setError] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true)
 
     // Fetch todo data from the API
-    const { result: todosData, success: isTodosLoading, error: todoError } = getAllTicketsData();
+    const { result: todosData, success: isTodosLoading, error: todoError } = curentTicketsData;
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            const userOrders = await getUserOrders();
+            setCurrentTicketsData(userOrders);
+            setLoading(false);
+        };
+
+        fetchOrders();
+        }, []);
+
     useEffect(() => {
         if (todosData) {
             const categoriesTickets: any = {
