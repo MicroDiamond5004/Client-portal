@@ -1,0 +1,84 @@
+{
+  "orders": [],
+  "messages": [
+    {
+      "__id": "af98b0f7-e280-47f3-8413-d76d2aa72ff5",
+      "target": {
+        "id": "0196ae4c-dd88-754a-9818-137b420bc569",
+        "namespace": "work_orders",
+        "code": "OrdersNew",
+        "title": "#696 - ИП КОНСТАНТИН",
+        "createdIn": [],
+        "elementName": "Заказы"
+      },
+      "author": "3ca1ff35-b244-4180-ac56-382b25f65e80",
+      "body": "Привет  из внешнего портала!",
+      "comments": [],
+      "unreadCommentsCount": 0,
+      "__createdAt": "2025-05-09T00:28:00.87Z",
+      "__updatedAt": "2025-05-09T00:28:00.87Z",
+      "__deletedAt": null
+    },
+    {
+      "__id": "2f6d16ac-4926-4c69-ab6e-765b32c8e832",
+      "target": {
+        "id": "0196ae4c-dd88-754a-9818-137b420bc569",
+        "namespace": "work_orders",
+        "code": "OrdersNew",
+        "title": "#696 - ИП КОНСТАНТИН",
+        "createdIn": [],
+        "elementName": "Заказы"
+      },
+      "author": "3ca1ff35-b244-4180-ac56-382b25f65e80",
+      "body": "Привет  из внешнего портала!",
+      "comments": [],
+      "unreadCommentsCount": 0,
+      "__createdAt": "2025-05-09T00:27:19.979Z",
+      "__updatedAt": "2025-05-09T00:27:19.979Z",
+      "__deletedAt": null
+    },
+    {
+      "__id": "4baebc9a-169f-4311-b276-a924ed3140f2",
+      "target": {
+        "id": "0196ae4c-dd88-754a-9818-137b420bc569",
+        "namespace": "work_orders",
+        "code": "OrdersNew",
+        "title": "#696 - ИП КОНСТАНТИН",
+        "createdIn": [],
+        "elementName": "Заказы"
+      },
+      "author": "2060cede-a1b1-489e-9c00-69570a4efec1",
+      "body": "hello",
+      "comments": [],
+      "unreadCommentsCount": 0,
+      "__createdAt": "2025-05-08T05:27:48.683Z",
+      "__updatedAt": "2025-05-08T05:27:48.683Z",
+      "__deletedAt": null
+    },
+    {
+      "__id": "f18c03d6-5d29-439c-a8c4-77621fdf68f1",
+      "target": {
+        "id": "0196ae4c-dd88-754a-9818-137b420bc569",
+        "namespace": "work_orders",
+        "code": "OrdersNew",
+        "title": "#696 - ИП КОНСТАНТИН",
+        "createdIn": [],
+        "elementName": "Заказы"
+      },
+      "author": "3ca1ff35-b244-4180-ac56-382b25f65e80",
+      "body": "hello!",
+      "comments": [
+        {
+          "__id": "ed749630-2591-4908-98e7-3f0c92113fc0",
+          "author": "543e820c-e836-45f0-b177-057a584463b7",
+          "body": "<p>Добрый день!</p>",
+          "__createdAt": "2025-05-09T00:39:57.767Z"
+        }
+      ],
+      "unreadCommentsCount": 0,
+      "__createdAt": "2025-05-08T05:25:28.478Z",
+      "__updatedAt": "2025-05-09T00:39:57.767Z",
+      "__deletedAt": null
+    }
+  ]
+}

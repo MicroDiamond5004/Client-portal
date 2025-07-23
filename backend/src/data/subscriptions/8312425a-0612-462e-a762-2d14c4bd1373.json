@@ -1,0 +1,11 @@
+[
+  {
+    "endpoint": "https://web.push.apple.com/QIr1xz-52sQcpErMvGVhVJCpb2MrOT4CtQB24I3kXJR-wV8x4as2hkuPNUUvG_-IakbWsSOCQTmMAKdormPe_eCy_ED_rGqVeXZ9tK_H7r4KX4yZq_9G1KDXW-DgSOyfKtUPX9t0EmTGFyMUlQY7EfMUvIPVEpfVCE3Oh2zcpCk",
+    "keys": {
+      "p256dh": "BGzcdhgi7peIkpYy8tSDEwaBkCqOnkEXcJQ_zxbMey10Yh3nxVfzL4VzSbDyP4v-VduYD0gMpfiYiKTKVzPEjiQ",
+      "auth": "2i3DDhUNcXs_jE1WiMrQcw"
+    },
+    "email": "beretta-juli@yandex.ru",
+    "userId": "8312425a-0612-462e-a762-2d14c4bd1373"
+  }
+]

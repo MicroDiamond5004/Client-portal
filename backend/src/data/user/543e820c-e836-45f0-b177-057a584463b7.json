@@ -1,0 +1,4462 @@
+{
+  "orders": [
+    {
+      "fio": [],
+      "__id": "0195700b-0d04-70fa-a81a-b23fb340862e",
+      "fio2": [],
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "sbor1": null,
+      "sbor2": null,
+      "sbor3": null,
+      "schet": null,
+      "__file": null,
+      "__name": "#242 - ООО АСТРА",
+      "oplata": null,
+      "pribyl": null,
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "vazhno": null,
+      "zapros": "Посмотрите Азал",
+      "__debug": false,
+      "__index": 192,
+      "artikul": null,
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "skidka1": null,
+      "vaucher": null,
+      "__status": {
+        "order": 0,
+        "status": 1
+      },
+      "stoimost": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "__version": 1741341636,
+      "ekvairing": null,
+      "marshrut1": null,
+      "marshrut2": null,
+      "marshrut3": null,
+      "marshrut4": null,
+      "marshrut5": null,
+      "marshrut6": null,
+      "menedzher": null,
+      "srochnost": false,
+      "stoimost2": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "stoimost3": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "tip_zakaz": [
+        {
+          "code": "klientskii_otdel_bronirovaniya",
+          "name": "Клиентский отдел (бронирования)"
+        }
+      ],
+      "aviabilety": [],
+      "karta_mest": null,
+      "kod_uslugi": null,
+      "komissiya1": null,
+      "komissiya2": null,
+      "komissiya3": null,
+      "platalshik": [],
+      "postavshik": [],
+      "schet_fail": null,
+      "taim_limit": null,
+      "__createdAt": "2025-03-07T10:00:34Z",
+      "__createdBy": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+      "__deletedAt": null,
+      "__directory": null,
+      "__updatedAt": "2025-03-07T10:00:36Z",
+      "__updatedBy": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+      "bd_zakaza_1": [],
+      "data_vyleta": null,
+      "karta_mest1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "zamechaniya": null,
+      "__externalId": null,
+      "data_vyezda1": null,
+      "data_vyezda2": null,
+      "data_vyezda3": null,
+      "data_zaezda1": null,
+      "data_zaezda2": null,
+      "data_zaezda3": null,
+      "forma_oplaty": null,
+      "nevozvratnyi": null,
+      "nomer_zakaza": "242",
+      "sbor_pokupka": null,
+      "sbor_vozvrat": null,
+      "__subscribers": [
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3"
+      ],
+      "otvet_klientu": "",
+      "sebestoimost1": null,
+      "sebestoimost2": null,
+      "sebestoimost3": null,
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "manager_answer": null,
+      "otvet_klientu1": null,
+      "razmer_shtrafa": null,
+      "__register_name": "242",
+      "data_ofrmleniya": null,
+      "fio_passazhira1": null,
+      "fio_passazhira2": null,
+      "fio_passazhira3": null,
+      "fio_passazhira4": null,
+      "fio_passazhira5": null,
+      "fio_passazhira6": null,
+      "kto_rekomedoval": [],
+      "otvet_na_zapros": null,
+      "summa_do_skidki": null,
+      "uchetnaya_zapis": null,
+      "nalichie_khostov": null,
+      "skrin_iz_sistemy": null,
+      "dopolnitelnye_fio": [],
+      "prichina_snyatiya": null,
+      "itogovaya_stoimost": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "otmena_bez_shtrafa": null,
+      "otmena_so_shtrafom": null,
+      "deistvie_menedzhera": [],
+      "kolichestvo_nochei1": null,
+      "kolichestvo_nochei2": null,
+      "kolichestvo_nomerov": null,
+      "komissiya_aeroflota": null,
+      "postavshik_transfer": [],
+      "procent_uderzhaniya": null,
+      "procenty_menedzheru": {
+        "rows": null,
+        "view": "",
+        "result": {
+          "__count": 0
+        }
+      },
+      "shtraf_aviakompanii": null,
+      "ssylka_na_kartochku": "[https://clck.ru/3Gyfja](https://clck.ru/3Gyfja)",
+      "klass_obsluzhivaniya": null,
+      "kolichestvo_nochei_3": null,
+      "postavshik_vipservis": [],
+      "stoimost_bileta_s_kh": null,
+      "stoimost_dlya_otveta": null,
+      "__externalProcessMeta": null,
+      "kod_bronirovaniya_a_k": null,
+      "sistema_bronirovaniya": null,
+      "komissiya_aviakompanii": null,
+      "komissiya_po_ekvairingu": null,
+      "marshrutnaya_kvitanciya": null,
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "opisanie_dannye_po_broni": null,
+      "bukking_klassy_v_nalichii": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "dopolnitelnaya_informaciya": null,
+      "fio_passazhirov_vipservis_2": [],
+      "kod_bronirovaniya_v_sisteme": null,
+      "kommentarii_k_predlozheniyu": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "modifikator_dlya_otveta_na_zapros": null,
+      "nomer_a_pasporta_ov_dlya_proverki": null
+    },
+    {
+      "fio": [],
+      "__id": "01957014-44ea-762f-b649-e42aec966a2c",
+      "fio2": [
+        "019504b0-67fe-7096-b698-5ffb4a19828a"
+      ],
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "sbor1": null,
+      "sbor2": null,
+      "sbor3": null,
+      "schet": null,
+      "__file": null,
+      "__name": "#243 - ООО АСТРА",
+      "oplata": null,
+      "pribyl": null,
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "vazhno": null,
+      "zapros": "Артем, еще второй вариант тоже надо проработать турками\n13 марта Канкун (CUN)  10: 35 - 14 марта Стамбул (IST) 06: 15\n\n14 марта Стамбул (IST)  08: 15 - 14 марта Москва (VKO) 12: 15",
+      "__debug": false,
+      "__index": 193,
+      "__tasks": null,
+      "artikul": null,
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "skidka1": null,
+      "vaucher": null,
+      "__status": {
+        "order": 0,
+        "status": 5
+      },
+      "stoimost": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "__version": 1741344559,
+      "ekvairing": null,
+      "marshrut1": null,
+      "marshrut2": null,
+      "marshrut3": null,
+      "marshrut4": null,
+      "marshrut5": null,
+      "marshrut6": null,
+      "menedzher": null,
+      "srochnost": null,
+      "stoimost2": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "stoimost3": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "tip_zakaz": [
+        {
+          "code": "klientskii_otdel_bronirovaniya",
+          "name": "Клиентский отдел (бронирования)"
+        }
+      ],
+      "aviabilety": [],
+      "karta_mest": null,
+      "kod_uslugi": null,
+      "komissiya1": null,
+      "komissiya2": null,
+      "komissiya3": null,
+      "platalshik": [],
+      "postavshik": [],
+      "schet_fail": null,
+      "taim_limit": "2025-03-13T21:00:00.000Z",
+      "__createdAt": "2025-03-07T10:09:00Z",
+      "__createdBy": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+      "__deletedAt": null,
+      "__directory": null,
+      "__updatedAt": "2025-03-07T10:49:19Z",
+      "__updatedBy": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+      "bd_zakaza_1": [],
+      "data_vyleta": "2025-03-20T21:00:00.000Z",
+      "karta_mest1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "zamechaniya": null,
+      "__externalId": null,
+      "data_vyezda1": null,
+      "data_vyezda2": null,
+      "data_vyezda3": null,
+      "data_zaezda1": null,
+      "data_zaezda2": null,
+      "data_zaezda3": null,
+      "forma_oplaty": null,
+      "nevozvratnyi": null,
+      "nomer_zakaza": "243",
+      "sbor_pokupka": {
+        "cents": 260000,
+        "currency": "RUB"
+      },
+      "sbor_vozvrat": null,
+      "__subscribers": [
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3"
+      ],
+      "otvet_klientu": "Доплата - 46 812 руб/пас",
+      "sebestoimost1": null,
+      "sebestoimost2": null,
+      "sebestoimost3": null,
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "manager_answer": [],
+      "otvet_klientu1": "\nДоплата - 46 812 руб/пас",
+      "razmer_shtrafa": null,
+      "__register_name": "243",
+      "data_ofrmleniya": "2025-03-06T21:00:00.000Z",
+      "fio_passazhira1": null,
+      "fio_passazhira2": null,
+      "fio_passazhira3": null,
+      "fio_passazhira4": null,
+      "fio_passazhira5": null,
+      "fio_passazhira6": null,
+      "kto_rekomedoval": [],
+      "otvet_na_zapros": "",
+      "summa_do_skidki": null,
+      "uchetnaya_zapis": null,
+      "nalichie_khostov": false,
+      "skrin_iz_sistemy": null,
+      "dopolnitelnye_fio": [],
+      "prichina_snyatiya": null,
+      "__tasks_performers": [],
+      "itogovaya_stoimost": {
+        "cents": 260000,
+        "currency": "RUB"
+      },
+      "otmena_bez_shtrafa": null,
+      "otmena_so_shtrafom": null,
+      "deistvie_menedzhera": [],
+      "kolichestvo_nochei1": null,
+      "kolichestvo_nochei2": null,
+      "kolichestvo_nomerov": null,
+      "komissiya_aeroflota": null,
+      "postavshik_transfer": [],
+      "procent_uderzhaniya": null,
+      "procenty_menedzheru": {
+        "rows": null,
+        "view": "",
+        "result": {
+          "__count": 0
+        }
+      },
+      "shtraf_aviakompanii": null,
+      "ssylka_na_kartochku": "[https://clck.ru/3Gyh9q](https://clck.ru/3Gyh9q)",
+      "klass_obsluzhivaniya": "бизнес",
+      "kolichestvo_nochei_3": null,
+      "postavshik_vipservis": [],
+      "stoimost_bileta_s_kh": null,
+      "stoimost_dlya_otveta": "Доплата - 46 812 руб/пас",
+      "__externalProcessMeta": null,
+      "kod_bronirovaniya_a_k": "6789",
+      "sistema_bronirovaniya": null,
+      "komissiya_aviakompanii": null,
+      "komissiya_po_ekvairingu": null,
+      "marshrutnaya_kvitanciya": null,
+      "__tasks_earliest_duedate": null,
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "opisanie_dannye_po_broni": "✈️ TK 189 - TURKISH AIRLINES. 13 марта Канкун (CUN) 10: 35 - 14 марта Стамбул (IST) 06: 15\n\nДоплата - 46 812 руб/пас\n\n✈️ TK 413 - TURKISH AIRLINES. 14 марта Стамбул (IST) 08: 15 - 14 марта Москва (VKO) 12: 15\n\nБизнес - 138 737 руб/пас (обмен 15 евро, возврат 80 евро)",
+      "bukking_klassy_v_nalichii": "с- 2\nz -1\n\nпри брони  с-1   z-нет",
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "dopolnitelnaya_informaciya": null,
+      "fio_passazhirov_vipservis_2": [],
+      "kod_bronirovaniya_v_sisteme": "456u8",
+      "kommentarii_k_predlozheniyu": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "modifikator_dlya_otveta_na_zapros": "1",
+      "nomer_a_pasporta_ov_dlya_proverki": "Данные паспортов: Петров Петр Петрович\n\tТип: Внутренний - 4612 1234545\n\n"
+    },
+    {
+      "fio": [],
+      "__id": "0195b27c-7b78-753f-9ae3-b462b2ecb058",
+      "fio2": [],
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "sbor1": null,
+      "sbor2": null,
+      "sbor3": null,
+      "schet": null,
+      "__file": null,
+      "__name": "#433 - ООО АСТРА",
+      "oplata": null,
+      "pribyl": null,
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "vazhno": null,
+      "zapros": "дгнрпори",
+      "__debug": false,
+      "__index": 383,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "0195b27c-cd30-7095-9957-e22c2cf64399",
+          "path": "/items/a72ac8a7-e98a-42e1-b312-1357f955d1d2",
+          "place": "",
+          "state": "assignment",
+          "__item": {
+            "id": "0195b27c-7b78-753f-9ae3-b462b2ecb058",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "Подготовка предложений: #433 (Авиабилеты)",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": "2025-03-20T10:52:58+03:00",
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "0042751e-e924-46b5-948f-778bea19708b",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "0195b27c-be54-7095-a63d-d1e367972a6b",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 433",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7",
+            "b8749e9d-2648-4752-8018-40a7b7164f67",
+            "df364732-f628-4c57-a866-684acd17ec8f",
+            "dbf65283-6c54-4614-996b-d6f06e8574db"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-03-20T07:37:58.22383269Z",
+          "__createdBy": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+          "__deletedAt": null,
+          "__updatedAt": "2025-03-20T07:37:58.531472632Z",
+          "__updatedBy": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "df364732-f628-4c57-a866-684acd17ec8f",
+            "dbf65283-6c54-4614-996b-d6f06e8574db",
+            "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7",
+            "b8749e9d-2648-4752-8018-40a7b7164f67"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "artikul": null,
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "skidka1": null,
+      "vaucher": null,
+      "__status": {
+        "order": 0,
+        "status": 2
+      },
+      "stoimost": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "__version": 1742456275,
+      "ekvairing": null,
+      "marshrut1": null,
+      "marshrut2": null,
+      "marshrut3": null,
+      "marshrut4": null,
+      "marshrut5": null,
+      "marshrut6": null,
+      "menedzher": null,
+      "srochnost": null,
+      "stoimost2": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "stoimost3": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "tip_zakaz": [
+        {
+          "code": "klientskii_otdel_bronirovaniya",
+          "name": "Клиентский отдел (бронирования)"
+        }
+      ],
+      "adjustment": null,
+      "aviabilety": [],
+      "karta_mest": null,
+      "kod_uslugi": null,
+      "komissiya1": null,
+      "komissiya2": null,
+      "komissiya3": null,
+      "platalshik": [],
+      "postavshik": [],
+      "schet_fail": null,
+      "taim_limit": null,
+      "__createdAt": "2025-03-20T07:37:53Z",
+      "__createdBy": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+      "__deletedAt": null,
+      "__directory": null,
+      "__updatedAt": "2025-03-20T07:37:58Z",
+      "__updatedBy": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+      "bd_zakaza_1": [],
+      "data_vyleta": null,
+      "karta_mest1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "zamechaniya": null,
+      "__externalId": null,
+      "data_vyezda1": null,
+      "data_vyezda2": null,
+      "data_vyezda3": null,
+      "data_zaezda1": null,
+      "data_zaezda2": null,
+      "data_zaezda3": null,
+      "forma_oplaty": null,
+      "nevozvratnyi": null,
+      "nomer_zakaza": "433",
+      "sbor_pokupka": null,
+      "sbor_vozvrat": null,
+      "__subscribers": [
+        "c566297b-2f3c-40b5-a27e-7d9f30aae080"
+      ],
+      "korrektirovka": null,
+      "otvet_klientu": "",
+      "sebestoimost1": null,
+      "sebestoimost2": null,
+      "sebestoimost3": null,
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "manager_answer": null,
+      "otvet_klientu1": null,
+      "otvet_klientu3": null,
+      "razmer_shtrafa": null,
+      "__register_name": "433",
+      "data_ofrmleniya": null,
+      "fio_passazhira1": null,
+      "fio_passazhira2": null,
+      "fio_passazhira3": null,
+      "fio_passazhira4": null,
+      "fio_passazhira5": null,
+      "fio_passazhira6": null,
+      "kto_rekomedoval": [],
+      "otvet_na_zapros": null,
+      "summa_do_skidki": null,
+      "uchetnaya_zapis": null,
+      "nalichie_khostov": null,
+      "skrin_iz_sistemy": null,
+      "dopolnitelnye_fio": [],
+      "prichina_snyatiya": null,
+      "__tasks_performers": [
+        "dbf65283-6c54-4614-996b-d6f06e8574db",
+        "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+        "543e820c-e836-45f0-b177-057a584463b7",
+        "b8749e9d-2648-4752-8018-40a7b7164f67",
+        "df364732-f628-4c57-a866-684acd17ec8f"
+      ],
+      "itogovaya_stoimost": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "otmena_bez_shtrafa": null,
+      "otmena_so_shtrafom": null,
+      "deistvie_menedzhera": [],
+      "kolichestvo_nochei1": null,
+      "kolichestvo_nochei2": null,
+      "kolichestvo_nomerov": null,
+      "komissiya_aeroflota": null,
+      "postavshik_transfer": [],
+      "procent_uderzhaniya": null,
+      "procenty_menedzheru": {
+        "rows": null,
+        "view": "",
+        "result": {
+          "__count": 0
+        }
+      },
+      "shtraf_aviakompanii": null,
+      "ssylka_na_kartochku": "[https://clck.ru/3Hwsys](https://clck.ru/3Hwsys)",
+      "klass_obsluzhivaniya": null,
+      "kolichestvo_nochei_3": null,
+      "postavshik_vipservis": [],
+      "stoimost_bileta_s_kh": null,
+      "stoimost_dlya_otveta": null,
+      "__externalProcessMeta": null,
+      "kod_bronirovaniya_a_k": null,
+      "nalichie_dop_segmenta": null,
+      "sistema_bronirovaniya": null,
+      "komissiya_aviakompanii": null,
+      "komissiya_po_ekvairingu": null,
+      "marshrutnaya_kvitanciya": null,
+      "taim_limit_dlya_klienta": null,
+      "__tasks_earliest_duedate": "2025-03-20T10:52:58+03:00",
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "opisanie_dannye_po_broni": null,
+      "bukking_klassy_v_nalichii": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "dopolnitelnaya_informaciya": null,
+      "fio_passazhirov_vipservis_2": [],
+      "kod_bronirovaniya_v_sisteme": null,
+      "kommentarii_k_predlozheniyu": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "pervonachalnye_predldozheniya": null,
+      "modifikator_dlya_otveta_na_zapros": null,
+      "nomer_a_pasporta_ov_dlya_proverki": null,
+      "aktualizirovannoe_opisanie_dannye_po_broni": null
+    },
+    {
+      "fio": [],
+      "__id": "0196f28e-2f19-77d8-b7c4-6526bf1087d7",
+      "fio2": [],
+      "fond": null,
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "__name": "#765 - ООО АСТРА",
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "vazhno": null,
+      "zapros": "заказ лк Борков",
+      "__debug": false,
+      "__index": 760,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "0196f29a-2bd7-7285-ae48-534dc2241ca8",
+          "path": "/items/1b5bc72a-a70f-4aa9-a92a-014134f7929a",
+          "place": "",
+          "state": "assignment",
+          "__item": {
+            "id": "0196f28e-2f19-77d8-b7c4-6526bf1087d7",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "На контроль: #765  ожидание информации от клиента - ООО АСТРА (Авиабилеты)",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": "2025-05-21T14:28:32.055072551Z",
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "d7278681-6275-40ba-b6db-184b8cb011d2",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "0196f28e-3151-7285-8335-e1e08a07c86a",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 765",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-05-21T11:28:32.055072551Z",
+          "__createdBy": "b8749e9d-2648-4752-8018-40a7b7164f67",
+          "__deletedAt": null,
+          "__updatedAt": "2025-05-21T11:28:32.397330552Z",
+          "__updatedBy": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "__status": {
+        "order": 0,
+        "status": 3
+      },
+      "stoimost": null,
+      "__version": 1747826910,
+      "stoimost2": null,
+      "stoimost3": null,
+      "tip_zakaz": [
+        {
+          "code": "klientskii_otdel_bronirovaniya",
+          "name": "Клиентский отдел (бронирования)"
+        }
+      ],
+      "adjustment": null,
+      "aviabilety": [],
+      "kod_uslugi": null,
+      "platalshik": [],
+      "postavshik": [],
+      "__createdAt": "2025-05-21T11:15:26Z",
+      "__createdBy": "8312425a-0612-462e-a762-2d14c4bd1373",
+      "__deletedAt": null,
+      "__updatedAt": "2025-05-21T11:28:31Z",
+      "__updatedBy": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+      "bd_zakaza_1": [],
+      "kod_uslugi1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "forma_oplaty": null,
+      "nomer_zakaza": "765",
+      "summa_bonusa": null,
+      "__subscribers": [
+        "8312425a-0612-462e-a762-2d14c4bd1373"
+      ],
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "otvet_klientu1": "✈️ TK 87 - TURKISH AIRLINES\n29 марта Осака (KIX) 22:30 - 30 марта Стамбул (IST) 05:30\n\n✈️ TK 417 - TURKISH AIRLINES\n30 марта Стамбул (IST) 09:05 - 30 марта Внуково (VKO) 13:00\n\n\nЭконом невозвратный/необменный без багажа - 190 633  руб/пас\nЭконом невозвратный c багажом - 196 093  руб/пас (обмен 80 евро)\nЭконом возвратный c багажом - 205 193  руб/пас (обмен 20 евро/возврат 125 евро)",
+      "__register_name": "765",
+      "kto_rekomedoval": [
+        "0194fa07-f526-7c98-873d-5f0d7547168a"
+      ],
+      "otvet_na_zapros": "✈️ TK 87 - TURKISH AIRLINES\n29 марта Осака (KIX) 22:30 - 30 марта Стамбул (IST) 05:30\n\n✈️ TK 417 - TURKISH AIRLINES\n30 марта Стамбул (IST) 09:05 - 30 марта Внуково (VKO) 13:00\n\n",
+      "nalichie_khostov": false,
+      "skrin_iz_sistemy": null,
+      "dopolnitelnye_fio": [],
+      "__tasks_performers": [
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+        "543e820c-e836-45f0-b177-057a584463b7"
+      ],
+      "procent_menedzhera": null,
+      "deistvie_menedzhera": [],
+      "postavshik_transfer": [],
+      "ssylka_na_kartochku": "https://clck.ru/3MCCRb",
+      "postavshik_vipservis": [],
+      "stoimost_dlya_otveta": "Эконом невозвратный/необменный без багажа - 190 633  руб/пас\nЭконом невозвратный c багажом - 196 093  руб/пас (обмен 80 евро)\nЭконом возвратный c багажом - 205 193  руб/пас (обмен 20 евро/возврат 125 евро)",
+      "sistema_bronirovaniya": null,
+      "bonus_rekomendadatelya": 0.03,
+      "__tasks_earliest_duedate": "2025-05-21T14:28:32.055072551Z",
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "nalog_6_ot_summy_bonusov": null,
+      "bukking_klassy_v_nalichii": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "fio_passazhirov_vipservis_2": [],
+      "nalog_6_ot_summy_menedzhera": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "pervonachalnye_predldozheniya": "✈️ TK 87 - TURKISH AIRLINES\n29 марта Осака (KIX) 22:30 - 30 марта Стамбул (IST) 05:30\n\n✈️ TK 417 - TURKISH AIRLINES\n30 марта Стамбул (IST) 09:05 - 30 марта Внуково (VKO) 13:00\n\n\nЭконом невозвратный/необменный без багажа - 190 633  руб/пас\nЭконом невозвратный c багажом - 196 093  руб/пас (обмен 80 евро)\nЭконом возвратный c багажом - 205 193  руб/пас (обмен 20 евро/возврат 125 евро)",
+      "modifikator_dlya_otveta_na_zapros": "TK   87 L  29MAR KIXIST HK3  2230  #0530  O*        E SA/SU 1   \n 2 . TK  417 L  30MAR ISTVKO HK3  0905   1300  O*        E SU    1   \n"
+    },
+    {
+      "fio": [],
+      "__id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+      "fio2": [
+        "0195806d-e2cd-736d-938c-fc4325627037"
+      ],
+      "fond": null,
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "__name": "#804 - ООО АСТРА",
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "vazhno": null,
+      "zapros": "Wwe",
+      "__debug": false,
+      "__index": 799,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "019720a4-3f35-728e-91be-c814b37fb549",
+          "path": "/items/c1b9bacc-a153-48f0-830b-edfa7236f558",
+          "place": "",
+          "state": "assignment",
+          "__item": {
+            "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "Передать на оформление #804 - Андрей Сергеевич Борков (Авиабилеты)",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": null,
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "00000000-0000-0000-0000-000000000000",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "01971b37-2e08-728e-a97c-2de6989364fd",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 804",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-05-30T10:02:04.406775848Z",
+          "__createdBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+          "__deletedAt": null,
+          "__updatedAt": "2025-05-30T10:02:04.55534689Z",
+          "__updatedBy": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "__status": {
+        "order": 0,
+        "status": 4
+      },
+      "stoimost": null,
+      "__version": 1748852213,
+      "stoimost2": null,
+      "stoimost3": null,
+      "tip_zakaz": [
+        {
+          "code": "klientskii_otdel_bronirovaniya",
+          "name": "Клиентский отдел (бронирования)"
+        }
+      ],
+      "adjustment": null,
+      "aviabilety": [],
+      "kod_uslugi": null,
+      "platalshik": [],
+      "postavshik": [],
+      "taim_limit": "2025-05-31T08:30:00.000Z",
+      "__createdAt": "2025-05-29T08:44:49Z",
+      "__createdBy": "8312425a-0612-462e-a762-2d14c4bd1373",
+      "__deletedAt": null,
+      "__updatedAt": "2025-06-02T08:16:53Z",
+      "__updatedBy": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+      "bd_zakaza_1": [],
+      "kod_uslugi1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "forma_oplaty": null,
+      "nomer_zakaza": "804",
+      "sbor_pokupka": {
+        "cents": 400000,
+        "currency": "RUB"
+      },
+      "summa_bonusa": null,
+      "__subscribers": [
+        "8312425a-0612-462e-a762-2d14c4bd1373"
+      ],
+      "kod_uslugi_vs": "VS",
+      "otvet_klientu": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)",
+      "sebestoimost1": null,
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "otvet_klientu1": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)\n",
+      "otvet_klientu3": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)+МБактуализация+МКо",
+      "__register_name": "804",
+      "kto_rekomedoval": [
+        "0194fa07-f526-7c98-873d-5f0d7547168a"
+      ],
+      "nazvanie_uslugi": "ВИП Шереметьево вылет 23 июня \nВИП\nВИП\n",
+      "otvet_na_zapros": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\n",
+      "sbor_la_pokupka": {
+        "cents": 400000,
+        "currency": "RUB"
+      },
+      "summa_do_skidki": null,
+      "nalichie_khostov": false,
+      "skrin_iz_sistemy": null,
+      "vaucher_transfer": [
+        "01972f79-7728-765d-8e4c-81fe562c490a"
+      ],
+      "dopolnitelnye_fio": [
+        "0195d6be-e5b0-717b-a949-4552db004123"
+      ],
+      "vaucher_vipservis": [
+        "01972fb7-06fd-765f-991b-738a414c4605"
+      ],
+      "__tasks_performers": [
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+        "543e820c-e836-45f0-b177-057a584463b7"
+      ],
+      "itogovaya_stoimost": null,
+      "procent_menedzhera": null,
+      "deistvie_menedzhera": [],
+      "postavshik_transfer": [
+        "0196347d-3799-7698-af9a-04bb55bf19ba"
+      ],
+      "prilozhenie_trasfer": null,
+      "ssylka_na_kartochku": "https://clck.ru/3MLHLj",
+      "klass_obsluzhivaniya": null,
+      "postavshik_vipservis": [
+        "019667f7-5346-702d-aa27-58d3521f9b53"
+      ],
+      "stoimost_dlya_otveta": "Бизнес невозвратный  - 42 400  руб/пас (обмен 80 евро)\nБизнес - 43 170  руб/пас (обмен/возврат 80 евро)",
+      "kod_bronirovaniya_a_k": null,
+      "prilozhenie_transfer1": [
+        "01972f79-76e9-765c-9079-7572d66351a3"
+      ],
+      "sistema_bronirovaniya": null,
+      "taim_limit_a_k_bron_2": "2025-05-31T09:00:00.000Z",
+      "taim_limit_a_k_bron_3": "2025-05-31T09:30:00.000Z",
+      "taim_limit_a_k_bron_4": "2025-05-31T10:00:00.000Z",
+      "taim_limit_a_k_bron_5": "2025-05-31T11:00:00.000Z",
+      "taim_limit_a_k_bron_6": "2025-05-31T11:00:00.000Z",
+      "bonus_rekomendadatelya": 0.03,
+      "sbor_la_pokupka_bron_3": {
+        "cents": 400000,
+        "currency": "RUB"
+      },
+      "sbor_la_pokupka_bron_4": {
+        "cents": 400000,
+        "currency": "RUB"
+      },
+      "sbor_la_pokupka_bron_5": {
+        "cents": 200000,
+        "currency": "RUB"
+      },
+      "sbor_la_pokupka_bron_6": {
+        "cents": 0,
+        "currency": "RUB"
+      },
+      "taim_limit_dlya_klienta": "2025-05-30T14:00:00.000Z",
+      "__tasks_earliest_duedate": null,
+      "fio_passazhira_ov_bron_3": [
+        "0195d69a-5362-7449-bfbe-29f7798f0f83"
+      ],
+      "fio_passazhira_ov_bron_4": [
+        "0195d697-1e06-73bb-b182-38da0dfceb79"
+      ],
+      "fio_passazhira_ov_bron_5": [
+        "0195d183-e067-740f-848e-61db42ca1f82"
+      ],
+      "fio_passazhira_ov_bron_6": [
+        "0195b36a-fd95-747f-9028-4df5846e3b6a"
+      ],
+      "informaciya_o_passazhire": "Иванов 926348776766",
+      "kolichestvo_bronirovanii": [
+        {
+          "code": "6",
+          "name": "6"
+        }
+      ],
+      "nalog_6_ot_summy_bonusov": null,
+      "opisanie_dannye_po_broni": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)",
+      "sebestoimost_transfera_1": {
+        "cents": 1200000,
+        "currency": "RUB"
+      },
+      "bukking_klassy_v_nalichii": null,
+      "fio_passazhirov_vipservis": [
+        "0195d6be-e5b0-717b-a949-4552db004123"
+      ],
+      "nachisleniya_skidka_bonus": [],
+      "opisanie_uslugi_vipservis": "ВИП Шереметьево вылет 23 июня \nВИП\nВИП\n1\n2\n3\n4\n4\n5\n56\n7",
+      "sbor_sistem_bronirovaniya": {
+        "cents": 44400,
+        "currency": "RUB"
+      },
+      "dopolnitelnaya_informaciya": null,
+      "opisanie_dannye_po_broni_2": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)",
+      "opisanie_dannye_po_broni_3": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)",
+      "opisanie_dannye_po_broni_4": "✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)",
+      "opisanie_dannye_po_broni_5": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nЭконом невозвратный  - 12 400  руб/пас (обмен 80 евро)",
+      "opisanie_dannye_po_broni_6": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nЭконом - 13 170  руб/пас (обмен/возврат 80 евро)",
+      "otvet_klientu_po_transferu": "Ответ клиенту по трансферу!!!!!!!!!!!!!!!\nокончат",
+      "sbor_sistem_bronirovaniya2": {
+        "cents": 44400,
+        "currency": "RUB"
+      },
+      "fio_passazhirov_vipservis_2": [],
+      "kod_bronirovaniya_v_sisteme": "1",
+      "nalog_6_ot_summy_menedzhera": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "pervonachalnye_predldozheniya": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\n\nundefined",
+      "sebestoimost_uslugi_vipservis": {
+        "cents": 3200000,
+        "currency": "RUB"
+      },
+      "otvet_klientu_o_bronirovanii_2": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)",
+      "otvet_klientu_o_bronirovanii_3": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)",
+      "otvet_klientu_o_bronirovanii_4": "✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)",
+      "otvet_klientu_o_bronirovanii_5": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nЭконом невозвратный  - 12 400  руб/пас (обмен 80 евро)",
+      "otvet_klientu_o_bronirovanii_6": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nЭконом - 13 170  руб/пас (обмен/возврат 80 евро)",
+      "sbor_za_oformlenie_transfera_1": {
+        "cents": 120000,
+        "currency": "RUB"
+      },
+      "taim_limit_dlya_klienta_bron_2": "2025-05-30T10:40:00.000Z",
+      "taim_limit_dlya_klienta_bron_3": "2025-05-30T10:45:00.000Z",
+      "taim_limit_dlya_klienta_bron_4": "2025-05-30T10:50:00.000Z",
+      "taim_limit_dlya_klienta_bron_5": "2025-05-30T10:55:00.000Z",
+      "taim_limit_dlya_klienta_bron_6": "2025-05-30T12:30:00.000Z",
+      "dopolnitelnyi_kod_bronirovaniya": "2",
+      "sbor_sistem_bronirovaniya_bron_3": {
+        "cents": 44400,
+        "currency": "RUB"
+      },
+      "sbor_sistem_bronirovaniya_bron_4": {
+        "cents": 44400,
+        "currency": "RUB"
+      },
+      "sbor_sistem_bronirovaniya_bron_5": {
+        "cents": 44400,
+        "currency": "RUB"
+      },
+      "sbor_sistem_bronirovaniya_bron_6": {
+        "cents": 44400,
+        "currency": "RUB"
+      },
+      "modifikator_dlya_otveta_na_zapros": "01.ШРММРВ SU-1314  T9 25ИЮН25 2140 1 0040   3:00 555 NB                \n02.МРВШРМ SU-1315  T9 04ИЮЛ25 0705   0945   2:40     NB\n",
+      "nomer_a_pasporta_ov_dlya_proverki": "Данные паспортов: CHEKRYGINA/NATALIA\n\tТип: Внутренний - 31212132132321\n\n",
+      "kod_bronirovaniya_v_sisteme_bron_3": "3",
+      "kod_bronirovaniya_v_sisteme_bron_4": "4",
+      "kod_bronirovaniya_v_sisteme_bron_5": "5",
+      "kod_bronirovaniya_v_sisteme_bron_6": "6",
+      "sbor_za_oformlenie_uslugi_vipservis": {
+        "cents": 480000,
+        "currency": "RUB"
+      },
+      "otvet_klientu_pered_oformleniem_bron_2": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)МБактуализация+МКО",
+      "otvet_klientu_pered_oformleniem_bron_3": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)+МБактуализация+МКО",
+      "otvet_klientu_pered_oformleniem_bron_4": "✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)+МБактуализация+МКО",
+      "otvet_klientu_pered_oformleniem_bron_5": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nЭконом невозвратный  - 12 400  руб/пас (обмен 80 евро)+МБактуализация+МКО",
+      "nomer_a_pasporta_ov_dlya_proverki_bron_2": "TROFIMOVA/IULIIA  \nВнутренний - 31212132132321",
+      "aktualizirovannoe_opisanie_dannye_po_broni": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)+МБактуализация",
+      "bukking_klassy_v_nalichii_pri_bronirovanii": "нет",
+      "aktualizirovannoe_opisanie_dannye_po_broni_2": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)МБактуализация",
+      "aktualizirovannoe_opisanie_dannye_po_broni_3": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)+МБактуализация",
+      "aktualizirovannoe_opisanie_dannye_po_broni_4": "✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)+МБактуализация",
+      "aktualizirovannoe_opisanie_dannye_po_broni_5": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nЭконом невозвратный  - 12 400  руб/пас (обмен 80 евро)+МБактуализация",
+      "aktualizirovannoe_opisanie_dannye_po_broni_6": "✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nЭконом - 13 170  руб/пас (обмен/возврат 80 евро)+МБактуализация",
+      "stoimost_dlya_klienta_za_oformlenie_transfera": {
+        "cents": 1320000,
+        "currency": "RUB"
+      },
+      "stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis": {
+        "cents": 3680000,
+        "currency": "RUB"
+      }
+    },
+    {
+      "fio": [],
+      "__id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+      "fio2": [],
+      "fond": null,
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "__name": "#806 - ООО АСТРА",
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "zapros": "заказ ",
+      "__debug": false,
+      "__index": 801,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "01971fd9-d517-728e-989b-d543711cee35",
+          "path": "/items/a72ac8a7-e98a-42e1-b312-1357f955d1d2",
+          "place": "",
+          "state": "in_progress",
+          "__item": {
+            "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "Подготовка предложений: #806 (Авиабилеты)",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": "2025-05-30T09:35:58+03:00",
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "7a3909b4-d206-49b9-ac66-7a8b063aac0c",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "01971fd8-2d1d-728e-9829-8c5aa7b5a64b",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 806",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "df364732-f628-4c57-a866-684acd17ec8f"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-05-30T06:20:58.878611351Z",
+          "__createdBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+          "__deletedAt": null,
+          "__updatedAt": "2025-06-02T12:51:18.171846774Z",
+          "__updatedBy": "df364732-f628-4c57-a866-684acd17ec8f",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "df364732-f628-4c57-a866-684acd17ec8f",
+            "dbf65283-6c54-4614-996b-d6f06e8574db",
+            "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "__status": {
+        "order": 0,
+        "status": 2
+      },
+      "stoimost": null,
+      "__version": 1748586057,
+      "stoimost2": null,
+      "stoimost3": null,
+      "tip_zakaz": [
+        {
+          "code": "klientskii_otdel_bronirovaniya",
+          "name": "Клиентский отдел (бронирования)"
+        }
+      ],
+      "adjustment": null,
+      "aviabilety": [],
+      "kod_uslugi": null,
+      "platalshik": [],
+      "postavshik": [],
+      "__createdAt": "2025-05-30T06:19:09Z",
+      "__createdBy": "8312425a-0612-462e-a762-2d14c4bd1373",
+      "__deletedAt": null,
+      "__updatedAt": "2025-05-30T06:20:58Z",
+      "__updatedBy": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+      "bd_zakaza_1": [],
+      "kod_uslugi1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "forma_oplaty": null,
+      "nomer_zakaza": "806",
+      "summa_bonusa": null,
+      "__subscribers": [
+        "8312425a-0612-462e-a762-2d14c4bd1373"
+      ],
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "__register_name": "806",
+      "kto_rekomedoval": [
+        "0194fa07-f526-7c98-873d-5f0d7547168a"
+      ],
+      "dopolnitelnye_fio": [],
+      "__tasks_performers": [
+        "df364732-f628-4c57-a866-684acd17ec8f"
+      ],
+      "procent_menedzhera": null,
+      "deistvie_menedzhera": [],
+      "postavshik_transfer": [],
+      "ssylka_na_kartochku": "https://clck.ru/3MM9wm",
+      "postavshik_vipservis": [],
+      "sistema_bronirovaniya": null,
+      "bonus_rekomendadatelya": 0.03,
+      "__tasks_earliest_duedate": "2025-05-30T09:35:58+03:00",
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "kolichestvo_bronirovanii": null,
+      "nalog_6_ot_summy_bonusov": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "fio_passazhirov_vipservis_2": [],
+      "nalog_6_ot_summy_menedzhera": null,
+      "fio_passazhira_ov_so_skidkoi": []
+    },
+    {
+      "fio": [],
+      "__id": "01972fad-51dd-77da-ae25-df79d7ebad58",
+      "fio2": [],
+      "fond": null,
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "__name": "#808 - ООО АСТРА",
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "zapros": "тест12",
+      "__debug": false,
+      "__index": 803,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "01972fad-602b-728e-85dd-21bc697094a1",
+          "path": "/items/0bc3b255-55a3-4dc4-8296-1724606e4f06",
+          "place": "",
+          "state": "assignment",
+          "__item": {
+            "id": "01972fad-51dd-77da-ae25-df79d7ebad58",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "#808 - ООО АСТРА",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": "2025-06-02T08:16:20.797190825Z",
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "dbb6180b-b33e-4e70-8c58-5b5465a190c9",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "01972fad-5794-728e-9db0-cf8036eb35af",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 808",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-06-02T08:06:20.797190825Z",
+          "__createdBy": "b8749e9d-2648-4752-8018-40a7b7164f67",
+          "__deletedAt": null,
+          "__updatedAt": "2025-06-02T08:06:21.172685271Z",
+          "__updatedBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "__status": {
+        "order": 0,
+        "status": 1
+      },
+      "stoimost": null,
+      "__version": 1748851580,
+      "stoimost2": null,
+      "stoimost3": null,
+      "tip_zakaz": null,
+      "adjustment": null,
+      "aviabilety": [],
+      "kod_uslugi": null,
+      "platalshik": [],
+      "postavshik": [],
+      "__createdAt": "2025-06-02T08:06:17Z",
+      "__createdBy": "8312425a-0612-462e-a762-2d14c4bd1373",
+      "__deletedAt": null,
+      "__updatedAt": "2025-06-02T08:06:20Z",
+      "__updatedBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+      "bd_zakaza_1": [],
+      "kod_uslugi1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "forma_oplaty": null,
+      "nomer_zakaza": "808",
+      "summa_bonusa": null,
+      "__subscribers": [
+        "8312425a-0612-462e-a762-2d14c4bd1373"
+      ],
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "__register_name": "808",
+      "kto_rekomedoval": [
+        "0194fa07-f526-7c98-873d-5f0d7547168a"
+      ],
+      "dopolnitelnye_fio": [],
+      "__tasks_performers": [
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+        "543e820c-e836-45f0-b177-057a584463b7"
+      ],
+      "procent_menedzhera": null,
+      "deistvie_menedzhera": [],
+      "postavshik_transfer": [],
+      "ssylka_na_kartochku": "https://clck.ru/3MQ2hz",
+      "postavshik_vipservis": [],
+      "prilozhenie_k_zaprosu": [
+        "01972fad-5319-765f-b989-c3e63192e3f0"
+      ],
+      "sistema_bronirovaniya": null,
+      "bonus_rekomendadatelya": 0.03,
+      "__tasks_earliest_duedate": "2025-06-02T08:16:20.797190825Z",
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "kolichestvo_bronirovanii": null,
+      "nalog_6_ot_summy_bonusov": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "fio_passazhirov_vipservis_2": [],
+      "nalog_6_ot_summy_menedzhera": null,
+      "fio_passazhira_ov_so_skidkoi": []
+    },
+    {
+      "fio": [],
+      "__id": "01973648-c5c7-77da-b29a-653164d44298",
+      "fio2": [],
+      "fond": null,
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "__name": "#817 - ООО АСТРА",
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "zapros": "ропропропро",
+      "__debug": false,
+      "__index": 812,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "01973648-d5dc-728e-9f24-7cc6e5e500d9",
+          "path": "/items/0bc3b255-55a3-4dc4-8296-1724606e4f06",
+          "place": "",
+          "state": "assignment",
+          "__item": {
+            "id": "01973648-c5c7-77da-b29a-653164d44298",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "#817 - ООО АСТРА",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": "2025-06-03T15:03:52.31364153Z",
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "869802f8-bd80-460d-b682-94453b6faadd",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "01973648-c942-728e-ac28-2a31689f3526",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 817",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7",
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-06-03T14:53:52.31364153Z",
+          "__createdBy": "b8749e9d-2648-4752-8018-40a7b7164f67",
+          "__deletedAt": null,
+          "__updatedAt": "2025-06-03T14:53:52.607336756Z",
+          "__updatedBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "__status": {
+        "order": 0,
+        "status": 1
+      },
+      "stoimost": null,
+      "__version": 1749354382,
+      "stoimost2": null,
+      "stoimost3": null,
+      "tip_zakaz": null,
+      "adjustment": null,
+      "aviabilety": [],
+      "kod_uslugi": null,
+      "platalshik": [],
+      "postavshik": [],
+      "taim_limit": "2025-06-16T21:00:00.000Z",
+      "__createdAt": "2025-06-03T14:53:48Z",
+      "__createdBy": "8312425a-0612-462e-a762-2d14c4bd1373",
+      "__deletedAt": null,
+      "__updatedAt": "2025-06-08T03:46:22Z",
+      "__updatedBy": "543e820c-e836-45f0-b177-057a584463b7",
+      "bd_zakaza_1": [],
+      "kod_uslugi1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "forma_oplaty": null,
+      "nomer_zakaza": "817",
+      "summa_bonusa": null,
+      "__subscribers": [
+        "8312425a-0612-462e-a762-2d14c4bd1373"
+      ],
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "__register_name": "817",
+      "kto_rekomedoval": [
+        "0194fa07-f526-7c98-873d-5f0d7547168a"
+      ],
+      "dopolnitelnye_fio": [],
+      "__tasks_performers": [
+        "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+        "543e820c-e836-45f0-b177-057a584463b7",
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3"
+      ],
+      "procent_menedzhera": null,
+      "deistvie_menedzhera": [],
+      "postavshik_transfer": [],
+      "ssylka_na_kartochku": "https://clck.ru/3MRpXx",
+      "postavshik_vipservis": [],
+      "prilozhenie_k_zaprosu": [
+        "01973648-c5fc-7668-9394-55679463ed49"
+      ],
+      "sistema_bronirovaniya": null,
+      "bonus_rekomendadatelya": 0.03,
+      "__tasks_earliest_duedate": "2025-06-03T15:03:52.31364153Z",
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "kolichestvo_bronirovanii": null,
+      "nalog_6_ot_summy_bonusov": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "fio_passazhirov_vipservis_2": [],
+      "nalog_6_ot_summy_menedzhera": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "isChanged": true
+    },
+    {
+      "fio": [],
+      "__id": "01973649-71cb-77da-bdae-39e18b972dfa",
+      "fio2": [],
+      "fond": null,
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "__name": "#818 - ООО АСТРА",
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "zapros": "пропропр",
+      "__debug": false,
+      "__index": 813,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "01973649-7bba-728e-8a0b-5e7c8da35931",
+          "path": "/items/0bc3b255-55a3-4dc4-8296-1724606e4f06",
+          "place": "",
+          "state": "assignment",
+          "__item": {
+            "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "#818 - ООО АСТРА",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": "2025-06-03T15:04:34.799862174Z",
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "fe417d78-2e88-472a-8d45-a484af86a9c3",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "01973649-7439-728e-802b-7381f038a3c7",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 818",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-06-03T14:54:34.799862174Z",
+          "__createdBy": "b8749e9d-2648-4752-8018-40a7b7164f67",
+          "__deletedAt": null,
+          "__updatedAt": "2025-06-03T14:54:35.153715245Z",
+          "__updatedBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "__status": {
+        "order": 0,
+        "status": 1
+      },
+      "stoimost": null,
+      "__version": 1749354301,
+      "stoimost2": null,
+      "stoimost3": null,
+      "tip_zakaz": null,
+      "adjustment": null,
+      "aviabilety": [],
+      "kod_uslugi": null,
+      "platalshik": [],
+      "postavshik": [],
+      "taim_limit": "2025-06-09T21:00:00.000Z",
+      "__createdAt": "2025-06-03T14:54:32Z",
+      "__createdBy": "8312425a-0612-462e-a762-2d14c4bd1373",
+      "__deletedAt": null,
+      "__updatedAt": "2025-06-08T03:45:01Z",
+      "__updatedBy": "543e820c-e836-45f0-b177-057a584463b7",
+      "bd_zakaza_1": [],
+      "kod_uslugi1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "forma_oplaty": null,
+      "nomer_zakaza": "818",
+      "summa_bonusa": null,
+      "__subscribers": [
+        "8312425a-0612-462e-a762-2d14c4bd1373"
+      ],
+      "kod_uslugi_vs": "VS",
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "__register_name": "818",
+      "kto_rekomedoval": [
+        "0194fa07-f526-7c98-873d-5f0d7547168a"
+      ],
+      "nazvanie_uslugi": "роапоапопро",
+      "dopolnitelnye_fio": [],
+      "__tasks_performers": [
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+        "543e820c-e836-45f0-b177-057a584463b7"
+      ],
+      "procent_menedzhera": null,
+      "deistvie_menedzhera": [],
+      "postavshik_transfer": [],
+      "ssylka_na_kartochku": "https://clck.ru/3MRpaT",
+      "postavshik_vipservis": [
+        "019667fa-9b1b-7157-93c3-b4b0d960bf65"
+      ],
+      "prilozhenie_k_zaprosu": [
+        "01973649-720d-7669-974a-4f8b685462b6"
+      ],
+      "sistema_bronirovaniya": null,
+      "bonus_rekomendadatelya": 0.03,
+      "__tasks_earliest_duedate": "2025-06-03T15:04:34.799862174Z",
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "kolichestvo_bronirovanii": null,
+      "nalog_6_ot_summy_bonusov": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "opisanie_uslugi_vipservis": "оропроапоапо",
+      "fio_passazhirov_vipservis_2": [],
+      "nalog_6_ot_summy_menedzhera": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "sebestoimost_uslugi_vipservis": {
+        "cents": 800000,
+        "currency": "RUB"
+      },
+      "sbor_za_oformlenie_uslugi_vipservis": {
+        "cents": 80000,
+        "currency": "RUB"
+      },
+      "stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis": {
+        "cents": 880000,
+        "currency": "RUB"
+      },
+      "isChanged": true
+    },
+    {
+      "fio": [],
+      "__id": "01974dd2-4e3e-77db-bfc4-ecf5a84580e5",
+      "fio2": [],
+      "fond": null,
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "__name": "#825 - ООО АСТРА",
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "zapros": "test 1234",
+      "__debug": false,
+      "__index": 820,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "01974dd2-5da9-728e-ad30-08f47f641512",
+          "path": "/items/0bc3b255-55a3-4dc4-8296-1724606e4f06",
+          "place": "",
+          "state": "assignment",
+          "__item": {
+            "id": "01974dd2-4e3e-77db-bfc4-ecf5a84580e5",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "#825 - ООО АСТРА",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": "2025-06-08T04:45:21.502204868Z",
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "aa60a372-4d13-4112-8da7-ebecd73fee49",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "01974dd2-5105-728e-9fce-2953d10d441d",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 825",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7",
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "df364732-f628-4c57-a866-684acd17ec8f"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-06-08T04:35:21.502204868Z",
+          "__createdBy": "b8749e9d-2648-4752-8018-40a7b7164f67",
+          "__deletedAt": null,
+          "__updatedAt": "2025-06-08T04:35:21.786490357Z",
+          "__updatedBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7",
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "df364732-f628-4c57-a866-684acd17ec8f"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "__status": {
+        "order": 0,
+        "status": 1
+      },
+      "stoimost": null,
+      "__version": 1749357321,
+      "stoimost2": null,
+      "stoimost3": null,
+      "tip_zakaz": null,
+      "adjustment": null,
+      "aviabilety": [],
+      "kod_uslugi": null,
+      "platalshik": [],
+      "postavshik": [],
+      "__createdAt": "2025-06-08T04:35:17Z",
+      "__createdBy": "8312425a-0612-462e-a762-2d14c4bd1373",
+      "__deletedAt": null,
+      "__updatedAt": "2025-06-08T04:35:21Z",
+      "__updatedBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+      "bd_zakaza_1": [],
+      "kod_uslugi1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "forma_oplaty": null,
+      "nomer_zakaza": "825",
+      "summa_bonusa": null,
+      "__subscribers": [
+        "8312425a-0612-462e-a762-2d14c4bd1373"
+      ],
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "__register_name": "825",
+      "kto_rekomedoval": [
+        "0194fa07-f526-7c98-873d-5f0d7547168a"
+      ],
+      "dopolnitelnye_fio": [],
+      "__tasks_performers": [
+        "543e820c-e836-45f0-b177-057a584463b7",
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "df364732-f628-4c57-a866-684acd17ec8f",
+        "fedcb9bf-d8f3-40a2-bcc0-a7428c444431"
+      ],
+      "procent_menedzhera": null,
+      "deistvie_menedzhera": [],
+      "postavshik_transfer": [],
+      "ssylka_na_kartochku": "https://clck.ru/3MW6y7",
+      "postavshik_vipservis": [],
+      "sistema_bronirovaniya": null,
+      "bonus_rekomendadatelya": 0.03,
+      "__tasks_earliest_duedate": "2025-06-08T04:45:21.502204868Z",
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "kolichestvo_bronirovanii": null,
+      "nalog_6_ot_summy_bonusov": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "fio_passazhirov_vipservis_2": [],
+      "nalog_6_ot_summy_menedzhera": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "isChanged": true
+    },
+    {
+      "fio": [],
+      "__id": "01974e2d-58f0-77db-96fc-74c86cc9ce34",
+      "fio2": [],
+      "fond": null,
+      "otel1": [],
+      "otel2": [],
+      "otel3": [],
+      "__name": "#826 - ООО АСТРА",
+      "tarif1": null,
+      "tarif2": null,
+      "tarif3": null,
+      "zapros": "test 1234",
+      "__debug": false,
+      "__index": 821,
+      "__tasks": [
+        {
+          "url": "",
+          "__id": "01974e2d-6468-728e-ad34-776cc7cc1763",
+          "path": "/items/0bc3b255-55a3-4dc4-8296-1724606e4f06",
+          "place": "",
+          "state": "assignment",
+          "__item": {
+            "id": "01974e2d-58f0-77db-96fc-74c86cc9ce34",
+            "code": "OrdersNew",
+            "namespace": "work_orders"
+          },
+          "__name": "#826 - ООО АСТРА",
+          "branch": "00000000-0000-0000-0000-000000000000",
+          "dueDate": "2025-06-08T06:24:46.96931575Z",
+          "openRef": false,
+          "planEnd": null,
+          "timerId": "cf1fab43-ce8a-45e9-86ad-6a030633698a",
+          "__logged": false,
+          "__target": "",
+          "instance": {
+            "__id": "01974e2d-5c0b-728e-a4e7-26992f7b90c3",
+            "code": "glavnyi_bp_copy",
+            "__name": "Работа с заказами 826",
+            "namespace": "work_orders.OrdersNew"
+          },
+          "priority": 0,
+          "template": "Работа с заказами с БД заказа",
+          "__context": [],
+          "__percent": 0,
+          "companies": null,
+          "planStart": null,
+          "performers": [
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7",
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "df364732-f628-4c57-a866-684acd17ec8f"
+          ],
+          "reassignes": null,
+          "__createdAt": "2025-06-08T06:14:46.96931575Z",
+          "__createdBy": "b8749e9d-2648-4752-8018-40a7b7164f67",
+          "__deletedAt": null,
+          "__updatedAt": "2025-06-08T06:14:47.283198345Z",
+          "__updatedBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+          "description": "",
+          "__targetData": null,
+          "detachedInfo": null,
+          "allowReassign": true,
+          "templateNsAndCode": "work_orders.OrdersNew:glavnyi_bp_copy",
+          "originalPerformers": [
+            "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+            "543e820c-e836-45f0-b177-057a584463b7",
+            "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+            "df364732-f628-4c57-a866-684acd17ec8f"
+          ],
+          "externalParticipants": null
+        }
+      ],
+      "kontakt": [
+        "01956095-aae0-77c8-abcb-2a9ed37ce74d"
+      ],
+      "pasport": [],
+      "__status": {
+        "order": 0,
+        "status": 1
+      },
+      "stoimost": null,
+      "__version": 1749363286,
+      "stoimost2": null,
+      "stoimost3": null,
+      "tip_zakaz": null,
+      "adjustment": null,
+      "aviabilety": [],
+      "kod_uslugi": null,
+      "platalshik": [],
+      "postavshik": [],
+      "__createdAt": "2025-06-08T06:14:44Z",
+      "__createdBy": "8312425a-0612-462e-a762-2d14c4bd1373",
+      "__deletedAt": null,
+      "__updatedAt": "2025-06-08T06:14:46Z",
+      "__updatedBy": "2b4d95ca-eea2-4d4f-8e2c-fc4937afbb77",
+      "bd_zakaza_1": [],
+      "kod_uslugi1": null,
+      "postavshik2": [],
+      "postavshik3": [],
+      "spravochnik": [],
+      "tip_nomera1": [],
+      "tip_nomera2": [],
+      "tip_nomera3": [],
+      "tip_pitani2": [],
+      "forma_oplaty": null,
+      "nomer_zakaza": "826",
+      "summa_bonusa": null,
+      "__subscribers": [
+        "8312425a-0612-462e-a762-2d14c4bd1373"
+      ],
+      "tip_pitaniya1": [],
+      "tip_pitaniya3": [],
+      "__register_name": "826",
+      "kto_rekomedoval": [
+        "0194fa07-f526-7c98-873d-5f0d7547168a"
+      ],
+      "dopolnitelnye_fio": [],
+      "__tasks_performers": [
+        "fedcb9bf-d8f3-40a2-bcc0-a7428c444431",
+        "543e820c-e836-45f0-b177-057a584463b7",
+        "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "df364732-f628-4c57-a866-684acd17ec8f"
+      ],
+      "procent_menedzhera": null,
+      "deistvie_menedzhera": [],
+      "postavshik_transfer": [],
+      "ssylka_na_kartochku": "https://clck.ru/3MW9FW",
+      "postavshik_vipservis": [],
+      "sistema_bronirovaniya": null,
+      "bonus_rekomendadatelya": 0.03,
+      "__tasks_earliest_duedate": "2025-06-08T06:24:46.96931575Z",
+      "fio_passazhira_ov_bron_3": [],
+      "fio_passazhira_ov_bron_4": [],
+      "fio_passazhira_ov_bron_5": [],
+      "fio_passazhira_ov_bron_6": [],
+      "kolichestvo_bronirovanii": null,
+      "nalog_6_ot_summy_bonusov": null,
+      "fio_passazhirov_vipservis": [],
+      "nachisleniya_skidka_bonus": [],
+      "fio_passazhirov_vipservis_2": [],
+      "nalog_6_ot_summy_menedzhera": null,
+      "fio_passazhira_ov_so_skidkoi": [],
+      "isChanged": true
+    }
+  ],
+  "messages": {
+    "242": [
+      {
+        "__id": "0195700c-b87d-75f6-9730-375b06611de0",
+        "target": {
+          "id": "0195700b-0d04-70fa-a81a-b23fb340862e",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#242 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "0195700c-b3a5-75f6-8f71-e24a471c12c1",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Отправка сообщения завершилась ошибкой",
+        "body": "searching client: connecting with receiver: requesting: client do not have whatsapp account\n: forbidden: forbidden: forbidden",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-03-07T10:00:36.743Z",
+        "__updatedAt": "2025-03-07T10:00:36.743Z",
+        "__deletedAt": null,
+        "isChanged": true
+      }
+    ],
+    "243": [
+      {
+        "__id": "01957035-37ea-75f6-9bb4-cd8004d669df",
+        "target": {
+          "id": "01957014-44ea-762f-b649-e42aec966a2c",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#243 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01957014-6bdd-75f6-b58d-aadf8b40bbe7",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Оповещение Ответ клиенту о бронировании 243",
+        "body": "Ваш запрос #243  выполнен. Билеты забронированы.<br/><br/>6789<br/><br/>Данные паспортов: Петров Петр Петрович\n\tТип: Внутренний - 4612 1234545\n\n<br/>✈️ TK 189 - TURKISH AIRLINES. 13 марта Канкун (CUN) 10: 35 - 14 марта Стамбул (IST) 06: 15\n\nДоплата - 46 812 руб/пас\n\n✈️ TK 413 - TURKISH AIRLINES. 14 марта Стамбул (IST) 08: 15 - 14 марта Москва (VKO) 12: 15\n\nБизнес - 138 737 руб/пас (обмен 15 евро, возврат 80 евро)<br/> Бронирование предварительное до 14.03.2025 00:00:00<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-03-07T10:44:50.804Z",
+        "__updatedAt": "2025-03-07T10:44:50.804Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "0195702d-5e07-75f6-ac38-35c0863fc77c",
+        "target": {
+          "id": "01957014-44ea-762f-b649-e42aec966a2c",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#243 - ООО АСТРА",
+          "createdIn": []
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Процесс \"Запуска процесса Тайм-лимит\" запущен",
+        "body": "07.03.2025 13:36",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-03-07T10:36:16.272Z",
+        "__updatedAt": "2025-03-07T10:36:16.272Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "4c9c2cfd-c800-44c6-ab8c-f0beca05c078",
+        "target": {
+          "id": "01957014-44ea-762f-b649-e42aec966a2c",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#243 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "body": "<p>Делаем обмен, добавляем 5000 ко всем доплатам</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-03-07T10:32:40.701Z",
+        "__updatedAt": "2025-03-07T10:32:40.701Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "116ee275-1f57-4d8a-a80c-3dce8b585391",
+        "target": {
+          "id": "01957014-44ea-762f-b649-e42aec966a2c",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#243 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "body": "<p>Делаем обмен</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-03-07T10:32:08.767Z",
+        "__updatedAt": "2025-03-07T10:32:08.767Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01957028-1535-75f6-8ad9-17e0646052ac",
+        "target": {
+          "id": "01957014-44ea-762f-b649-e42aec966a2c",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#243 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01957014-6bdd-75f6-b58d-aadf8b40bbe7",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Предложения отправленные клиенту",
+        "body": "Направляем расчет стоимости по запросу #243. <br/><br/>✈️  TK 189 - TURKISH AIRLINES.\n13 марта Канкун (CUN)  10: 35 - 14 марта Стамбул (IST) 06: 15\n\nДоплата - 46 812 руб/пас\n\n✈️  TK 413 - TURKISH AIRLINES.\n14 марта Стамбул (IST)  08: 15 - 14 марта Москва (VKO) 12: 15\n\nБизнес - 138 737 руб/пас (обмен 15 евро, возврат 80 евро).<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-03-07T10:30:29.949Z",
+        "__updatedAt": "2025-03-07T10:30:29.949Z",
+        "__deletedAt": null,
+        "isChanged": true
+      }
+    ],
+    "433": [],
+    "765": [
+      {
+        "__id": "645e0676-324a-4371-af3b-80dd6fa623e2",
+        "target": {
+          "id": "0196f28e-2f19-77d8-b7c4-6526bf1087d7",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#765 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "из внешного",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-27T14:12:40.922Z",
+        "__updatedAt": "2025-05-27T14:12:40.922Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "0196f29a-29dc-7285-939d-a2921215ffda",
+        "target": {
+          "id": "0196f28e-2f19-77d8-b7c4-6526bf1087d7",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#765 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "0196f28e-3151-7285-8335-e1e08a07c86a",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Предложения отправленные клиенту #765 - (Авиабилеты) ",
+        "body": "Направляем расчет стоимости по запросу #765. <br/><br/>✈️ TK 87 - TURKISH AIRLINES\n29 марта Осака (KIX) 22:30 - 30 марта Стамбул (IST) 05:30\n\n✈️ TK 417 - TURKISH AIRLINES\n30 марта Стамбул (IST) 09:05 - 30 марта Внуково (VKO) 13:00\n\n\nЭконом невозвратный/необменный без багажа - 190 633  руб/пас\nЭконом невозвратный c багажом - 196 093  руб/пас (обмен 80 евро)\nЭконом возвратный c багажом - 205 193  руб/пас (обмен 20 евро/возврат 125 евро).<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-21T11:28:31.714Z",
+        "__updatedAt": "2025-05-21T11:28:31.714Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "0196f28f-0ae4-7285-8b31-dc5b368d4fbe",
+        "target": {
+          "id": "0196f28e-2f19-77d8-b7c4-6526bf1087d7",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#765 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "0196f28e-3151-7285-8335-e1e08a07c86a",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Оповещение о принятии в работу",
+        "body": "Здравствуйте! <br/>💬 Ваш заказ принят в работу. Номер заказа  #765.<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-21T11:16:22.893Z",
+        "__updatedAt": "2025-05-21T11:16:22.893Z",
+        "__deletedAt": null,
+        "isChanged": true
+      }
+    ],
+    "804": [
+      {
+        "__id": "b409b139-d66f-40c2-9ad0-71a1d9061014",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "t",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:55:06.474Z",
+        "__updatedAt": "2025-06-08T06:55:06.474Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "f259ee51-276f-4ed7-b96d-813eb998a2d4",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "hello",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:52:45.658Z",
+        "__updatedAt": "2025-06-08T06:52:45.658Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "d938c9eb-6691-4f95-88bd-195527831c6b",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "test",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:49:34.552Z",
+        "__updatedAt": "2025-06-08T06:49:34.552Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "1eb108cd-0719-4151-ae44-ea174f709643",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "comments": [],
+        "files": [
+          {
+            "__id": "01974e3d-886c-766f-9fe3-8a2a8be31243",
+            "hash": "49861843-21fb-428f-810a-70c858639760",
+            "__name": "Screenshot 2025-05-25 151247 (4).png",
+            "size": 33998,
+            "originalName": "Screenshot 2025-05-25 151247 (4).png",
+            "thumbnails": {
+              "md64": "49861843-21fb-428f-810a-70c858639760"
+            }
+          }
+        ],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:32:24.956Z",
+        "__updatedAt": "2025-06-08T06:32:24.956Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "cad5ce67-4a75-492b-aac0-99ee7ece9919",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:23:39.386Z",
+        "__updatedAt": "2025-06-08T06:23:39.386Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "7513369c-8e17-46b3-b39d-b0b473bc4260",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "comments": [],
+        "files": [
+          {
+            "__id": "01974e2e-9b1c-766f-9532-4812fad52af7",
+            "hash": "e759d018-df5d-4882-a16e-19067d30f4b6",
+            "__name": "Screenshot 2025-05-16 013645 (1).png",
+            "size": 183901,
+            "originalName": "Screenshot 2025-05-16 013645 (1).png",
+            "thumbnails": {
+              "md64": "e759d018-df5d-4882-a16e-19067d30f4b6"
+            }
+          }
+        ],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:16:06.695Z",
+        "__updatedAt": "2025-06-08T06:16:06.695Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "61896644-b458-4bec-bd93-2a01b6bad6af",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "hello",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:07:07.479Z",
+        "__updatedAt": "2025-06-08T06:07:07.479Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "31cf245b-3b9c-4e64-9c72-b478ef367b61",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "гншгншгншнгшгн",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T15:10:23.755Z",
+        "__updatedAt": "2025-06-03T15:10:23.755Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "25a042f0-99cc-4c6d-ab30-3c06a284cfea",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "вапвапвапвапва",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T15:07:19.44Z",
+        "__updatedAt": "2025-06-03T15:07:19.44Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "30960800-1aae-448b-aacf-8f7f7e651006",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "тесттттттт карточка заказ",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T15:07:03.767Z",
+        "__updatedAt": "2025-06-03T15:07:03.767Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01972fb7-11ed-728e-9635-01b38d756f63",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01972fb4-9f7e-728e-8a48-a2c18959ff2f",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_Vip"
+            }
+          ]
+        },
+        "author": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "title": "Вип-сервис заказан # 804 Андрей Сергеевич Борков",
+        "body": "Услуга  Вип-сервис оформлена.<br/><br/>TROFIMOVA/IULIIA<br/>ВИП Шереметьево вылет 23 июня \nВИП\nВИП\n -  36 800,00/пас.<br/><br/><br/>Направляем ваучер:<br/>ANDRIANOV ANDRIANOVА+3.pdf",
+        "comments": [
+          {
+            "__id": "a830ba34-a50c-4d14-bb1a-eba16c7de91b",
+            "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+            "body": "Супер!",
+            "__createdAt": "2025-06-08T06:15:30.046Z"
+          }
+        ],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-02T08:16:56.312Z",
+        "__updatedAt": "2025-06-08T06:15:30.046Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01972fb5-ea01-728e-907e-556cea63523e",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01972fb4-9f7e-728e-8a48-a2c18959ff2f",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_Vip"
+            }
+          ]
+        },
+        "author": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "title": "Предложения Вип-сервис # 804 Андрей Сергеевич Борков",
+        "body": "Направляем Вам возможные варианты Вип-сервиса по заказу #804:<br/><br/>ВИП Шереметьево вылет 23 июня \nВИП\nВИП\n - 36 800,00/пас.<br/><br/>ВИП Шереметьево вылет 23 июня \nВИП\nВИП\n1\n2\n3\n4\n4\n5\n56\n7",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-02T08:15:40.552Z",
+        "__updatedAt": "2025-06-02T08:15:40.552Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01972fb4-a4c5-728e-91a9-c59b433df03f",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01972fb4-9f7e-728e-8a48-a2c18959ff2f",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_Vip"
+            }
+          ]
+        },
+        "author": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "title": "Заказ принят в работу # 804 -Андрей Сергеевич Борков(Вип-сервис)",
+        "body": "Ваш заказ по оформлению Вип-сервиса принят в работу.<br/><br/>💬 Номер заказа для работы #804",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-02T08:14:17.296Z",
+        "__updatedAt": "2025-06-02T08:14:17.296Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "d9a92762-58c6-4f29-969d-6097ec64fb9d",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "цукукукцуку",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-02T07:13:33.79Z",
+        "__updatedAt": "2025-06-02T07:13:33.79Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01972f79-8082-728e-9c70-c8cfcd4a037b",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01972f74-2435-728e-9c97-636351932d7f",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_transfer"
+            }
+          ]
+        },
+        "author": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "title": "Трансфер заказан #804 Андрей Сергеевич Борков",
+        "body": "Услуга трансфер по заказу # 804 оформлена.<br/><br/>Направляем ваучер на трансфер:<br/>Услуга «Личный шофер» _ Эмирейтс.pdf",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-02T07:09:41.387Z",
+        "__updatedAt": "2025-06-02T07:09:41.387Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01972f77-e214-728e-b15a-a54a5bde5f0c",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01972f74-2435-728e-9c97-636351932d7f",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_transfer"
+            }
+          ]
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Предложения трансфер 804 Андрей Сергеевич Борков",
+        "body": "Направляем Вам возможные варианты трансфера по заказу #804:<br/>Ответ клиенту по трансферу!!!!!!!!!!!!!!!<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-02T07:07:55.318Z",
+        "__updatedAt": "2025-06-02T07:07:55.318Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01972f74-2afb-728e-9395-7bd5df601901",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01972f74-2435-728e-9c97-636351932d7f",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_transfer"
+            }
+          ]
+        },
+        "author": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "title": "Заказ принят в работу #804 Андрей Сергеевич Борков (Трансфер)",
+        "body": "Ваш заказ на оформление трансфера принят в работу.<br/><br/>💬 Номер заказа #804<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-02T07:03:51.826Z",
+        "__updatedAt": "2025-06-02T07:03:51.826Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "019720d9-4b9c-728e-9aef-673f0b2f8df5",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Окончание срока бронирования (бронь № 6) по заказу #804",
+        "body": "Связаться с клиентом Андрей Сергеевич Борков для получения ответа по бронированию:<br/>заказ #804 , <br/>тайм-лимит А/К бронь № 6 30.05.2025 14:00:00<br/>тайм лимит для клиента бронь № 6 29.05.2025 13:00:00<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T11:00:01.065Z",
+        "__updatedAt": "2025-05-30T11:00:01.065Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "019720d9-4822-728e-8551-50c45868adc3",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Окончание срока бронирования (бронь № 5) по заказу #804",
+        "body": "Связаться с клиентом Андрей Сергеевич Борков для получения ответа по бронированию:<br/>заказ #804 , <br/>тайм-лимит А/К бронь № 5 30.05.2025 14:00:00<br/>тайм лимит для клиента бронь № 5 29.05.2025 13:55:00<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T11:00:00.177Z",
+        "__updatedAt": "2025-05-30T11:00:00.177Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "019720a4-3e47-728e-95c5-0c11f57c93e5",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b37-2e08-728e-a97c-2de6989364fd",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Оповещение Ответ клиенту - актуализированное бронирование #804",
+        "body": "По Вашему  запросу #804 произошли изменения.  <br/><br/>Данные паспортов: CHEKRYGINA/NATALIA\n\tТип: Внутренний - 31212132132321\n\n<br/>✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)+МБактуализация+МКо<br/><br/>Необходимо оформить до 30.05.2025 17:00:00.<br/><br/>TROFIMOVA/IULIIA  \nВнутренний - 31212132132321<br/>✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)МБактуализация+МКО<br/><br/>Необходимо оформить до 30.05.2025 13:40:00",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T10:02:04.238Z",
+        "__updatedAt": "2025-05-30T10:02:04.238Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "019720a2-5950-728e-9ea9-ded3b6ac199f",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Окончание срока бронирования (бронь № 4) по заказу #804",
+        "body": "Связаться с клиентом Андрей Сергеевич Борков для получения ответа по бронированию:<br/>заказ #804 , <br/>тайм-лимит А/К бронь № 4 30.05.2025 13:00:00<br/>тайм лимит для клиента бронь № 4 29.05.2025 13:50:00<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T10:00:00.089Z",
+        "__updatedAt": "2025-05-30T10:00:00.089Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01972086-e1f8-728e-a111-8492acdb6396",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Окончание срока бронирования (бронь № 3) по заказу #804",
+        "body": "Связаться с клиентом Андрей Сергеевич Борков для получения ответа по бронированию:<br/>заказ #804 , <br/>тайм-лимит А/К бронь № 3 30.05.2025 12:30:00<br/>тайм лимит для клиента бронь № 3 29.05.2025 13:45:00<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T09:30:00.063Z",
+        "__updatedAt": "2025-05-30T09:30:00.063Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "0197206b-6abd-728e-a922-d0a6d03f6fb7",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Окончание срока бронирования  (бронь № 2) по заказу #804",
+        "body": "Связаться с клиентом Андрей Сергеевич Борков для получения ответа по бронированию:<br/>заказ #804 , <br/>тайм-лимит А/К 30.05.2025 12:00:00<br/>тайм лимит для клиента 30.05.2025 12:00:00",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T09:00:00.07Z",
+        "__updatedAt": "2025-05-30T09:00:00.07Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "0197204f-f3a8-728e-9d59-14866a0caa01",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Окончание срока бронирования (бронь № 1) по заказу #804",
+        "body": "Связаться с клиентом Андрей Сергеевич Борков для получения ответа по бронированию:<br/>заказ #804 , <br/>тайм-лимит А/К (бронь № 1) 30.05.2025 11:30:00<br/>тайм лимит для клиента (бронь №1) 29.05.2025 13:30:00<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T08:30:00.127Z",
+        "__updatedAt": "2025-05-30T08:30:00.127Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971bae-5bff-728e-b7b3-647ca2b13fd3",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "b8749e9d-2648-4752-8018-40a7b7164f67",
+        "title": "Окончание срока бронирования  по заказу #804",
+        "body": "Уважаемый клиент!<br/>По вашему заказу #804  срок бронирования № 5 истекает 29.05.2025 13:55:00.",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T10:55:01.127Z",
+        "__updatedAt": "2025-05-29T10:55:01.127Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971ba9-c808-728e-aaf2-7e276eb34119",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "b8749e9d-2648-4752-8018-40a7b7164f67",
+        "title": "Окончание срока бронирования по заказу #804",
+        "body": "Уважаемый клиент!<br/>По вашему заказу #804  срок бронирования № 4 истекает 29.05.2025 13:50:00.",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T10:50:01.102Z",
+        "__updatedAt": "2025-05-29T10:50:01.102Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971ba5-3483-728e-a09e-a83b4de7835c",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "b8749e9d-2648-4752-8018-40a7b7164f67",
+        "title": "Окончание срока бронирования по заказу #804",
+        "body": "Уважаемый клиент!<br/>По вашему заказу #804  срок бронирования № 3 истекает 29.05.2025 13:45:00.",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T10:45:01.195Z",
+        "__updatedAt": "2025-05-29T10:45:01.195Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971ba0-a0c5-728e-b3a8-4b182f1dec3b",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "b8749e9d-2648-4752-8018-40a7b7164f67",
+        "title": "Окончание срока бронирования по заказу #804",
+        "body": "Уважаемый клиент!<br/>По вашему заказу #804  срок бронирования № 2 истекает 29.05.2025 13:40:00.",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T10:40:01.234Z",
+        "__updatedAt": "2025-05-29T10:40:01.234Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971b97-78f5-728e-84df-0ab809cc2217",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "b8749e9d-2648-4752-8018-40a7b7164f67",
+        "title": "Окончание срока бронирования по заказу #804",
+        "body": "Уважаемый клиент!<br/>По вашему заказу #804  срок бронирования № 1 истекает 29.05.2025 13:30:00.",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T10:30:01.212Z",
+        "__updatedAt": "2025-05-29T10:30:01.212Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971b7c-01bd-728e-98f7-8c2f83462c33",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b6e-2504-728e-bc5e-9215ffb551a9",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_zapuska_processa_taimlimit"
+            }
+          ]
+        },
+        "author": "b8749e9d-2648-4752-8018-40a7b7164f67",
+        "title": "Окончание срока бронирования по заказу #804",
+        "body": "Уважаемый клиент!<br/>По вашему заказу #804  срок бронирования № 6 истекает 29.05.2025 13:00:00.",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T10:00:01.219Z",
+        "__updatedAt": "2025-05-29T10:00:01.219Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "318ac248-eced-4525-a76e-972465c8ded9",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "спасибо супер ",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T09:55:43.706Z",
+        "__updatedAt": "2025-05-29T09:55:43.706Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971b6e-2c16-728e-b580-86babe92fb2e",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b37-2e08-728e-a97c-2de6989364fd",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Оповещение Ответ клиенту о бронировании 804",
+        "body": "По Вашему заказу #804 созданы бронирования.<br/><br/>Данные паспортов: CHEKRYGINA/NATALIA\n\tТип: Внутренний - 31212132132321\n\n<br/>✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)<br/> Бронирование предварительное до 29.05.2025 13:30:00<br/><br/>TROFIMOVA/IULIIA  \nВнутренний - 31212132132321<br/>✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)<br/>Бронирование предварительное до 29.05.2025 13:40:00<br/><br/>SOKOLOVA/IRINA\nВнутренний - 31212132132321<br/>✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)<br/><br/>Бронирование предварительное до 29.05.2025 13:45:00<br/><br/>KUPCHINA/MARIA \nВнутренний - 31212132132321<br/>✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)<br/>Бронирование предварительное до 29.05.2025 13:50:00<br/><br/>BARANOVA/ANASTASIIA\nВнутренний - 31212132132321<br/>✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nЭконом невозвратный  - 12 400  руб/пас (обмен 80 евро)<br/>Бронирование предварительное до 29.05.2025 13:55:00<br/><br/>MOUSE/MICKEY\n Внутренний - 31212132132321<br/>✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\nЭконом - 13 170  руб/пас (обмен/возврат 80 евро)<br/>Бронирование предварительное до 29.05.2025 13:00:00<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T09:44:54.568Z",
+        "__updatedAt": "2025-05-29T09:44:54.568Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971b6e-2531-728e-9213-35a9949b245c",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": []
+        },
+        "author": "00000000-0000-0000-0000-000000000000",
+        "title": "Процесс \"Запуска процесса Тайм-лимит\" запущен",
+        "body": "29.05.2025 12:44",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T09:44:52.794Z",
+        "__updatedAt": "2025-05-29T09:44:52.794Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971b54-0ed9-728e-b5f4-467c1120c23e",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b37-2e08-728e-a97c-2de6989364fd",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Предложения отправленные клиенту #804 - (Авиабилеты) ",
+        "body": "Направляем расчет стоимости по запросу #804. <br/><br/>✈️ SU 1314 - Аэрофлот\n25 июня Шереметьево (ШРМ) 21:40 - 26 июня Минеральные Воды (МРВ) 00:40\n\n✈️ SU 1315 - Аэрофлот\n04 июля Минеральные Воды (МРВ) 07:05 - 04 июля Шереметьево (ШРМ) 09:45\n\nБизнес невозвратный  - 32 400  руб/пас (обмен 80 евро)\nБизнес - 33 170  руб/пас (обмен/возврат 80 евро)\n.<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T09:16:23.14Z",
+        "__updatedAt": "2025-05-29T09:16:23.14Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971b4f-dd73-728e-a1f6-8632fb5f0829",
+        "target": {
+          "id": "01971b37-2b60-77da-b1d8-ae41cfe3d591",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#804 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971b37-2e08-728e-a97c-2de6989364fd",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Оповещение о принятии в работу",
+        "body": "Здравствуйте! <br/>💬 Ваш заказ принят в работу. Номер заказа  #804.<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-29T09:11:48.348Z",
+        "__updatedAt": "2025-05-29T09:11:48.348Z",
+        "__deletedAt": null,
+        "isChanged": true
+      }
+    ],
+    "806": [
+      {
+        "__id": "0d4ccf16-3727-406a-919f-4f8dcfcb7c75",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "6666666666666666",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:52:19.576Z",
+        "__updatedAt": "2025-06-03T14:52:19.576Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "60579803-e934-41f7-ac13-5975a9f1b886",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "вапвпвапвапавпвап",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:52:04.823Z",
+        "__updatedAt": "2025-06-03T14:52:04.823Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "65f87b43-270b-4268-ac08-9411f950d080",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "11111",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:51:49.265Z",
+        "__updatedAt": "2025-06-03T14:51:49.265Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "bd423879-c2ec-481d-97a4-652abc3e1602",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "12323123",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:51:32.044Z",
+        "__updatedAt": "2025-06-03T14:51:32.044Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "6cf09fbc-0fe2-457b-9ebe-1316e0978fee",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "р11111",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:51:21.757Z",
+        "__updatedAt": "2025-06-03T14:51:21.757Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "40f7b849-61a4-47a8-9cea-9c554ae29b4f",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "апрарапрапрапрапрапрапрап",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:51:10.784Z",
+        "__updatedAt": "2025-06-03T14:51:10.784Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "2c57e094-c1b2-40f8-b842-76c91c510784",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "ропропропропопро",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:45:49.244Z",
+        "__updatedAt": "2025-06-03T14:45:49.244Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "4f54b978-38d0-434a-80fb-6b8b33af8404",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "ыаываываываываываываыва",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:45:41.526Z",
+        "__updatedAt": "2025-06-03T14:45:41.526Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "8ddbeafb-3b5a-44de-bd2a-3a7998a102cd",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "вапвапвапвапвапвапвап",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:41:36.83Z",
+        "__updatedAt": "2025-06-03T14:41:36.83Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "a53af53c-e09e-4211-a685-efa3dadf1766",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "митмитмитмитмитмитмитмаптмт",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:41:22.132Z",
+        "__updatedAt": "2025-06-03T14:41:22.132Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "3443ed16-0e7e-4b8a-a946-012bc63010ea",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "1",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:40:40.135Z",
+        "__updatedAt": "2025-06-03T14:40:40.135Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "099fb6da-f2f3-46d8-92df-583439a58061",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "1",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-03T14:40:27.773Z",
+        "__updatedAt": "2025-06-03T14:40:27.773Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "b15ed9d0-c899-47ee-8e6f-d52de46a6a9d",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "body": "<p><a class=\"mention\" href=\"/(p:profile/77209dc7-ebac-45f3-9395-1af78be6a7a3)\" data-blot=\"elmaMention\" data-id=\"77209dc7-ebac-45f3-9395-1af78be6a7a3\" data-type=\"user\" rel=\"nofollow\">﻿<span>Андрей Борковский</span>﻿</a> тест</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T06:21:58.437Z",
+        "__updatedAt": "2025-05-30T06:21:58.437Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "01971fd9-d33f-728e-ba17-9f5d06ce8f57",
+        "target": {
+          "id": "01971fd8-2a1c-77da-8e20-9b0b956e7a77",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#806 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "01971fd8-2d1d-728e-9829-8c5aa7b5a64b",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_glavnyi_bp_copy"
+            }
+          ]
+        },
+        "author": "77209dc7-ebac-45f3-9395-1af78be6a7a3",
+        "title": "Оповещение о принятии в работу",
+        "body": "Здравствуйте! <br/>💬 Ваш заказ принят в работу. Номер заказа  #806.<br/>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-05-30T06:20:58.566Z",
+        "__updatedAt": "2025-05-30T06:20:58.566Z",
+        "__deletedAt": null,
+        "isChanged": true
+      }
+    ],
+    "808": [
+      {
+        "__id": "19173b2f-aa39-4af9-ac30-ef592603f227",
+        "target": {
+          "id": "01972fad-51dd-77da-ae25-df79d7ebad58",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#808 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>как дела?</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-05T07:15:50.953Z",
+        "__updatedAt": "2025-06-05T07:15:50.953Z",
+        "__deletedAt": null,
+        "isChanged": true
+      }
+    ],
+    "817": [],
+    "818": [
+      {
+        "__id": "b68034a2-b453-4440-b406-6edc844bf03d",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "Причина тест ",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:03:59.277Z",
+        "__updatedAt": "2025-06-08T06:03:59.277Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "cfa523fc-61f4-4299-9160-8b33aae166c2",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>Добрый день!</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:03:54.937Z",
+        "__updatedAt": "2025-06-08T06:03:54.937Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "9b6c2511-9875-4425-97a6-577788adb796",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "Отлично! ",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:03:39.347Z",
+        "__updatedAt": "2025-06-08T06:03:39.347Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "24f6f41e-f395-467b-97f6-eac55b82596c",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "Привет!",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:02:20.707Z",
+        "__updatedAt": "2025-06-08T06:02:20.707Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "489527f4-0656-4e6a-8c2c-d14eb4a7bee4",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>+</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T06:00:04.679Z",
+        "__updatedAt": "2025-06-08T06:00:04.679Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "5a3b9505-2498-4fe0-9fcd-cd003933db9d",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>.</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:58:52.769Z",
+        "__updatedAt": "2025-06-08T05:58:52.769Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "19b63ff1-2f25-4805-a6d3-42ebc564d288",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>Все работает и сообщения моментально приходят на портал</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:56:05.228Z",
+        "__updatedAt": "2025-06-08T05:56:05.228Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "a4909f1e-63a3-4236-9e5e-0e2831d0f389",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "hello",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:45:50.666Z",
+        "__updatedAt": "2025-06-08T05:45:50.666Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "fff99ad3-a90b-43a6-a996-5cefa2360d35",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "супер!",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:45:23.722Z",
+        "__updatedAt": "2025-06-08T05:45:23.722Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "1d1d4d6e-84e5-487f-b377-9163fa5c84fa",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+        "body": "отлично!",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:44:19.06Z",
+        "__updatedAt": "2025-06-08T05:44:19.06Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "6aa1278a-a7c2-4d5e-80f1-910903b8d278",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>t e</p>",
+        "comments": [
+          {
+            "__id": "b4be0454-ce91-438b-9af8-8b0745aed991",
+            "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+            "body": "а у вас как?",
+            "__createdAt": "2025-06-08T05:44:37.617Z"
+          },
+          {
+            "__id": "a867ebd6-726a-4a0e-957f-6ca8206e8342",
+            "author": "8312425a-0612-462e-a762-2d14c4bd1373",
+            "body": "как у вас дела, тест?",
+            "__createdAt": "2025-06-08T05:52:33.74Z"
+          },
+          {
+            "__id": "c4613b13-9176-4379-989d-ecabadbd2f67",
+            "author": "543e820c-e836-45f0-b177-057a584463b7",
+            "body": "<p>отлично!</p>",
+            "__createdAt": "2025-06-08T05:53:03.613Z"
+          }
+        ],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:41:01.311Z",
+        "__updatedAt": "2025-06-08T05:53:03.613Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "c512658f-d41f-4e85-a2c6-d99a7493351a",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>t e s t</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:40:00.991Z",
+        "__updatedAt": "2025-06-08T05:40:00.991Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "c0a9f742-3ca9-4d3d-b704-b4734b2af2c3",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 12</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:35:07.435Z",
+        "__updatedAt": "2025-06-08T05:35:07.435Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "16cf6079-b630-446b-9c43-d87858711458",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:31:26.144Z",
+        "__updatedAt": "2025-06-08T05:31:26.144Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "b422e8d8-2dfb-407e-bf3d-e5e91062e514",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 123</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:30:03.59Z",
+        "__updatedAt": "2025-06-08T05:30:03.59Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "224951ce-4b6e-482e-8837-5ea0bdcbd414",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T05:28:52.958Z",
+        "__updatedAt": "2025-06-08T05:28:52.958Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "c27f2100-c834-4e0f-ad2f-6897ddf2d24e",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>тестик</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T01:04:07.064Z",
+        "__updatedAt": "2025-06-08T01:04:07.064Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "244bc28d-19e5-4b4b-b090-4bf159fe9aad",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>тест 1234321</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-08T01:02:41.033Z",
+        "__updatedAt": "2025-06-08T01:02:41.033Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "9ed3fe51-5f24-4421-b1db-a57765bf4572",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [
+          {
+            "__id": "67e971b6-d37a-4839-833c-7245f3ea90b7",
+            "author": "543e820c-e836-45f0-b177-057a584463b7",
+            "body": "<p>comment</p>",
+            "__createdAt": "2025-06-08T00:54:39.304Z"
+          },
+          {
+            "__id": "88b3b2f7-052f-47df-bbbe-a0867fa34a59",
+            "author": "543e820c-e836-45f0-b177-057a584463b7",
+            "body": "<p>com</p>",
+            "__createdAt": "2025-06-08T00:59:20.817Z"
+          }
+        ],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T22:03:09.164Z",
+        "__updatedAt": "2025-06-08T00:59:20.817Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "28f0ca65-9a83-4daa-9993-1b7650687043",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [
+          {
+            "__id": "ddb5558e-1100-412d-8b78-daf8dcfd912d",
+            "author": "543e820c-e836-45f0-b177-057a584463b7",
+            "body": "<p>com 1</p>",
+            "__createdAt": "2025-06-08T01:02:20.696Z"
+          },
+          {
+            "__id": "ca8ee7dd-ca2e-45b5-82c4-4e16614d7498",
+            "author": "543e820c-e836-45f0-b177-057a584463b7",
+            "body": "<p>com 2</p>",
+            "__createdAt": "2025-06-08T01:02:25.596Z"
+          }
+        ],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T22:00:54.914Z",
+        "__updatedAt": "2025-06-08T01:02:25.596Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "bfcc0a1b-1d63-4866-aedb-20611b2e0019",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T21:34:31.549Z",
+        "__updatedAt": "2025-06-07T21:34:31.549Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "e424573b-e3cd-4f5d-858d-813f599fb078",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 12</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:52:40.238Z",
+        "__updatedAt": "2025-06-07T00:52:40.238Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "842f7c66-7de9-4b6c-bff9-e14fa6177db8",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:36:08.346Z",
+        "__updatedAt": "2025-06-07T00:36:08.346Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "677aed85-1239-44af-97b8-fcc96d40aa3d",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:33:50.558Z",
+        "__updatedAt": "2025-06-07T00:33:50.558Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "1a6f1219-c9fe-404e-92ca-ad0421ac5ccd",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:33:19.066Z",
+        "__updatedAt": "2025-06-07T00:33:19.066Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "23485356-6476-4cab-a198-6c3283305f42",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:30:59.962Z",
+        "__updatedAt": "2025-06-07T00:30:59.962Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "e361e67c-d9d9-4416-b191-e4ebf97110b9",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:28:31.629Z",
+        "__updatedAt": "2025-06-07T00:28:31.629Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "2cf05d93-fac8-4854-82b0-fc4cf5ba6c38",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:26:27.673Z",
+        "__updatedAt": "2025-06-07T00:26:27.673Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "f78b14b9-f8e8-42d9-b904-b941d9ae0f80",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:20:24.703Z",
+        "__updatedAt": "2025-06-07T00:20:24.703Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "d10d38c1-7580-444a-9f28-abc5c33b7d2f",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:19:42.33Z",
+        "__updatedAt": "2025-06-07T00:19:42.33Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "39119463-db30-4099-a85f-0c7f4426fc7f",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:18:18.348Z",
+        "__updatedAt": "2025-06-07T00:18:18.348Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "bc3f7b63-2ee2-4a1b-9649-24103d88f79d",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-07T00:13:42.406Z",
+        "__updatedAt": "2025-06-07T00:13:42.406Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "231d8144-2a16-4270-bd76-a4344bb7f83c",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 3456</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:52:45.228Z",
+        "__updatedAt": "2025-06-06T22:52:45.228Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "1188bfd0-df4e-4516-ad5d-3a7b4ddea7d9",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 121212</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:52:20.875Z",
+        "__updatedAt": "2025-06-06T22:52:20.875Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "00772e11-1734-4e1d-b65a-ff27e2eedbbb",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>тест 1234</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:51:26.719Z",
+        "__updatedAt": "2025-06-06T22:51:26.719Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "afb833d3-6107-4566-a300-d6905a8289e5",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>тест для мобилки</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:51:07.768Z",
+        "__updatedAt": "2025-06-06T22:51:07.768Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "fe3574c2-8c91-4943-8650-244ff8808476",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>еуые</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:50:49.472Z",
+        "__updatedAt": "2025-06-06T22:50:49.472Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "aeb8123b-cb9c-49bb-8ed9-0c14f06bdaca",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [
+          {
+            "__id": "c20110f9-2375-4793-9c62-91b63925fea4",
+            "author": "543e820c-e836-45f0-b177-057a584463b7",
+            "body": "<p>как дела?</p>",
+            "__createdAt": "2025-06-06T22:48:36.261Z"
+          }
+        ],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:47:54.485Z",
+        "__updatedAt": "2025-06-06T22:48:36.261Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "2bb074be-2946-401b-9066-61c36672c16d",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:47:36.949Z",
+        "__updatedAt": "2025-06-06T22:47:36.949Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "fe01500b-bfe3-4e5c-a6bb-2b11d30b9e85",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:47:24.399Z",
+        "__updatedAt": "2025-06-06T22:47:24.399Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "8aa36d6b-dc82-4ec1-ac55-ae4818c1d990",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:46:38.331Z",
+        "__updatedAt": "2025-06-06T22:46:38.331Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "b936d677-1b7c-4b09-8bc9-66a3df7e6d5e",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:46:11.225Z",
+        "__updatedAt": "2025-06-06T22:46:11.225Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "3815613a-a674-41b5-ba88-e79c5264c16c",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:44:19.881Z",
+        "__updatedAt": "2025-06-06T22:44:19.881Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "ae20f655-893f-4cfa-9436-17ced917f9e3",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:44:05.087Z",
+        "__updatedAt": "2025-06-06T22:44:05.087Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "0f4dec96-6765-48a9-bbb8-36ec42638b39",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:31:08.353Z",
+        "__updatedAt": "2025-06-06T22:31:08.353Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "93986519-3dac-4333-9928-0a4101499880",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:23:57.814Z",
+        "__updatedAt": "2025-06-06T22:23:57.814Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "cc544b43-7486-45f0-bd99-8e933af1a01e",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T22:02:32.958Z",
+        "__updatedAt": "2025-06-06T22:02:32.958Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "b4ca3814-889a-4721-8695-ed3d9bcb9a34",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T21:59:28.998Z",
+        "__updatedAt": "2025-06-06T21:59:28.998Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "4aa845ec-4e08-4eaa-9bd8-468bcaa26960",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T21:54:06.327Z",
+        "__updatedAt": "2025-06-06T21:54:06.327Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "b85f905b-7b2d-4979-887a-7c924a71b613",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 4</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T21:53:31.464Z",
+        "__updatedAt": "2025-06-06T21:53:31.464Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "02f42841-9cf8-4c56-bb2b-1d25a45cfb3f",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 4</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T21:51:27.056Z",
+        "__updatedAt": "2025-06-06T21:51:27.056Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "a4377841-3f9c-48f9-9693-381b76a63b19",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 3</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-06T21:46:44.41Z",
+        "__updatedAt": "2025-06-06T21:46:44.41Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "019740a5-324a-728e-9457-9dfebeced35f",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "019740a3-9c65-728e-bbf4-12e87e65046b",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_Vip"
+            }
+          ]
+        },
+        "author": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "title": "Предложения Вип-сервис # 818 Андрей Сергеевич Борков",
+        "body": "Направляем Вам возможные варианты Вип-сервиса по заказу #818:<br/><br/>роапоапопро - 8 800,00/пас.<br/><br/>оропроапоапо",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-05T15:10:57.618Z",
+        "__updatedAt": "2025-06-05T15:10:57.618Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "019740a3-a1ea-728e-b4e8-f55a89b17f98",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [
+            {
+              "id": "019740a3-9c65-728e-bbf4-12e87e65046b",
+              "namespace": "work_orders.OrdersNew",
+              "code": "_process_Vip"
+            }
+          ]
+        },
+        "author": "c566297b-2f3c-40b5-a27e-7d9f30aae080",
+        "title": "Заказ принят в работу # 818 -Андрей Сергеевич Борков(Вип-сервис)",
+        "body": "Ваш заказ по оформлению Вип-сервиса принят в работу.<br/><br/>💬 Номер заказа для работы #818",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-05T15:09:15.125Z",
+        "__updatedAt": "2025-06-05T15:09:15.125Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "363a7bbd-c77d-4b79-9501-a67bc390da66",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>test 1</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-05T07:20:00.424Z",
+        "__updatedAt": "2025-06-05T07:20:00.424Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "1f63d1c5-526f-4869-8463-7bfaf4e6696b",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>Как дела?</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-05T07:06:33.241Z",
+        "__updatedAt": "2025-06-05T07:06:33.241Z",
+        "__deletedAt": null,
+        "isChanged": true
+      },
+      {
+        "__id": "bb65da21-4cff-4d71-b236-ed44aa1e345d",
+        "target": {
+          "id": "01973649-71cb-77da-bdae-39e18b972dfa",
+          "namespace": "work_orders",
+          "code": "OrdersNew",
+          "title": "#818 - ООО АСТРА",
+          "createdIn": [],
+          "elementName": "Заказы"
+        },
+        "author": "543e820c-e836-45f0-b177-057a584463b7",
+        "body": "<p>Добрый день!</p>",
+        "comments": [],
+        "unreadCommentsCount": 0,
+        "__createdAt": "2025-06-05T07:05:49.022Z",
+        "__updatedAt": "2025-06-05T07:05:49.022Z",
+        "__deletedAt": null,
+        "isChanged": true
+      }
+    ],
+    "825": [],
+    "826": []
+  }
+}

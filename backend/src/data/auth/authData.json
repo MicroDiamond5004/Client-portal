@@ -1,0 +1,15 @@
+[
+    {
+      "auth_login": "test1@example.com",
+      "password": "12345asdf678",
+      "klient_name": "Клиент 1",
+      "klient_id": "0195d6be-66fa-72ec-bb45-227759b3b668"
+    },
+    {
+      "auth_login": "test2@example.com",
+      "password": "qwertydsaf",
+      "klient_name": "Клиент 2",
+      "klient_id": "0195d699-7475-772e-8a4f-9938687e9ba2"
+    }
+]
+  

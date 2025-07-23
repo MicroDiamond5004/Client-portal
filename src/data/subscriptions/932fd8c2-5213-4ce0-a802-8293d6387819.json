@@ -1,0 +1,32 @@
+[
+  {
+    "endpoint": "https://updates.push.services.mozilla.com/wpush/v2/gAAAAABoR-MS1fSCQzLeIIa62vBtabAVyCgd2MCOt9QNM96rd7y5V-FvoDBAabZNugyOzcgS4bWO-hDUfmg5HLy0KQ-p6Cl1SPiaCfb25OV4a89Ph7ry0_pXhV95Awfi-1qluzjL7_7WwzqKABDO4uCz7Qn32NdZ5HSNYu4yGZyPSyPeLgMD7RY",
+    "expirationTime": null,
+    "keys": {
+      "auth": "_ZTZecdCICpWt2xBVKPwTQ",
+      "p256dh": "BFF6E6FrCwvpSwj1KxYmk-JiiGmlXVc9w_czynyrorWJMWZbGU3eJj2tQUqSxeDiYlNkkAMJGoCQKv2QxgSc0_8"
+    },
+    "email": "flame77707@yandex.ru",
+    "userId": "932fd8c2-5213-4ce0-a802-8293d6387819"
+  },
+  {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/eztn63Rzl-g:APA91bGIce2w801Cz4PDdBF3V3SOoWew6JJYdQ78j67LXUp5jXcYKHhoJJK24iTICRoK3hTge05nYajKUTEYHDMlGam6MAre_wM5yVFic4ScMRI0COhVYlQZOo4svM-zCsUbmUjhFyBn",
+    "expirationTime": null,
+    "keys": {
+      "p256dh": "BHFbtPXfdobEYbFVCU4KdC1Fd_KAlkVA-g2ln9zvDIczp2t_3rCPoWOmF2wQQ8fIg17l28NiRIuuLBCjXcoQXNM",
+      "auth": "xC25x0p5ElcCvbDZV-a6-A"
+    },
+    "email": "flame77707@yandex.ru",
+    "userId": "932fd8c2-5213-4ce0-a802-8293d6387819"
+  },
+  {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/cNkSnf13EjQ:APA91bFZi97WZTEZVnG-8mSivr4BwJqLo8nvNS7fXghs5szg3ZGXPfrZEXY4bBYKxp5NYJ3wXEv0vn2RNkn6yxzUL3JKvjna7Gb1XzgHTE0hH2ehWCjQ6iAsmH4JX0h-CjGQKrpZnEK4",
+    "expirationTime": null,
+    "keys": {
+      "p256dh": "BGoN_nV2EAm1NLbVT7dv13CXZq_nVF5ia2c6np-2ISUBogyyVBnf86MpPuAaWkE_2CosG0PUNM_sRlr27ouNWNs",
+      "auth": "gdCrMAbsCkWWCyD3i6IFEA"
+    },
+    "email": "flame77707@yandex.ru",
+    "userId": "932fd8c2-5213-4ce0-a802-8293d6387819"
+  }
+]

@@ -1,0 +1,39 @@
+/*p {*/
+/*    word-wrap: break-word !important;*/
+/*}*/
+
+.chat-text div {
+    word-break: break-word;
+}
+
+
+.tabs-text div {
+    word-break: break-word;
+}
+
+.break-word {
+    word-break: break-word;
+}
+
+@media screen and (max-width: 460px) {
+    .MuiListItemAvatar-root {
+        min-width: 45px !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .css-gshwue-MuiContainer-root {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+.css-19kzrtu {
+    padding: 2vh !important;
+}
+
+input,
+textarea,
+select {
+    font-size: 16px !important;
+}
