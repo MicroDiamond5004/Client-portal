@@ -374,8 +374,11 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
     const changeOrder = currentOrders.findIndex((el) => el.__id === id);
     // // console.log(type, changeOrder);
     if (changeOrder !== -1) {
-      currentOrders[changeOrder].isChanged = false;
       const newData = { orders: currentOrders, messages: currentMessages };
+      console.log('[DEBUG] Order найден:', currentOrders[changeOrder]);
+      console.log('[DEBUG] isChanged до:', currentOrders[changeOrder].isChanged);
+      currentOrders[changeOrder].isChanged = false;
+      console.log('[DEBUG] isChanged после:', currentOrders[changeOrder].isChanged);
       saveUserData(clientId, newData);
       sendToUser(email, {type: 'orders', orders: currentOrders});
     }
@@ -394,10 +397,10 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
     })
 
     if (found) {
-      currentMessages = {
-        ...currentMessages,
-        [orderNumber]: currentMessages[orderNumber]?.map((e) => ({...e, isChanged: false}))
-      };
+      currentMessages[orderNumber] = currentMessages[orderNumber].map((msg) => ({
+        ...msg,
+        isChanged: false
+      }));
     }
 
     const newData = { orders: currentOrders, messages: currentMessages };
@@ -1176,8 +1179,7 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
       }
     );
 
-    // // // // // // console.log(elmaInstance.data);
-
+    //
     // {
     //   "context": {
     //     "OrdersNew": [
@@ -1965,6 +1967,48 @@ const getStatus = (ticket: any): string => {
   return status;
 }
 
+function mergeIsChanged<T extends { __id: string; isChanged?: boolean }>(
+  oldItems: T[],
+  newItems: T[]
+): T[] {
+  const map = new Map(oldItems.map(item => [item.__id, item]));
+
+  return newItems.map(newItem => {
+    const oldItem = map.get(newItem.__id);
+
+    // если isChanged был сброшен вручную — не затираем
+    if (oldItem && oldItem.isChanged === false && newItem.isChanged === true) {
+      return { ...newItem, isChanged: false };
+    }
+
+    return newItem;
+  });
+}
+
+function mergeMessagesWithIsChanged(
+  oldMessages: Record<string, any[]>,
+  newMessages: Record<string, any[]>
+): Record<string, any[]> {
+  const result: Record<string, any[]> = {};
+
+  for (const key of Object.keys(newMessages)) {
+    const old = oldMessages[key] || [];
+    const incoming = newMessages[key];
+
+    const map = new Map(old.map(m => [m.__id, m]));
+
+    result[key] = incoming.map(m => {
+      const existing = map.get(m.__id);
+      if (existing && existing.isChanged === false && m.isChanged === true) {
+        return { ...m, isChanged: false };
+      }
+      return m;
+    });
+  }
+
+  return result;
+}
+
 
 async function pollNewMessages() {
   const users = getAllUsersData();
@@ -2334,25 +2378,38 @@ async function pollNewMessages() {
         });
 
         // 1️⃣ Сначала обрабатываем и отдаем заказы
+        // 1️⃣ Сначала обрабатываем и отдаем заказы
         const ordersResult = await Promise.all(orderPromises);
         currentOrders = ordersResult;
+
         if (ordersFlag) {
           sendToUser(email, { type: 'orders', orders: currentOrders });
+
+          // 🛡 Безопасное сохранение с учетом изменений isChanged
+          const latest = loadUserData(clientId);
+          const finalOrders = mergeIsChanged(latest.orders, currentOrders);
+          const finalMessages = latest.messages;
+
           saveUserData(clientId, {
-            orders:   currentOrders,
-            messages: messages,
+            orders: finalOrders,
+            messages: finalMessages,
           });
         }
 
-        // 2️⃣ Параллельно (но уже после того, как заказы уехали) обрабатываем сообщения
-        //    и не ждем их здесь, чтобы не блокировать следующий шаг.
+// 2️⃣ Параллельно обрабатываем сообщения
         Promise.all(messagePromises)
           .then(() => {
             if (messagesFlag) {
               sendToUser(email, { type: 'messages', messages: allMessagesByOrder });
+
+              // 🛡 Безопасное сохранение сообщений с учетом isChanged
+              const latest = loadUserData(clientId);
+              const finalOrders = latest.orders;
+              const finalMessages = mergeMessagesWithIsChanged(latest.messages, allMessagesByOrder);
+
               saveUserData(clientId, {
-                orders:   tickets,
-                messages: allMessagesByOrder,
+                orders: finalOrders,
+                messages: finalMessages,
               });
             }
           })

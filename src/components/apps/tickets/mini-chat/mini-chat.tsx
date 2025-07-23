@@ -71,7 +71,7 @@ function MiniChat({selectedChat}: any) {
                   sx={{
                     overflowX: 'hidden', // скрываем горизонтальную прокрутку
                     height: "auto",
-                    maxHeight: `${(window.innerHeight) / 2.2}px`,
+                    maxHeight: `60vh`,
                     width: mainBoxRef && inBoxRef && ((mainBoxRef.current?.clientWidth || 0) - (inBoxRef.current?.clientWidth || 0)) > 300 ?
                       `${((mainBoxRef.current?.clientWidth || 0) - (inBoxRef.current?.clientWidth || 0))}px` : '300px',
                   }}

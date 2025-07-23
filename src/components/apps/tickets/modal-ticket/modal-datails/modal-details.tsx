@@ -89,6 +89,7 @@ const ModalDetails = (props: ModalTicketProps) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
+    if (!ticket.prilozhenie_k_zaprosu) return;
     const fetchFiles = async () => {
       try {
         const response = await api.post('/get-files', {
@@ -116,26 +117,27 @@ const ModalDetails = (props: ModalTicketProps) => {
     link.click();
   };
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await api.post('/get-files', {
-          fileIds: ticket?.marshrutnaya_kvitanciya,
-        });
-
-        if (response.data.success) {
-          setFiles(response.data.files);
-        } else {
-          console.error('Ошибка на сервере:', response.data.error);
-        }
-
-      } catch (error) {
-        console.error('Ошибка загрузки файлов:', error);
-      }
-    };
-
-    fetchFiles();
-  }, [ticket]);
+  // useEffect(() => {
+  //   if (!ticket?.marshrutnaya_kvitanciya) return;
+  //   const fetchFiles = async () => {
+  //     try {
+  //       const response = await api.post('/get-files', {
+  //         fileIds: ticket?.marshrutnaya_kvitanciya,
+  //       });
+  //
+  //       if (response.data.success) {
+  //         setFiles(response.data.files);
+  //       } else {
+  //         console.error('Ошибка на сервере:', response.data.error);
+  //       }
+  //
+  //     } catch (error) {
+  //       console.error('Ошибка загрузки файлов:', error);
+  //     }
+  //   };
+  //
+  //   fetchFiles();
+  // }, [ticket]);
 
 
   useEffect(() => {
@@ -426,6 +428,7 @@ const ModalDetails = (props: ModalTicketProps) => {
   const originalFiles = ticket.marshrutnaya_kvitanciya || [];
 
   useEffect(() => {
+    if (!ticket?.marshrutnaya_kvitanciya) return;
     const fetchFiles = async () => {
       const fileIds = ticket?.marshrutnaya_kvitanciya;
       if ((fileIds?.length ?? 0)> 0) {
