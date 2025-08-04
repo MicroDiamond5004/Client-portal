@@ -103,7 +103,7 @@ const BigCalendar = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
-  const [selectedDay, setSelectedDay] = useState<Date>(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -154,13 +154,12 @@ const BigCalendar = () => {
       const newEnd = addDays(newStart, 6);
 
       // если selectedDay не входит в новую неделю
-      if (!isWithinInterval(selectedDay, { start: newStart, end: newEnd })) {
-        // если today входит в новую неделю, выбрать today
+      if (!isWithinInterval(selectedDay ?? new Date(0), { start: newStart, end: newEnd })) {
         const today = new Date();
         if (isWithinInterval(today, { start: newStart, end: newEnd })) {
           setSelectedDay(today);
         } else {
-          setSelectedDay(newStart); // или null, если хочешь полностью сбросить выбор
+          setSelectedDay(null); // 👈 не подсвечиваем ничего
         }
       }
     }
@@ -182,9 +181,14 @@ const BigCalendar = () => {
       addDays(currentWeekStart, i)
     );
 
-    const dayEvents = Events.filter(ev =>
-      isSameDay(ev.start ?? new Date(), selectedDay)
-    );
+    const dayEvents = selectedDay
+      ? Events.filter(ev => isSameDay(ev.start ?? new Date(), selectedDay))
+      : [];
+
+    const getShortDay = (day: Date) => {
+      const short = format(day, 'EEEEEE', { locale: ru }); // ← самое точное
+      return short.toUpperCase();
+    };
 
     return (
       <>
@@ -197,7 +201,7 @@ const BigCalendar = () => {
           overflowX: 'auto'
         }}>
           {daysOfWeek.map(day => {
-            const isActive = isSameDay(day, selectedDay);
+            const isActive = selectedDay ? isSameDay(day, selectedDay) : false;
             const isEventDay = Events.some(ev =>
               isSameDay(ev.start, day)
             );
@@ -209,7 +213,7 @@ const BigCalendar = () => {
                 sx={{ minWidth: '30px', width: '10vw', color: (isActive || isEventDay) ? '#fff' : '',  border: isToday ? '2px solid #1ad835' : '2px solid transparent', backgroundColor: isActive ? '#5d87ff' : isEventDay ? '#fa896b' : 'none' }}
                 onClick={() => setSelectedDay(day)}
               >
-                {format(day, 'EE', { locale: ru }).slice(0, 2).toUpperCase()}<br/> {format(day, 'dd')}
+                {getShortDay(day)}<br />{format(day, 'dd')}
 
               </Button>
             );
@@ -305,11 +309,11 @@ const BigCalendar = () => {
               ))}
             </Box>
           </Box>
-        ) : (
+        ) : selectedDay ? (
           <Typography variant="body2">
             Нет событий
           </Typography>
-        )}
+        ) : null}
 
       </>
     );
@@ -444,7 +448,8 @@ const BigCalendar = () => {
             <Typography>Нет событий</Typography>
           )}
           {showMoreEvents.map((event, index) => {
-            const currentTicket = tickets.find((ticket: ELMATicket) => ticket.__id === event.id);
+            console.log(event)
+            const currentTicket = tickets.find((ticket: ELMATicket) => ticket.nomer_zakaza === event.nomerZakaza);
             const fios = event.fios || [];
 
             const timeLimits = event.timeLimit ?? [];
@@ -554,9 +559,9 @@ const BigCalendar = () => {
             {/* ------------------------------------------- */}
             {/* Add Edit title */}
             {/* ------------------------------------------- */}
-            <Typography variant="h4" sx={{ mb: 2 }}>
-              События
-            </Typography>
+            {/*<Typography variant="h4" sx={{ mb: 2 }}>*/}
+            {/*  События*/}
+            {/*</Typography>*/}
 
             {/* <TextField
               id="Event Title"
@@ -575,7 +580,7 @@ const BigCalendar = () => {
               {currentEvent && (currentEvent.timeLimit || currentEvent.vylet) &&
                 ((currentEvent.timeLimit?.length ?? 0) > 0 ? currentEvent.timeLimit : currentEvent.vylet)?.map((_el, index) => {
 
-                  const currentTicket = tickets.find((ticket: ELMATicket) => ticket.__id === currentEvent.id);
+                  const currentTicket = tickets.find((ticket: ELMATicket) => ticket.nomer_zakaza === currentEvent.nomerZakaza);
                   const fios = currentEvent.fios || [];
 
                   const fioNames = fios;

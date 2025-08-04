@@ -1534,7 +1534,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
 });
 
 
-app.post('/api/change-subscription', authenticateToken, (req: any, res: any) => {
+app.post('/change-subscription', authenticateToken, (req: any, res: any) => {
   const { endpoint, newUserId, newEmail } = req.body;
 
   if (!endpoint || !newUserId || !newEmail) {

@@ -36,7 +36,12 @@ import { fetchUserOrders } from 'src/store/middleware/thunks';
 import { fetchMessages } from 'src/store/middleware/thunks/messageThunks';
 
 import { Theme, useMediaQuery } from '@mui/system';
-import { selectChatData, selectChatSearch, selectSelectedchat } from 'src/store/selectors/messagesSelectors.ts';
+import {
+  selectChatData,
+  selectChatSearch,
+  selectMessageStatus,
+  selectSelectedchat,
+} from 'src/store/selectors/messagesSelectors.ts';
 import { updateChatSearch, updateSelectedChat } from 'src/store/slices/messageSlice.ts';
 
 export const stripHtmlAndDecode = (html: string): string => {
@@ -55,7 +60,9 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
   const order = useAppSelector(selectOrder);
   const passports = useAppSelector(selectPassports);
 
-  const dispatch = useAppDispatch(); 
+  const dispatch = useAppDispatch();
+
+  const messageStatus = useAppSelector(selectMessageStatus);
 
   const chatData = useAppSelector(selectChatData)
   const selectedChat = useAppSelector(selectSelectedchat);
@@ -70,7 +77,13 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
     const orderMatch = String(chat.name).includes(chatSearch);
     const fioMatch = order.result.result.find((task: ELMATicket) => task.__id === chat.taskId)?.fio2.some((fio: string) => passports[fio]?.[0]?.toLocaleLowerCase()?.includes(chatSearch.toLocaleLowerCase()));
     return nameMatch || orderMatch || fioMatch;
-  }).sort((a, b) => Number(b.name) -Number(a.name));
+  }).sort((a, b) => {
+
+    if (a.isChanged !== b.isChanged) {
+      return (b.isChanged ? 1 : 0) - (a.isChanged ? 1 : 0);
+    }
+    return (b.name) - Number(a.name)
+  });
 
 
   const handleChatSelect = (chat: ChatsType) => {
@@ -99,7 +112,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
 
 
 
-  return chatData ? (
+  return (
     <div>
       <Box display={'flex'} alignItems="center" gap="10px" p={3}>
         {/* <Badge
@@ -150,7 +163,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
       </Box>
       <List sx={{ px: 0 }}>
         <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '600px' }}>
-          {filteredChats && filteredChats.length ? (
+          {messageStatus === 'succeeded' && chatData && filteredChats && filteredChats.length ? (
             filteredChats.map((chat) => (
               <ListItemButton 
                 key={chat.name + chat.id}
@@ -187,7 +200,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
             ))
           ) : (
             <Box m={2}>
-              {chatData.length === 0 ?
+              {(messageStatus !== 'succeeded' || (chatData && chatData.length === 0)) ?
               <Alert severity="info" variant="filled" sx={{ color: 'white' }}>
                 Сообщения загружаются...
               </Alert> :<Alert severity="warning" variant="filled" sx={{ color: 'white' }}>
@@ -197,7 +210,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
           )}
         </Scrollbar>
       </List>
-    </div>) : <></>
+    </div>)
 };
 
 export default React.memo(ChatListing);

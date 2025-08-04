@@ -7,6 +7,111 @@ const DATA_DIR = path.resolve(__dirname, 'user');
 const authDataDir = path.resolve(__dirname, 'auth');
 const subscriptionsDir = path.join(__dirname, 'subscriptions');
 
+// ---------------- LOCKING ----------------
+
+type Lock = {
+  readers: number;
+  writing: boolean;
+  readQueue: (() => void)[];
+  writeQueue: (() => void)[];
+};
+
+const locks: Record<string, Lock> = {};
+
+function getLock(userId: string): Lock {
+  if (!locks[userId]) {
+    locks[userId] = {
+      readers: 0,
+      writing: false,
+      readQueue: [],
+      writeQueue: [],
+    };
+  }
+  return locks[userId];
+}
+
+
+async function withReadLock<T>(userId: string, fn: () => Promise<T>, isImportant = false): Promise<T> {
+  const lock = getLock(userId);
+
+  return new Promise<T>((resolve, reject) => {
+    const run = async () => {
+      lock.readers++;
+      try {
+        const result = await fn();
+        resolve(result);
+      } catch (e) {
+        reject(e);
+      } finally {
+        lock.readers--;
+        if (lock.readers === 0 && lock.writeQueue.length > 0) {
+          const next = lock.writeQueue.shift();
+          if (next) next();
+        }
+      }
+    };
+
+    const enqueue = () => {
+      if (isImportant) {
+        lock.readQueue.unshift(run);
+      } else {
+        lock.readQueue.push(run);
+      }
+    };
+
+    if (lock.writing || lock.writeQueue.length > 0) {
+      enqueue();
+    } else {
+      run();
+    }
+  });
+}
+
+async function withWriteLock<T>(userId: string, fn: () => Promise<T>, isImportant = false): Promise<T> {
+  const lock = getLock(userId);
+
+  return new Promise<T>((resolve, reject) => {
+    const run = async () => {
+      lock.writing = true;
+      try {
+        const result = await fn();
+        resolve(result);
+      } catch (e) {
+        reject(e);
+      } finally {
+        lock.writing = false;
+
+        if (lock.writeQueue.length > 0) {
+          const next = lock.writeQueue.shift();
+          if (next) next();
+        } else {
+          while (lock.readQueue.length > 0) {
+            const nextRead = lock.readQueue.shift();
+            if (nextRead) nextRead();
+          }
+        }
+      }
+    };
+
+    const enqueue = () => {
+      if (isImportant) {
+        lock.writeQueue.unshift(run);
+      } else {
+        lock.writeQueue.push(run);
+      }
+    };
+
+    if (lock.writing || lock.readers > 0) {
+      enqueue();
+    } else {
+      run();
+    }
+  });
+}
+
+
+
+
 // --- UTILS ---
 function getUserFilePath(userId: string): string {
   return path.join(DATA_DIR, `${userId}.json.gz`);
@@ -46,10 +151,41 @@ function writeGzipJson(filePath: string, data: any): void {
 }
 
 // --- USER DATA (gzipped) ---
-export function getAllUsersData(): { userId: string; data: UserData }[] {
+// ---------------- SAFE USER FUNCTIONS ----------------
+
+export async function loadUserData(userId: string, isImportant = false): Promise<UserData> {
+  return withReadLock(userId, async () => {
+    // ... тело как раньше ...
+    const gzPath = getUserFilePath(userId);
+    const jsonPath = path.join(DATA_DIR, `${userId}.json`);
+
+    if (!fs.existsSync(gzPath) && fs.existsSync(jsonPath)) {
+      migrateUserJsonToGzip(userId);
+    }
+
+    if (!fs.existsSync(gzPath)) {
+      return { orders: [], messages: {} };
+    }
+
+    try {
+      return readGzipJson(gzPath);
+    } catch (e) {
+      console.warn(`⚠ Не удалось загрузить ${userId}.json.gz:`, e);
+      return { orders: [], messages: {} };
+    }
+  }, isImportant);
+}
+
+export async function saveUserData(userId: string, data: UserData, isImportant = false): Promise<void> {
+  return withWriteLock(userId, async () => {
+    const filePath = getUserFilePath(userId);
+    writeGzipJson(filePath, data);
+  }, isImportant);
+}
+
+export async function getAllUsersData(): Promise<{ userId: string; data: UserData }[]> {
   if (!fs.existsSync(DATA_DIR)) return [];
 
-  // Собираем список и .json.gz, и .json
   const files = fs.readdirSync(DATA_DIR);
   const userIds = new Set<string>();
 
@@ -61,48 +197,14 @@ export function getAllUsersData(): { userId: string; data: UserData }[] {
     }
   }
 
-  return Array.from(userIds).map(userId => {
-    // Миграция при необходимости
-    const gzPath = getUserFilePath(userId);
-    const jsonPath = path.join(DATA_DIR, `${userId}.json`);
+  const results: { userId: string; data: UserData }[] = [];
 
-    if (!fs.existsSync(gzPath) && fs.existsSync(jsonPath)) {
-      migrateUserJsonToGzip(userId);
-    }
-
-    try {
-      const data: UserData = readGzipJson(gzPath);
-      return { userId, data };
-    } catch (e) {
-      console.warn(`⚠ Ошибка чтения ${userId}.json.gz:`, e);
-      return { userId, data: { orders: [], messages: {} } };
-    }
-  });
-}
-
-
-export function loadUserData(userId: string): UserData {
-  const gzPath = getUserFilePath(userId);
-  const jsonPath = path.join(DATA_DIR, `${userId}.json`);
-
-  if (!fs.existsSync(gzPath) && fs.existsSync(jsonPath)) {
-    migrateUserJsonToGzip(userId);
+  for (const userId of userIds) {
+    const data = await loadUserData(userId); // автоматически под readLock
+    results.push({ userId, data });
   }
 
-  if (!fs.existsSync(gzPath)) return { orders: [], messages: {} };
-
-  try {
-    return readGzipJson(gzPath);
-  } catch (e) {
-    console.warn(`⚠ Не удалось загрузить ${userId}.json.gz:`, e);
-    return { orders: [], messages: {} };
-  }
-}
-
-
-export function saveUserData(userId: string, data: UserData): void {
-  const filePath = getUserFilePath(userId);
-  writeGzipJson(filePath, data);
+  return results;
 }
 
 // --- SUBSCRIPTIONS ---

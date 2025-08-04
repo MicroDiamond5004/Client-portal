@@ -118,6 +118,11 @@ export type ELMATicket = {
     __deletedAt: null | string | number | boolean;
     __directory: null | string | number | boolean;
     __updatedAt: string | null;
+    __updatedAtBooking?: string | null;
+    __updatedAtHotels?: string | null;
+    __updatedAtMap?: string | null;
+    __updatedAtTransfer?: string | null;
+    __updatedAtVip?: string | null;
     __updatedBy: string | null;
     bd_zakaza_1: string[] | null;
     data_vyleta: null | string | number | boolean;

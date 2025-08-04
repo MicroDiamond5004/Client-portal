@@ -107,7 +107,7 @@ export const fetchTickets = createAsyncThunk(
   const initialState: MessageState = {
     messages: {},
     prevMessages: {},
-    status: "idle",
+    status: "loading",
     unreadedChats: 0,
     mockMessages: []
   };
@@ -140,6 +140,7 @@ export const fetchTickets = createAsyncThunk(
           state.messages = action.payload.newMessages;
           state.chatData = action.payload.allChatData;
           state.unreadedChats = action.payload.unreadedChats;
+          state.status = "succeeded";
         })
         .addCase(logoutAll.fulfilled, (state: MessageState) => {
           state.messages = {};
@@ -149,7 +150,7 @@ export const fetchTickets = createAsyncThunk(
           state.selectedChat = null;
         })
         .addCase(fetchMessages.rejected, (state: MessageState) => {
-          state.status = "failed";
+          state.status = "succeeded";
         })
         .addCase(sendMessage.fulfilled, (state: MessageState, action: PayloadAction<ELMAChat>) => {
           state.messages.push(action.payload);

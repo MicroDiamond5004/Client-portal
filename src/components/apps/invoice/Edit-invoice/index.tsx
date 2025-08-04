@@ -183,7 +183,7 @@ const EditInvoicePage = () => {
         alignItems="center"
         mb={3}
       >
-        <Typography variant="h5"># {editedInvoice.id}</Typography>
+        <Typography variant="h5">Заказ №{editedInvoice.id}</Typography>
         <Box display="flex" gap={1}>
           {editing ? (
             <>

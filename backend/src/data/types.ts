@@ -20,6 +20,11 @@ export type ELMATicket = {
     tarif3: null | string | number | boolean;
     vazhno: string | null;
     zapros: string | null;
+    __updatedAtBooking?: string | null;
+    __updatedAtHotels?: string | null;
+    __updatedAtMap?: string | null;
+    __updatedAtTransfer?: string | null;
+    __updatedAtVip?: string | null;
     __debug: boolean | null;
     __index: number | null;
     __tasks: {

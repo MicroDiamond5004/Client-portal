@@ -1,11 +1,11 @@
 
-import { useContext, useEffect, useState } from 'react';
+import { createRef, RefObject, useContext, useEffect, useState } from 'react';
 import KanbanHeader from './KanbanHeader';
 import { KanbanDataContext } from 'src/context/kanbancontext/index';
 import CategoryTaskList from './CategoryTaskList';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import SimpleBar from 'simplebar-react';
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import ModalTicket from '../tickets/modal-ticket/modal-ticket';
 import { useSearchParams } from 'react-router';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
@@ -14,6 +14,8 @@ import getBiggestTicketNumber from '../tickets/get-big-ticket/get-big-ticket';
 import { useAppDispatch, useAppSelector } from 'src/store/hooks';
 import { updateTicket } from 'src/store/slices/ticketsSlice';
 import { selectTodoCategories } from 'src/store/selectors/ticketsSelectors.ts';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 type TaskManagerProps = {
   changeView: (isList: boolean) => void,
@@ -92,21 +94,83 @@ function TaskManager(props: TaskManagerProps) {
     // moveTask(draggableId, sourceCategoryId, destinationCategoryId, sourceIndex, destinationIndex);
   };
 
+  const scrollRef = useState<RefObject<HTMLDivElement>>(() => createRef())[0];
+
+  const scrollContainer = (direction: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const scrollAmount = 300; // px
+    scrollRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
+
   return (
     <>
-      <KanbanHeader addTask={(isCurrentNew) => {
-        setIsNew(isCurrentNew);
-        setSearchParams({type: 'kanban', add: 'new'});
-      }} changeView={(isList) => changeView(isList)}/>
+      <KanbanHeader
+        addTask={(isCurrentNew) => {
+          setIsNew(isCurrentNew);
+          setSearchParams({ type: 'kanban', add: 'new' });
+        }}
+        changeView={(isList) => changeView(isList)}
+      />
+
       <SimpleBar>
-        <Box>
-          <Box display="flex" gap={2}>
+        <Box position="relative">
+          {/* Arrow Buttons on top */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 1,
+              position: 'sticky',
+              top: 0,
+              backgroundColor: '#fff',
+              zIndex: 20,
+              px: 1,
+            }}
+          >
+            <IconButton
+              onClick={() => scrollContainer('left')}
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                backgroundColor: '#f5f5f5',
+                boxShadow: 1,
+              }}
+            >
+              <ArrowBackIosNewIcon fontSize="small" />
+            </IconButton>
+
+            <IconButton
+              onClick={() => scrollContainer('right')}
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                backgroundColor: '#f5f5f5',
+                boxShadow: 1,
+              }}
+            >
+              <ArrowForwardIosIcon fontSize="small" />
+            </IconButton>
+          </Box>
+
+          {/* Scrollable Categories */}
+          <Box
+            ref={scrollRef}
+            sx={{
+              display: 'flex',
+              gap: 2,
+              overflowX: 'auto',
+              scrollBehavior: 'smooth',
+              pb: 2,
+              mt: 3
+            }}
+          >
             {openTicket && <ModalTicket show={showModal} ticket={openTicket} close={handleCloseModal}/>}
             {todoCategories.map((category) => (
               <Box key={category.id}>
-                  <div>
-                    <CategoryTaskList id={category.id} openTicketModal={handleShowModal} />
-                  </div>
+                <CategoryTaskList id={category.id} openTicketModal={handleShowModal} />
               </Box>
             ))}
           </Box>

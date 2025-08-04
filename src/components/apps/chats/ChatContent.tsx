@@ -55,7 +55,12 @@ import { ELMATicket } from 'src/mocks/tickets/ticket.type.ts';
 import { selectOrder, selectPassports } from 'src/store/selectors/ticketsSelectors.ts';
 import { fetchMessages } from 'src/store/middleware/thunks/messageThunks.ts';
 import ForumIcon from "@mui/icons-material/Forum";
-import { selectChatData, selectChatSearch, selectSelectedchat } from 'src/store/selectors/messagesSelectors.ts';
+import {
+  selectChatData,
+  selectChatSearch,
+  selectMessageStatus,
+  selectSelectedchat,
+} from 'src/store/selectors/messagesSelectors.ts';
 import { updateChatSearch, updateSelectedChat } from 'src/store/slices/messageSlice.ts';
 import { selectPath, selectPrevPath } from 'src/store/selectors/appSelector.ts';
 
@@ -79,6 +84,8 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
   const order = useAppSelector(selectOrder);
   const passports = useAppSelector(selectPassports);
 
+  const messageStatus = useAppSelector(selectMessageStatus);
+
   const dispatch = useAppDispatch();
 
   const chatData = useAppSelector(selectChatData)
@@ -93,7 +100,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
   const filteredChats = chatData?.filter((chat: any) => {
     const nameMatch = chat.name?.toLowerCase().includes(chatSearch?.toLowerCase());
     const orderMatch = String(chat.name).includes(chatSearch);
-    const fioMatch = order.result.result.find((task: ELMATicket) => task.__id === chat.taskId)?.fio2.some((fio: string) => passports[fio]?.[0]?.toLocaleLowerCase()?.includes(chatSearch.toLocaleLowerCase()));
+    const fioMatch = order.result.result.find((task: ELMATicket) => task.__id === chat.taskId)?.fio2?.some((fio: string) => passports[fio]?.[0]?.toLocaleLowerCase()?.includes(chatSearch.toLocaleLowerCase()));
     return nameMatch || orderMatch || fioMatch;
   }).sort((a, b) => Number(b.name) - Number(a.name));
 
@@ -332,7 +339,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
 
 
   useEffect(() => {
-    if (isAtBottom && (!isEqual(prevChat.current, selectedChat))) {
+    if (isAtBottom && (!isEqual(prevChat.current, selectedChat) && !mobileChatsMenuOpen)) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       prevChat.current = selectedChat;
     }
@@ -1284,7 +1291,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
     ) : null;
   }
 
-  return selectedChat && (Object.values(managers)?.length ?? 0) > 0 ? (
+  return selectedChat && messageStatus === 'succeeded' ? (
     <Box overflow={'hidden'}>
       <Box sx={{ display: 'flex', flexWrap: 'wrap' }} overflow={'hidden'} >
         <Box width="100%" overflow={'hidden'}>
@@ -1366,7 +1373,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                     }
                     secondary={selectedChat.status}
                   />}
-                  {!lgUp && open && (
+                  {!lgUp && !mobileChatsMenuOpen && open && (
                     <Fab
                       color="primary"
                       size="small"
@@ -1457,7 +1464,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                               ))
                             ) : (
                               <Box m={2}>
-                                {chatData.length === 0 ?
+                                {messageStatus !== 'succeeded' ?
                                   <Alert severity="info" variant="filled" sx={{ color: 'white' }}>
                                     Сообщения загружаются...
                                   </Alert> :<Alert severity="warning" variant="filled" sx={{ color: 'white' }}>
@@ -1473,7 +1480,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                   ) : (
                     // 👇 Отображение сообщений
                     <>
-                      {Object.keys(managers)?.length > 0 ? (
+                      {Object.keys(managers)?.length > 0 && selectedChat.messages.length > 0 ? (
                         (open
                             ? sortedMessages
                             : sortedMessages.slice(

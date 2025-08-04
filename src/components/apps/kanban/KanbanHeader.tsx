@@ -35,7 +35,6 @@ type KandanHeaderProps = {
 
 function KanbanHeader(props: KandanHeaderProps) {
   const {changeView, addTask} = props;
-  const { setError } = useContext(KanbanDataContext);
   const [show, setShow] = useState(false);
   const [listName, setListName] = useState('');
 

@@ -7,3 +7,4 @@ export const selectMockMessages = (state: RootState) => state.messages.unreadedC
 export const selectChatData = (state: RootState) => state.messages.chatData;
 export const selectSelectedchat = (state: RootState) => state.messages.selectedChat;
 export const selectChatSearch = (state: RootState) => state.messages.chatSearch;
+export const selectMessageStatus = (state: RootState) => state.messages.status;

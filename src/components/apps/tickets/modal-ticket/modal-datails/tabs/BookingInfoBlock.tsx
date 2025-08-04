@@ -1,5 +1,5 @@
 import { Paper, Typography } from '@mui/material';
-import React from 'react';
+import React, { Fragment } from 'react';
 import formatToRussianDate from 'src/help-functions/format-to-date';
 import { useMediaQuery, useTheme } from '@mui/system';
 import { AllStatus, getStatus } from 'src/components/apps/tickets/TicketListing.tsx';
@@ -72,6 +72,7 @@ export const BookingInfoBlock: React.FC<BookingInfoBlockProps> = ({
                                                                     ticket,
                                                                     passports,
                                                                   }) => {
+
   const fields = fieldMap[bookingNumber];
   if (!fields) return null;
 
@@ -152,23 +153,13 @@ export const BookingInfoBlock: React.FC<BookingInfoBlockProps> = ({
         <Typography mb={1}>
           <strong>Маршрут и стоимость:</strong>
           {routeInfo
-            .split('✈️')
-            .filter(Boolean)
-            .map((part: string, idx: number) => (
-              <React.Fragment key={idx}>
+            ? <> <br />{routeInfo.split('\n').map((line: string, i: number) => (
+              <Fragment key={i}>
+                {line}
                 <br />
-                ✈️{' '}
-                {part
-                  .trim()
-                  .split('\n')
-                  .map((line, i) => (
-                    <React.Fragment key={i}>
-                      {line}
-                      {i < part.split('\n').length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
-              </React.Fragment>
-            ))}
+              </Fragment>
+            ))}</>
+            : null}
         </Typography>
       )}
 

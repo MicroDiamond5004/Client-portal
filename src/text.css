@@ -37,3 +37,8 @@ textarea,
 select {
     font-size: 16px !important;
 }
+
+/* Сделать дни из других месяцев более бледными */
+.rbc-off-range {
+    color: rgba(0, 0, 0, 0.2) !important; /* Можно изменить значение прозрачности по желанию */
+}

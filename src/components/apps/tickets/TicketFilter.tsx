@@ -88,7 +88,7 @@ const TicketFilter = () => {
           <BoxStyled border={filter === item.filter ? '2px solid #5d87ff' : ''} onClick={() => {
             setFilter(item.filter)
             // setSearchParams({...searchParams, filter: item.filter})
-          }} sx={item.sx}>
+          }} sx={{...item.sx, height: isMobile ? '80px' : '127px' }}>
             <Typography variant="h3">{item.value}</Typography>
             <Typography variant="h6">{item.label}</Typography>
           </BoxStyled>

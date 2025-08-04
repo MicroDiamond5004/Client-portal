@@ -1,6 +1,6 @@
-import { Paper, Typography } from '@mui/material';
+import { Chip, Paper, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import formatToRussianDate from 'src/help-functions/format-to-date';
 import api from 'src/store/api';
 import { FileListBlock } from '../fileList/FileListBlock';
@@ -60,9 +60,25 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
         elevation={3}
         sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}
       >
-        <Typography variant="h5" mb={2}>
-          Отель {index}
-        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: {
+              xs: 'column', // для мобильных (xs и меньше)
+              sm: 'row',    // от sm и выше — в строку
+            },
+            justifyContent: 'space-between',
+            gap: 0,
+          }}
+        >
+          <Chip
+            size="small"
+            color="success"
+            variant="outlined"
+            label={formatToRussianDate(ticket?.__updatedAtHotels, 'd MMMM yyyy / HH:mm')}
+            sx={{ mt: 0.5, mb: 2 }}
+          />
+        </Box>
         {hotel && <Typography mb={1}><strong>Название отеля:</strong> {hotel}</Typography>}
         {ticket.kolichestvo_nomerov && index === 1 && (
           <Typography mb={1}><strong>Количество номеров:</strong> {ticket.kolichestvo_nomerov}</Typography>
@@ -93,7 +109,13 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
       {hotelItems}
       {(hasExtraData) && (
         <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
-          {ticket.kommentarii_k_predlozheniyu && <Typography mb={1}><strong>Комментарий:</strong> {ticket.kommentarii_k_predlozheniyu}</Typography>}
+          {ticket.kommentarii_k_predlozheniyu && <Typography mb={1}><strong>Комментарий:</strong> {ticket.kommentarii_k_predlozheniyu ? ticket.kommentarii_k_predlozheniyu.split('\n').map((line: string, i: number) => (
+              <Fragment key={i}>
+                {line}
+                <br />
+              </Fragment>
+            ))
+            : null}</Typography>}
           {ticket.otmena_bez_shtrafa && <Typography mb={1}><strong>Отмена без штрафа до:</strong> {formatToRussianDate(ticket.otmena_bez_shtrafa)}</Typography>}
           {ticket.otmena_so_shtrafom && <Typography mb={1}><strong>Отмена со штрафом с:</strong> {formatToRussianDate(ticket.otmena_so_shtrafom)}</Typography>}
           {ticket.nevozvratnyi && <Typography mb={1}><strong>Невозвратный с:</strong> {formatToRussianDate(ticket.nevozvratnyi)}</Typography>}

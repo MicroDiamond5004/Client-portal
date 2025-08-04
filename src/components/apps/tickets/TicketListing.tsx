@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import './ticket.css';
 
 import { format } from 'date-fns';
@@ -19,9 +19,9 @@ import {
   TableContainer,
   Button,
   Popover,
-  Grid,
+  Grid, InputAdornment,
 } from '@mui/material';
-import { IconList, IconPlus } from '@tabler/icons-react';
+import { IconList, IconPlus, IconSearch, IconX } from '@tabler/icons-react';
 import { TicketContext } from 'src/context/TicketContext';
 import { styled, useMediaQuery } from '@mui/system';
 import ModalTicket from './modal-ticket/modal-ticket';
@@ -268,7 +268,7 @@ const TicketListing = (props: TicketListingProps) => {
   };
 
   useEffect(() => {
-    if (startDate) {
+   if (startDate && (startDate !== endDate)) {
       setSelectionRange({
         startDate: startDate ? startDate.toDate() : new Date(),
         endDate: endDate ? endDate.toDate() : new Date(),
@@ -304,10 +304,17 @@ const TicketListing = (props: TicketListingProps) => {
     setSelectionRange(ranges.selection);
   };
 
-  const formatted =
-    (selectionRange.startDate !== selectionRange.endDate)
-      ? `${format(selectionRange.startDate, 'dd.MM.yyyy')} - ${format(selectionRange.endDate, 'dd.MM.yyyy')}`
-      : `${format(selectionRange.startDate, 'dd.MM.yyyy')}`;
+  const formatted = useMemo(() => {
+    if (!startDate || !endDate) return '';
+
+    const format = 'D MMMM YYYY';
+    const formattedStart = startDate.format(format);
+    const formattedEnd = endDate.format(format);
+
+    return formattedStart === formattedEnd
+      ? formattedStart
+      : `${formattedStart} – ${formattedEnd}`;
+  }, [startDate, endDate]);
 
   // при нажатии кнопки "Применить"
   const applyDates = () => {
@@ -484,15 +491,21 @@ const TicketListing = (props: TicketListingProps) => {
         return tickets.filter((ticket: any) => {
           if (ticket.__deletedAt) return false;
 
-          const matchesSearch =
-            ticket.__name?.toLowerCase().includes(ticketSearch.toLowerCase()) ||
-            ticket?.fio2?.some((fio: string) =>
-              passports[fio]?.[0]?.toLowerCase()?.includes(ticketSearch.toLowerCase())
-            ) ||
-            ticket.otvet_klientu?.toLowerCase().split(/[\s\n]+/).join('').includes(ticketSearch.toLowerCase().split(/[\s\n]+/).join('')) ||
-            ticket.otvet_klientu1?.toLowerCase().split(/[\s\n]+/).join('').includes(ticketSearch.toLowerCase().split(/[\s\n]+/).join('')) ||
-            ticket.otvet_klientu3?.toLowerCase().split(/[\s\n]+/).join('').includes(ticketSearch.toLowerCase().split(/[\s\n]+/).join(''));
+          const search = ticketSearch.toLowerCase().replace(/\s+/g, '');
 
+          const matchesSearch =
+            (ticket.__name?.toLowerCase().includes(search)) ||
+
+            (ticket?.fio2?.some((fio: string) => {
+              const fioValue = passports?.[fio]?.[0];
+              return fioValue?.toLowerCase()?.includes(search);
+            })) ||
+
+            [ticket.otvet_klientu, ticket.otvet_klientu1, ticket.otvet_klientu3]
+              .filter(Boolean)
+              .some((text) =>
+                text.toLowerCase().replace(/\s+/g, '').includes(search)
+              );
 
           const ticketDates = [
             ticket.__createdAt,
@@ -603,11 +616,35 @@ const TicketListing = (props: TicketListingProps) => {
       spacing={2}
       alignItems="flex-start"
     >
-      <Box sx={{ display: 'flex', flexWrap: isMobile ? 'wrap' : 'nowrap', gap: 5 }}>
+      <Box sx={{ display: 'flex', flexWrap: isMobile ? 'wrap' : 'nowrap', gap: 3 }}>
         <Box sx={{ minWidth: { xs: '100%', sm: '50%' }, flexGrow: 1 }}>
           <TextField
             size="small"
             label="Поиск"
+            type="text"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {ticketSearch ? (
+                    <IconX
+                      size={16}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => searchTickets('')}
+                    />
+                  ) : (
+                    <IconSearch size={16} />
+                  )}
+                </InputAdornment>
+              ),
+              sx: {
+                height: 40,
+                '& input': {
+                  height: '40px',
+                  boxSizing: 'border-box',
+                  padding: '0 14px',
+                },
+              },
+            }}
             fullWidth
             onChange={(e) => searchTickets(e.target.value)}
             value={ticketSearch}
@@ -615,41 +652,53 @@ const TicketListing = (props: TicketListingProps) => {
         </Box>
 
         <Box sx={{ minWidth: { xs: '100%', sm: '25%' }, flexGrow: 1 }}>
-            <TextField
-              label="Выберите дату(ы)"
-              value={formatted}
-              onClick={handleClick}
-              fullWidth
-            />
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      >
-        <Box sx={{ p: 2 }}>
-          <DateRange
-            ranges={[selectionRange]}
-            onChange={handleSelect}
-            moveRangeOnFirstSelection={false}
-            locale={ru}
-            showDateDisplay={false}
-            showPreview={false}
+          <TextField
+            label="Выберите дату(ы)"
+            value={formatted}
+            size="small"
+            onClick={handleClick}
+            fullWidth
+            type="text"
+            inputProps={{ readOnly: true }}
+            InputProps={{
+              sx: {
+                height: 40,
+                '& input': {
+                  height: '40px',
+                  boxSizing: 'border-box',
+                  padding: '0 14px',
+                },
+              },
+            }}
           />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-            <Button sx={{mr: 2}} color="warning" onClick={resetDates}>
-              Сбросить
-            </Button>
-            <Button variant="contained" onClick={applyDates}>
-              Применить
-            </Button>
-          </Box>
+          <Popover
+            open={Boolean(anchorEl)}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          >
+            <Box sx={{ p: 2 }}>
+              <DateRange
+                ranges={[selectionRange]}
+                onChange={handleSelect}
+                moveRangeOnFirstSelection={false}
+                locale={ru}
+                showDateDisplay={false}
+                showPreview={false}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                <Button sx={{ mr: 2 }} color="warning" onClick={resetDates}>
+                  Сбросить
+                </Button>
+                <Button variant="contained" onClick={applyDates}>
+                  Применить
+                </Button>
+              </Box>
+            </Box>
+          </Popover>
         </Box>
-      </Popover>
-        </Box>
-
-
       </Box>
+
     </Stack>
   </Grid>
 
@@ -837,7 +886,7 @@ const TicketListing = (props: TicketListingProps) => {
                 updateChange();
               }
             };
-            
+
 
             const info = ticket.otvet_klientu1
               ? `${ticket.otvet_klientu1}`

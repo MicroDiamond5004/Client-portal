@@ -59,7 +59,7 @@ export default function PushManagerFloatingButton() {
       dispatch(setSubscription(JSON.stringify(sub)));
       if (sub.endpoint && clientId && email) {
         try {
-          await api.post('/api/change-subscription', {
+          await api.post('/change-subscription', {
             endpoint: sub.endpoint,
             newUserId: clientId,
             newEmail: email,

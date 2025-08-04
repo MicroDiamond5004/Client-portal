@@ -6,11 +6,13 @@ import { v4 as uuidv4 } from 'uuid';
 const router = express.Router();
 
 router.post('/generate-preview', async (req: any, res: any) => {
-  const { name, url, type } = req.body;
+  const { name: rawName, url, type } = req.body;
 
-  if (!name || !url) {
+  if (!rawName || !url) {
     return res.status(400).json({ error: 'Некорректные данные файла' });
   }
+
+  const name = decodeURIComponent(rawName);
 
   const id = uuidv4();
   const html = `
@@ -103,12 +105,12 @@ router.post('/generate-preview', async (req: any, res: any) => {
 `;
 
 
-  const filePath = path.join(__dirname, '..', '..', '..', 'public', 'previews', `${name.replaceAll(' ', '_').split('.')[0]}.html`);
+  const filePath = path.join(__dirname, '..', '..', '..', 'public', 'previews', `${id}.html`);
   fs.writeFileSync(filePath, html);
 
   return res.json({
     id,
-    previewUrl: `${req.protocol}://${req.get('host')}/previews/${name.replaceAll(' ', '_').split('.')[0]}.html`
+    previewUrl: `${req.protocol}://${req.get('host')}/previews/${id}.html`
   });
 });
 

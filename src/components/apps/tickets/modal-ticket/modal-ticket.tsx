@@ -1,4 +1,19 @@
-import { Avatar, Button, Dialog, DialogContent, DialogTitle, Divider, Grid, IconButton, ListItemAvatar, TextareaAutosize, TextField, Tooltip, Typography } from "@mui/material"
+import {
+  Avatar,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  ListItemAvatar,
+  TextareaAutosize,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { Box, styled, useMediaQuery, useTheme } from "@mui/system"
 import { ChangeEvent, useContext, useEffect, useRef, useState } from 'react';
 import { AllStatus, getStatus } from "../TicketListing"
@@ -34,6 +49,9 @@ const ModalTicket = (props: ModalTicketProps) => {
     }
   };
 
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0); // 0–100
+
   const handleClearImages = () => {
     setImages([]);
   };
@@ -41,6 +59,8 @@ const ModalTicket = (props: ModalTicketProps) => {
     const dispatch = useAppDispatch();
 
     const {show, close, ticket} = props;
+
+
     const textRef = useRef<HTMLTextAreaElement>(null);
 
     const currentChats: any  = useAppSelector(selectMessages);
@@ -172,7 +192,7 @@ const ModalTicket = (props: ModalTicketProps) => {
         <>{/* Крестик вне модального окна */}
           <Dialog
       open={show}
-      onClose={() => close(false)}
+      onClose={() => uploading ? null : close(false)}
       fullWidth
       PaperProps={{
         sx: {
@@ -190,7 +210,8 @@ const ModalTicket = (props: ModalTicketProps) => {
       {/* Крестик внутри Dialog, но поверх содержимого */}
       <IconButton
         aria-label="close"
-        onClick={() => close(false)}
+        disabled={uploading}
+        onClick={() => uploading ? null : close(false)}
         sx={{
           position: 'absolute',
           top: -20,
@@ -210,11 +231,37 @@ const ModalTicket = (props: ModalTicketProps) => {
       position: 'relative',
       px: isMobile ? 0 : 3,
       py: isMobile ? 2 : 2,
+      borderRadius: 2,
+      height: uploading ? '150px' : 'inherit',
     }}
   >
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        {ticket?.__id ? (
+        {(uploading) ? (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
+              zIndex: 2000,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 2,
+            }}
+          >
+            <CircularProgress size={48} thickness={4} />
+            <Typography variant="h6" mt={3} textAlign="center">
+              Пожалуйста, подождите...
+            </Typography>
+            <Typography variant="body2" mt={1} textAlign="center" color="text.secondary">
+              Загружаем файлы и сохраняем заказ
+            </Typography>
+          </Box>) : ticket?.__id ? (
           <Box>
             <ModalDetails ticket={ticket as any} onClose={() => close(false)} />
           </Box>
@@ -223,7 +270,7 @@ const ModalTicket = (props: ModalTicketProps) => {
             {/* Запрос */}
             <Box>
               <Typography mb={1}>
-                Текст запроса: <b style={{ color: 'red' }}>*</b>
+                Введите ваш запрос:
               </Typography>
               <TextField
                 onChange={handlerClose}
@@ -232,7 +279,7 @@ const ModalTicket = (props: ModalTicketProps) => {
                 inputRef={textRef}
                 fullWidth
                 minRows={3}
-                maxRows={10}
+                maxRows={20}
                 sx={{ '& textarea': { padding: 0 } }}
               />
             </Box>
@@ -306,16 +353,26 @@ const ModalTicket = (props: ModalTicketProps) => {
                   width: '100%',
                   '&:disabled': { background: '#c5c5c5 !important' },
                 }}
-                onClick={() => {
-                  dispatch(
-                    fetchAddNewOrder({
-                      zapros: textRef?.current?.value?.trim() ?? '',
-                      imgs: images,
-                      kontakt,
-                    })
-                  );
-                  handlerOnClickAdd();
-                  sendPushFromClient('На рассмотрении', `Создан новый заказ`);
+                onClick={async () => {
+                  setUploading(true);
+                  setUploadProgress(0);
+
+                  try {
+                    await dispatch(
+                      fetchAddNewOrder({
+                        zapros: textRef?.current?.value?.trim() ?? '',
+                        imgs: images,
+                        kontakt,
+                      })
+                    ).unwrap(); // unwrap, если используешь RTK
+
+                    handlerOnClickAdd();
+                    sendPushFromClient('На рассмотрении', `Создан новый заказ`);
+                  } catch (e) {
+                    console.error('Ошибка при отправке заказа:', e);
+                  } finally {
+                    setUploading(false);
+                  }
                 }}
               >
                 <IconSend size="18" color="white" />

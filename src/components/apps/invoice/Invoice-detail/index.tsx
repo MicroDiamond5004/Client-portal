@@ -74,7 +74,7 @@ const InvoiceDetail = () => {
           },
         }}
       >
-        <Typography variant="h5"># {selectedInvoice.id}</Typography>
+        <Typography variant="h5">Заказ №{selectedInvoice.id}</Typography>
         <Box mt={1}>
           <Chip size="small" color="secondary" variant="outlined" label={orderDate}></Chip>
         </Box>

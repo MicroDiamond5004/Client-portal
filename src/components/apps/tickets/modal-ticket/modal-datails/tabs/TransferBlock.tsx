@@ -1,9 +1,11 @@
-import { Paper, Typography } from '@mui/material';
+import { Chip, Paper, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import api from 'src/store/api';
 import { FileListBlock } from '../fileList/FileListBlock';
 import { formatMoney } from 'src/utils/formatMoney';
+import formatToRussianDate from 'src/help-functions/format-to-date.ts';
+import DOMPurify from 'dompurify';
 
 type TransferBlockProps = {
   ticket: any;
@@ -65,7 +67,25 @@ export const TransferBlock: React.FC<TransferBlockProps> = ({ ticket }) => {
   return (
     <Box>
       <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
-        <Typography variant="h5" mb={2}>Трансфер</Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: {
+              xs: 'column', // для мобильных (xs и меньше)
+              sm: 'row',    // от sm и выше — в строку
+            },
+            justifyContent: 'space-between',
+            gap: 0,
+          }}
+        >
+          <Chip
+            size="small"
+            color="success"
+            variant="outlined"
+            label={formatToRussianDate(ticket?.__updatedAtTransfer, 'd MMMM yyyy / HH:mm')}
+            sx={{ mt: 0.5, mb: 2 }}
+          />
+        </Box>
 
         {opisanie_transfera && (
           <Typography mb={1}><strong>Описание:</strong> {opisanie_transfera}</Typography>
@@ -74,7 +94,14 @@ export const TransferBlock: React.FC<TransferBlockProps> = ({ ticket }) => {
           <Typography mb={1}><strong>Информация о пассажире:</strong> {informaciya_o_passazhire}</Typography>
         )}
         {otvet_klientu_po_transferu && (
-          <Typography mb={1}><strong>Информацию по трансферу:</strong> {otvet_klientu_po_transferu}</Typography>
+          <Typography mb={1}><strong>Информация по трансферу:</strong>{otvet_klientu_po_transferu
+            ? otvet_klientu_po_transferu.split('\n').map((line: string, i: number) => (
+              <Fragment key={i}>
+                {line}
+                <br />
+              </Fragment>
+            ))
+            : null}</Typography>
         )}
         {stoimost_dlya_klienta_za_oformlenie_transfera_1 && (
           <Typography mb={1}>

@@ -189,7 +189,10 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
   const ticket = AllTickets?.find((ticket) => ticket.nomer_zakaza === String(chat?.id));
 
   useEffect(() => {
-    if (!ticket?.prilozhenie_k_zaprosu) return;
+    if (!ticket?.prilozhenie_k_zaprosu) {
+      setZaprosFiles([]);
+      return;
+    }
     const fetchFiles = async () => {
       try {
         const response = await api.post('/get-files', {
@@ -274,7 +277,10 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
 
 
   useEffect(() => {
-    if (!ticket?.marshrutnaya_kvitanciya) return;
+    if (!ticket?.marshrutnaya_kvitanciya) {
+      setFiles([]);
+      return;
+    }
     const fetchFiles = async () => {
       try {
         const response = await api.post('/get-files', {
@@ -407,7 +413,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
             {ticket.zapros && (
               <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>{ticket.zapros}</Typography>
             )}
-            {zaprosFiles.map(file => {
+            {(ticket.prilozhenie_k_zaprosu?.length ?? 0) > 0 && zaprosFiles.map(file => {
               const filename = decodeURIComponent(file.filename);
               const ext = filename.split('.').pop()?.toLowerCase() || '';
               const isImage = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(ext);

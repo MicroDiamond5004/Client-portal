@@ -174,7 +174,7 @@ const CreateInvoice = () => {
           justifyContent="space-between"
           mb={3}
         >
-          <Typography variant="h5"># {formData.id}</Typography>
+          <Typography variant="h5">Заказ №{formData.id}</Typography>
           <Box display="flex" gap={1}>
             <Button
               variant="outlined"

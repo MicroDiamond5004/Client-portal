@@ -7,6 +7,7 @@ import { indexOf, isEqual } from 'lodash';
 import { selectSearchTerm } from 'src/store/selectors/ticketsSelectors.ts';
 import { TodoCategory } from 'src/types/apps/kanban.ts';
 import { AllStatus, getStatus } from 'src/components/apps/tickets/TicketListing.tsx';
+import sortAllTickets from 'src/components/apps/tickets/sort-tickets/sort-tickets.ts';
 
 interface TicketState {
   tickets: ELMATicket[];
@@ -70,17 +71,18 @@ const ticketsSlice = createSlice({
     updateAllTickets(state, action: PayloadAction<any>) {
       console.log('ОБНОВИЛ');
       state.prevTickets = [...state.tickets]; // сохранить копию до изменений
-      state.tickets = action.payload;
+      const AllTickets = sortAllTickets(action.payload);
+      state.tickets = AllTickets;
       state.fullOrder = {
         result: {
-          result: action.payload,
-          total: action.payload?.length,
+          result: AllTickets,
+          total: AllTickets?.length,
         },
         success: true,
         error: ''
       };
 
-      const todosData = action.payload;
+      const todosData = AllTickets;
 
       const categoriesTickets: any = {
         [AllStatus.NEW]: [],
@@ -130,10 +132,18 @@ const ticketsSlice = createSlice({
 
         if (!isEqual(action.payload.fetchedOrders.result.result, state.tickets)) {
           state.prevTickets = state.tickets;
-          state.fullOrder = action.payload.fetchedOrders;
-          state.tickets = action.payload.fetchedOrders.result.result
+          const AllTickets = action.payload.fetchedOrders.result.result;
+          state.fullOrder = {
+            result: {
+              result: AllTickets,
+              total: AllTickets?.length,
+            },
+            success: true,
+            error: ''
+          };
+          state.tickets = sortAllTickets(AllTickets);
 
-          const todosData = action.payload.fetchedOrders.result.result;
+          const todosData = AllTickets;
 
           const categoriesTickets: any = {
             [AllStatus.NEW]: [],

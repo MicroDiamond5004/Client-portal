@@ -104,7 +104,7 @@ const Profile = () => {
             </Typography>
           </Box>
         </Stack>
-        <Divider />
+        {/*<Divider />*/}
         {/* {dropdownData.profile.map((profile) => (
           <Box key={profile.title}>
             <Box sx={{ py: 2, px: 0 }} className="hover-text-primary">

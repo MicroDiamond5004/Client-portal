@@ -360,42 +360,76 @@ const ModalDetails = (props: ModalTicketProps) => {
 
   const visibleTabs = AllTabs.filter(Boolean);
 
+
   const renderTabContent = () => {
     if (tabIndex === 0) {
       return (
         <>
-          {aviabilety.some(Boolean) ? (
-            aviabilety
+          {aviabilety.some(Boolean) ? (<>
+              <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: {
+                      xs: 'column', // для мобильных (xs и меньше)
+                      sm: 'row',    // от sm и выше — в строку
+                    },
+                    justifyContent: 'space-between',
+                    gap: 0,
+                  }}
+                >
+                  {/* Тут ваши дочерние элементы */}
+                  <Chip
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                    label={formatToRussianDate(ticket?.__updatedAtBooking, 'd MMMM yyyy / HH:mm')}
+                    sx={{ mt: 0.5, mb: 2 }}
+                  />
+                </Box>
+              {aviabilety.map((el) => el)}
+              </Paper>
+            </>
           ) : (
             <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: {
+                    xs: 'column', // для мобильных (xs и меньше)
+                    sm: 'row',    // от sm и выше — в строку
+                  },
+                  justifyContent: 'space-between',
+                  gap: 0,
+                }}
+              >
+                {/* Тут ваши дочерние элементы */}
+                <Chip
+                  size="small"
+                  color="success"
+                  variant="outlined"
+                  label={formatToRussianDate(ticket?.__updatedAtBooking, 'd MMMM yyyy / HH:mm')}
+                  sx={{ mt: 0.5, mb: 2 }}
+                />
+              </Box>
               {ticket.otvet_klientu1 ? (
                 <Typography mb={1}>
                   <strong>Маршрут и стоимость:</strong>
-                  {ticket.otvet_klientu1
-                    .split('✈️')
-                    .filter(Boolean)
-                    .map((part: string, idx: number) => (
-                      <Fragment key={idx}>
-                        <br />
-                        ✈️{' '}
-                        {part
-                          .trim()
-                          .split('\n')
-                          .map((line, i) => (
-                            <Fragment key={i}>
-                              {line}
-                              {i < part.split('\n').length - 1 && <br />}
-                            </Fragment>
-                          ))}
-                      </Fragment>
-                    ))}
+                  {ticket.otvet_klientu1 ?
+                    ticket.otvet_klientu1.split('\n').map((line: string, i: number) => (
+                    <Fragment key={i}>
+                  {line}
+                  <br />
+                </Fragment>
+              ))
+                : null}
                 </Typography>
               ) : (
                 <Typography>Нет данных по авиабилетам</Typography>
               )}
             </Paper>
           )}
-          {files.length > 0 && (
+          {mfiles.length > 0 && (
             <FileListBlock
               title="Маршрутные квитанции"
               files={mfiles}
@@ -495,33 +529,49 @@ const ModalDetails = (props: ModalTicketProps) => {
               flexDirection: isMobile ? 'column' : 'row',
               alignItems: 'center',
               justifyContent: isMobile ? 'center' : 'space-between',
-              gap: isMobile ? 1.5 : 0,
+              gap: isMobile ? 0.5 : 0,
               textAlign: isMobile ? 'center' : 'left',
             }}
           >
+            {isMobile ? (<>
+              <Box>
+                <Logo />
+              </Box>
+              <Box mt={0}>
+                <Typography variant="h6" fontSize={isMobile ? '1.1rem' : '1.25rem'}>
+                  Заказ №{ticket.nomer_zakaza}
+                </Typography>
+                <Chip
+                  size="small"
+                  color="secondary"
+                  variant="outlined"
+                  label={formatToRussianDate(ticket.__createdAt, 'd MMMM yyyy / HH:mm')}
+                  sx={{ mt: 1 }} />
+              </Box></>) : (<>
             <Box>
               <Typography variant="h6" fontSize={isMobile ? '1.1rem' : '1.25rem'}>
-                # {ticket.nomer_zakaza}
+                Заказ №{ticket.nomer_zakaza}
               </Typography>
               <Chip
                 size="small"
                 color="secondary"
                 variant="outlined"
                 label={formatToRussianDate(ticket.__createdAt, 'd MMMM yyyy / HH:mm')}
-                sx={{ mt: 0.5 }}
+                sx={{ mt: 1.5 }}
               />
             </Box>
 
             <Box mt={isMobile ? 1 : 0}>
               <Logo />
             </Box>
+            </>)}
 
             <Chip
               size="small"
               sx={{
                 color: colorStatus,
                 backgroundColor: backgroundStatus,
-                mt: isMobile ? 1 : 0,
+                mt: isMobile ? 2 : 0,
               }}
               label={status}
             />
@@ -529,7 +579,7 @@ const ModalDetails = (props: ModalTicketProps) => {
         </AppBar>
 
 
-        <Container maxWidth={"100%"} sx={{ mt: 2 }}>
+        <Container maxWidth={"100%"} sx={{ mt: isMobile ? 1.5 : 2 }}>
           <Grid container spacing={3}>
             {/* Left Column */}
             <Grid item xs={12} sm={8}>
@@ -577,13 +627,6 @@ const ModalDetails = (props: ModalTicketProps) => {
                 {/* Tabs */}
                 <Grid item xs={12} sm={8} sx={{ mt: { xs: 1, sm: 0 } }}>
                   <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Chip
-                      size="small"
-                      color="success"
-                      variant="outlined"
-                      label={formatToRussianDate(ticket.__updatedAt, 'd MMMM yyyy / HH:mm')}
-                      sx={{ mt: 0.5 }}
-                    />
                     <Tabs
                       value={tabIndex}
                       onChange={handleTabChange}
@@ -609,7 +652,7 @@ const ModalDetails = (props: ModalTicketProps) => {
                   {!isMobile && <MiniChat selectedChat={selectedChat} />}
                   <Box display="flex" flexDirection="row" justifyContent={'space-around'} textAlign="center" gap={1} mt={2}>
                     <Button sx={{width: '200px'}} variant="contained" color="secondary" state={{ item: ticket.nomer_zakaza }} component={Link} to={`/apps/chats?item=${ticket.nomer_zakaza}`}>Перейти в чат</Button>
-                    <Button sx={{width: '200px'}} variant="contained" color="primary" onClick={onClose}>Вернуться к заказам</Button>
+                    <Button sx={{width: '200px'}} variant="contained" color="primary" onClick={onClose}>Перейти к заказам</Button>
                   </Box>
                 </Box>
               )}

@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import rateLimit from "express-rate-limit";
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { isEqual, result } from 'lodash';
+import { get, isEqual, result } from 'lodash';
 import previewRouter from './router/routes/previewRoute';
 import htmlRouter from './router/routes/htmlRoute';
 import { initWebSocket, sendToUser } from './websocket';
@@ -37,6 +37,18 @@ const AUTH_DATA_PATH = "./src/data/auth/authData.json";
 function readAuthData() {
   const data = fs.readFileSync(AUTH_DATA_PATH, "utf-8");
   return JSON.parse(data);
+}
+
+function sortAllTickets(tickets: ELMATicket[]): ELMATicket[] {
+  return [...tickets].sort((a, b) => {
+    // Сначала те, у кого isChanged === true
+    if (a.isChanged !== b.isChanged) {
+      return a.isChanged ? -1 : 1;
+    }
+
+    // Затем сортировка по убыванию nomer_zakaza (по номеру заказа)
+    return Number(b?.nomer_zakaza || '0') - Number(a?.nomer_zakaza || '0');
+  });
 }
 
 const auth_login = process.env.API_USER;
@@ -364,7 +376,7 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
   const email = req.email;
   const {type, id} = req.body;
 
-  const localData = loadUserData(clientId);
+  const localData = await loadUserData(clientId);
 
   let currentOrders = localData.orders;
   let currentMessages = localData.messages;
@@ -379,11 +391,15 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
       console.log('[DEBUG] isChanged до:', currentOrders[changeOrder].isChanged);
       currentOrders[changeOrder].isChanged = false;
       console.log('[DEBUG] isChanged после:', currentOrders[changeOrder].isChanged);
-      saveUserData(clientId, newData);
+      await saveUserData(clientId, newData);
       sendToUser(email, {type: 'orders', orders: currentOrders});
     }
   } else if (type === 'message') {
     const orderNumber = currentOrders.find((el) => el.__id === id)?.nomer_zakaza;
+    currentOrders.forEach((el) => {
+      console.log(el.nomer_zakaza)
+    },);
+    console.log(clientId,currentOrders?.length, currentOrders?.filter(el => el.nomer_zakaza).length);
     let found = false;
 
     if (!orderNumber) {
@@ -404,7 +420,7 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
     }
 
     const newData = { orders: currentOrders, messages: currentMessages };
-    saveUserData(clientId, newData);
+    await saveUserData(clientId, newData);
 
     sendToUser(email, {type: 'messages', messages: currentMessages});
   } else {
@@ -600,7 +616,7 @@ app.post("/api/addComment/:messageId", authenticateToken, async (req: any, res: 
   const result = response.data;
 
   if (result) {
-    const userData = loadUserData(clientId);
+    const userData = await loadUserData(clientId);
 
     const [orderNumber, messages] = Object.entries(userData?.messages ?? {}).find(
       ([_, msgs]) => msgs.some((msg) => msg.__id === messageId)
@@ -631,7 +647,7 @@ app.post("/api/addComment/:messageId", authenticateToken, async (req: any, res: 
       sendToUser(email, {type: 'message', messages: updatedUserData.messages});
 
       // // // // console.log('✅ Обновлённый userData:', updatedUserData);
-      saveUserData(clientId, updatedUserData);
+      await saveUserData(clientId, updatedUserData);
     }
   }
 
@@ -875,6 +891,9 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+const CHUNK_SIZE = 5242880;
+
+
 const uploadFilesAndGetMetadata = async (
   files: Express.Multer.File[],
   token: string
@@ -891,20 +910,83 @@ const uploadFilesAndGetMetadata = async (
   );
 
   const targetDir = listData?.result?.result?.[0];
-  if (!targetDir) {
-    throw new Error('Нет доступных директорий для загрузки');
-  }
+  if (!targetDir) throw new Error('Нет доступных директорий для загрузки');
 
   const directoryId = targetDir.__id;
 
   const uploadedFileMetadata = await Promise.all(
-    files.map(async (file) => {
-      const hash = uuidv4();
-
+    files.map(async (file, idx) => {
+      console.log(`\n🆔 [#${idx + 1}] Файл: ${file.originalname}, размер: ${file.buffer.length} байт`);
       if (file.buffer.length !== file.size) {
+        console.error(`❌ Неверный размер: buffer.length=${file.buffer.length}, size=${file.size}`);
         throw new Error(`Неверный размер файла ${file.originalname}`);
       }
 
+      const hash = uuidv4();
+      let offset = 0;
+      let lastRes: any = null;
+
+      if (file.buffer.length > CHUNK_SIZE) {
+        console.log(`🚧 Chunked upload: total=${file.buffer.length}`);
+        while (offset < file.buffer.length) {
+          const total = file.buffer.length;
+          const start = offset;
+          const endExclusive = Math.min(offset + CHUNK_SIZE, total);
+          const chunk = file.buffer.slice(start, endExclusive);
+          const endInclusive = endExclusive;
+
+          console.log(`🔹 Чанк: bytes ${start}-${endInclusive} (payload=${chunk.length})`);
+
+          const form = new FormData();
+          form.append('file', chunk, {
+            filename: file.originalname,
+            contentType: file.mimetype,
+            knownLength: chunk.length,
+          });
+
+          const formLength = await new Promise<number>((res, rej) =>
+            form.getLength((e, l) => (e ? rej(e) : res(l)))
+          );
+
+          const headers = {
+            ...form.getHeaders(),
+            Authorization: token,
+            'Content-Length': formLength,
+            'Content-Range': `bytes ${start}-${endInclusive}/${total}`,
+          };
+
+          try {
+            lastRes = await axios.post(
+              `https://portal.dev.lead.aero/pub/v1/disk/directory/${directoryId}/upload`,
+              form,
+              {
+                params: { hash },
+                headers,
+                maxBodyLength: Infinity,
+                maxContentLength: Infinity,
+              }
+            );
+            console.log(`    ✅ chunk status=${lastRes.status}`);
+          } catch (err: any) {
+            console.error(`    ❌ chunk error: status=${err.response?.status}`);
+            console.error(`       data=`, err.response?.data);
+            throw err;
+          }
+
+          offset = endExclusive;
+        }
+
+        const uploaded = lastRes.data.file;
+        return {
+          hash,
+          size: file.buffer.length,
+          __id: uploaded.__id,
+          __name: uploaded.name || uploaded.__name || file.originalname,
+        };
+      }
+
+      // Маленький файл — обычная загрузка
+      console.log('✔️ Маленький файл, обычная загрузка одним запросом');
       const form = new FormData();
       form.append('file', file.buffer, {
         filename: file.originalname,
@@ -925,35 +1007,46 @@ const uploadFilesAndGetMetadata = async (
         'Content-Length': contentLength,
       };
 
-      const uploadRes = await axios.post(
-        `https://portal.dev.lead.aero/pub/v1/disk/directory/${directoryId}/upload`,
-        form,
-        {
-          params: { hash },
-          headers,
-          maxBodyLength: Infinity,
-          maxContentLength: Infinity,
-        }
-      );
+      try {
+        const uploadRes = await axios.post(
+          `https://portal.dev.lead.aero/pub/v1/disk/directory/${directoryId}/upload`,
+          form,
+          {
+            params: { hash },
+            headers,
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+          }
+        );
 
-      const uploaded = uploadRes.data.file;
-
-      return {
-        hash,
-        size: file.buffer.length,
-        __id: uploaded.__id,
-        __name: uploaded.name || uploaded.__name || file.originalname,
-      };
+        const uploaded = uploadRes.data.file;
+        return {
+          hash,
+          size: file.buffer.length,
+          __id: uploaded.__id,
+          __name: uploaded.name || uploaded.__name || file.originalname,
+        };
+      } catch (err: any) {
+        console.error('    ❌ Ошибка при обычной загрузке:', err?.response?.data || err.message);
+        throw err;
+      }
     })
   );
 
+  console.log('\n🎉 Все файлы обработаны');
   return uploadedFileMetadata;
 };
 
-const uploadFilesAndGetIds = async (files: Express.Multer.File[], token: string): Promise<string[]> => {
+const uploadFilesAndGetIds = async (
+  files: Express.Multer.File[],
+  token: string
+): Promise<string[]> => {
   if (!files || files.length === 0) return [];
 
+  console.log(`📁 Начинаем загрузку ${files.length} файлов`);
+
   // Получаем список директорий
+  console.log('🔍 Запрашиваем список директорий...');
   const { data: listData } = await axios.get(
     'https://portal.dev.lead.aero/pub/v1/disk/directory/list',
     {
@@ -961,23 +1054,87 @@ const uploadFilesAndGetIds = async (files: Express.Multer.File[], token: string)
       headers: { Authorization: token },
     }
   );
+  console.log('📂 Список директорий получен');
 
   const targetDir = listData?.result?.result?.[0];
   if (!targetDir) {
+    console.error('❌ Нет доступных директорий');
     throw new Error('Нет доступных директорий для загрузки');
   }
 
   const directoryId = targetDir.__id;
-  // // // // // // // // console.log('🎯 Загрузка в директорию:', directoryId);
+  console.log(`🎯 Загружаем в директорию: ${directoryId}`);
 
   const uploadedFileIds = await Promise.all(
-    files.map(async (file) => {
-      const hash = uuidv4();
-
+    files.map(async (file, idx) => {
+      console.log(`\n🆔 [#${idx + 1}] Файл: ${file.originalname}, размер: ${file.buffer.length} байт`);
       if (file.buffer.length !== file.size) {
+        console.error(`❌ Неверный размер: buffer.length=${file.buffer.length}, size=${file.size}`);
         throw new Error(`Неверный размер файла ${file.originalname}`);
       }
 
+      const hash = uuidv4();
+      console.log(`🔑 Сгенерировали hash: ${hash}`);
+
+      let offset = 0;
+      let lastRes: any = null;
+
+      // БОЛЬШОЙ файл?
+      // если файл достаточно большой — по частям
+      if (file.buffer.length > CHUNK_SIZE) {
+        console.log(`🚧 Chunked upload: total=${file.buffer.length}`);
+        while (offset < file.buffer.length) {
+          const total = file.buffer.length;
+          const start = offset;
+          const endExclusive = Math.min(offset + CHUNK_SIZE, total);
+          const chunk = file.buffer.slice(start, endExclusive);
+          const endInclusive = endExclusive;
+
+          console.log(`🔹 Чанк: bytes ${start}-${endInclusive} (payload=${chunk.length})`);
+
+          const form = new FormData();
+          form.append('file', chunk, {
+            filename: file.originalname,
+            contentType: file.mimetype,
+            knownLength: chunk.length,
+          });
+
+          const formLength = await new Promise<number>((res, rej) =>
+            form.getLength((e, l) => (e ? rej(e) : res(l)))
+          );
+          console.log(`    formLength=${formLength}`);
+
+          const headers = {
+            ...form.getHeaders(),
+            Authorization: token,
+            'Content-Length': formLength,
+            'Content-Range': `bytes ${start}-${endInclusive}/${total}`,
+          };
+
+          try {
+            lastRes = await axios.post(
+              `https://portal.dev.lead.aero/pub/v1/disk/directory/${directoryId}/upload`,
+              form,
+              { params: { hash }, headers, maxBodyLength: Infinity, maxContentLength: Infinity }
+            );
+            console.log(`    ✅ chunk status=${lastRes.status}`);
+            console.log(`    response.data=`, lastRes.data);
+          } catch (err: any) {
+            console.error(`    ❌ chunk error: status=${err.response?.status}`);
+            console.error(`       data=`, err.response?.data);
+            console.error(`       headers=`, err.response?.headers);
+            throw err;
+          }
+
+          offset = endExclusive;
+        }
+
+        // результат последнего чанка возвращает data.file
+        return lastRes.data.file.__id;
+      }
+
+      // Мелкий файл — обычная загрузка
+      console.log('✔️ Маленький файл, обычная загрузка одним запросом');
       const form = new FormData();
       form.append('file', file.buffer, {
         filename: file.originalname,
@@ -998,27 +1155,34 @@ const uploadFilesAndGetIds = async (files: Express.Multer.File[], token: string)
         'Content-Length': contentLength,
       };
 
-      // // // // // // // // console.log('⬆️ Загружаем файл:', file.originalname);
-      // // // // // // // // console.log('📦 Content-Length:', contentLength);
-
-      const uploadRes = await axios.post(
-        `https://portal.dev.lead.aero/pub/v1/disk/directory/${directoryId}/upload`,
-        form,
-        {
-          params: { hash },
-          headers,
-          maxBodyLength: Infinity,
-          maxContentLength: Infinity,
-        }
-      );
-
-      // // // // // // // // console.log('✅ Успешно загружен:', uploadRes.data.file.name);
-      return uploadRes.data.file.__id;
+      console.log(`  🚀 Отправляем: Content-Length=${contentLength}`);
+      try {
+        const uploadRes = await axios.post(
+          `https://portal.dev.lead.aero/pub/v1/disk/directory/${directoryId}/upload`,
+          form,
+          {
+            params: { hash },
+            headers,
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+          }
+        );
+        console.log(`    ✅ Загружен маленький файл, статус ${uploadRes.status}`);
+        console.log(`    📄 Returned file ID: ${uploadRes.data.file.__id}`);
+        return uploadRes.data.file.__id;
+      } catch (err: any) {
+        console.error('    ❌ Ошибка при обычной загрузке:', err?.response?.data || err.message);
+        throw err;
+      }
     })
   );
 
+  console.log('\n🎉 Все файлы обработаны');
   return uploadedFileIds;
 };
+
+
+
 
 // {
 //   "context": {
@@ -1076,6 +1240,19 @@ app.post('/api/get-files', authenticateToken, async (req: any, res: any) => {
   }
 });
 
+function sortByIsChangedAndCreatedAt<T extends { isChanged?: boolean; __createdAt?: string }>(arr: T[]): T[] {
+  return [...arr].sort((a, b) => {
+    // Сначала isChanged === true
+    if (a.isChanged !== b.isChanged) {
+      return a.isChanged ? -1 : 1;
+    }
+
+    // Потом по дате (по убыванию)
+    const dateA = new Date(a.__createdAt || 0).getTime();
+    const dateB = new Date(b.__createdAt || 0).getTime();
+    return dateB - dateA;
+  });
+}
 
 // Создание нового заказа
 app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req: any, res: any) => {
@@ -1188,9 +1365,69 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
     // }
     // }
 
+    const orderId = elmaResponse.data?.__id; // замените на нужный ID
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const response = await axios.post(
+      `https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/${orderId}/get`,
+      {},
+      {
+        headers: {
+          'Authorization': `${TOKEN}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json, text/plain, */*',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-Language': 'ru-RU',
+          'X-Timezone': 'Europe/Moscow',
+          'Sec-CH-UA': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"',
+          'Sec-CH-UA-Mobile': '?0',
+          'Sec-CH-UA-Platform': '"Windows"',
+          'Referer': 'https://portal.dev.lead.aero/admin/process/01957f60-8641-75f6-a8f9-b41a57782729/settings',
+          'Origin': 'https://portal.dev.lead.aero'
+        },
+        withCredentials: true
+      }
+    );
+
+
+    const newOrderId = response.data?.__id;
+
+    const latest = await loadUserData(clientId, true);
+
+    const newOrder: any = {
+      ...response.data,
+      __id: newOrderId,
+      isChanged: true,
+      zapros,
+      kontakt,
+    };
+
+
+    const finalOrders = [...(latest.orders || []), newOrder];
+    const finalMessages = {
+      ...(latest.messages || {}),
+      [newOrder.nomer_zakaza]: [], // если nomer_zakaza ещё не присвоен, подстраховка
+    };
+
+    sendToUser(email, {
+      type: 'orders',
+      orders: sortAllTickets(finalOrders),
+    });
+
+    sendToUser(email, {
+      type: 'messages',
+      messages: finalMessages,
+    });
+
+    await saveUserData(clientId, {
+      orders: finalOrders,
+      messages: finalMessages,
+    }, true);
+
     res.json({
       message: 'Заявка отправлена',
-      elmaResponse: elmaInstance.data,
+      elmaResponse: response.data,
       fileIds: uploadedFileIds,
     });
 
@@ -1310,7 +1547,7 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
     }
 
     if (clientId && orderId && result) {
-      const userData = loadUserData(clientId);
+      const userData = await loadUserData(clientId);
       const orderNumber = userData.orders.find((el) => el.__id === orderId)?.nomer_zakaza;
       if (orderNumber) {
         const updatedUserData = {
@@ -1322,14 +1559,14 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
             }
         };
 
-        saveUserData(clientId, updatedUserData);
+        await saveUserData(clientId, updatedUserData);
 
         return res.json(updatedUserData.messages);
 
       }
     }
   } catch (err) {
-    const userData = loadUserData(clientId);
+    const userData = await loadUserData(clientId);
     const savedMessages = userData?.messages || [];
 
     // console.log(clientId);
@@ -1422,7 +1659,7 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
 // //     const elmaData = responseAll.data;
 // //     const elmaMessages = Array.isArray(elmaData) ? elmaData : elmaData?.result || [];
 //
-//     const userData = loadUserData(clientId);
+//     const userData = await loadUserData(clientId);
 //     const savedMessages = userData?.messages || [];
 //
 // //     const currentMessageId = savedMessages.findIndex((el: any) => el.id === id);
@@ -1483,7 +1720,7 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
 // //     if (allMessages.length > 0) {
 // //       userData.messages = allMessages;
 // //       if (clientId && userData) {
-// //         saveUserData(clientId, userData);
+// //         await saveUserData(clientId, userData);
 // //       }
 // //     }
 //
@@ -1569,7 +1806,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
     console.log(clientId, userId, result)
 
     if (userId && result) {
-      const userData = loadUserData(clientId);
+      const userData = await loadUserData(clientId);
       const updatedUserData = {
         ...userData,
         messages:
@@ -1580,7 +1817,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
 
       sendToUser(email, {type: 'messages', messages: updatedUserData.messages});
 
-      saveUserData(clientId, updatedUserData);
+      await saveUserData(clientId, updatedUserData);
     }
 
     const responseAllChannels = await fetch(`https://portal.dev.lead.aero/api/feed/channels/`, {
@@ -1732,7 +1969,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
 });
 
 
-app.post('/api/change-subscription', authenticateToken, (req: any, res: any) => {
+app.post('/change-subscription', authenticateToken, (req: any, res: any) => {
   const { endpoint, newUserId, newEmail } = req.body;
 
   if (!endpoint || !newUserId || !newEmail) {
@@ -1787,7 +2024,7 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
 
   try {
     // Если уже есть сохранённые заказы — сразу возвращаем
-    const localData = loadUserData(clientId);
+    const localData = await loadUserData(clientId);
 
     const getContact = await axios.post('https://portal.dev.lead.aero/pub/v1/app/_clients/_contacts/list', {
       "active": true,
@@ -1907,7 +2144,7 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
 
 
     const newData = { orders: currentOrders.length > 0 ? currentOrders : allData.result.result, messages: localData.messages };
-    // saveUserData(clientId, newData as UserData);
+    // await saveUserData(clientId, newData as UserData);
 
     if (currentOrders.length > 0) {
       return res.json({fetchedOrders: {result: {result: currentOrders, total: currentOrders.length}, error: '', success: true}, passports});
@@ -2011,14 +2248,16 @@ function mergeMessagesWithIsChanged(
 
 
 async function pollNewMessages() {
-  const users = getAllUsersData();
+  const users = await getAllUsersData();
   await getSergeiToken()
   const auth = readAuth();
   const token = auth?.token;
   const cookie = auth?.cookie;
 
   try {
-    for (const { userId, data } of users) {
+    await Promise.all(
+      users.map(async ({ userId, data }) => {
+        try {
       const subscriptions = getUserSubscriptions(userId);
       const webSubscriptions = subscriptions?.map((el) => ({
         endpoint: el.endpoint,
@@ -2063,7 +2302,7 @@ async function pollNewMessages() {
         const contactData = getContact.data?.result?.result[0];
         const kontakt = contactData?.__id;
 
-        if (!kontakt) continue;
+        if (!kontakt) return;
 
         // ----- Получаем заказы с ЕЛМЫ -----
         const elmaResponse = await axios.post('https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list',
@@ -2109,139 +2348,290 @@ async function pollNewMessages() {
         let ordersFlag = false;
         let messagesFlag = false;
 
-        let currentData = loadUserData(userId);
+        let currentData = await loadUserData(userId);
 
         messages = currentData.messages;
         tickets = currentData.orders;
 
 
         // ----- Логика заказов ----- //
-        const pickFields = (obj: Record<string, any>, fields: string[]) =>
-          fields.reduce((res, key) => {
-            res[key] = obj[key];
-            return res;
+        function pickFields(obj: any, fields: string[]) {
+          return fields.reduce((acc, field) => {
+            acc[field] = get(obj, field); // безопасно достаёт вложенные поля
+            return acc;
           }, {} as Record<string, any>);
+        }
 
         let allMessagesByOrder: Record<string, any[]> = {};
         let currentOrders: any[] = [];
 
 
         const orderPromises = mergedOrders.map(async (ticket: ELMATicket) => {
-          const existingTicket = tickets?.find(
-            (el) => el && (el?.__id === ticket?.__id || el?.nomer_zakaza === ticket?.nomer_zakaza)
-          );
-          
-          if (ticket?.__updatedAt === existingTicket?.__updatedAt) {
-            return existingTicket;
-          }
-
-
-          const isCurrentChanged = existingTicket?.isChanged ?? false;
-          const isNew = !existingTicket;
-          const status = getStatus(ticket);
-          let fieldsToCompare: string[] = [];
-
-          if (isNew) {
-            ordersFlag = true;
-            messagesFlag = true;
-            if (webSubscriptions?.length && ticket?.nomer_zakaza) {
-              // sendPushNotifications(webSubscriptions, 'Новый заказ', `Поступил новый заказ №${ticket.nomer_zakaza}`);
-            }
-            return { ...ticket, isChanged: true };
-          }
-
-          if ((getStatus(existingTicket) === AllStatus.NEW) && (status === AllStatus.PENDING)) {
-            ordersFlag = true;
-            if (webSubscriptions?.length) {
-              sendPushNotifications(webSubscriptions, 'Принят в работу', `Заказ №${ticket.nomer_zakaza} принят в работу`);
-            }
-            return { ...ticket, isChanged: true };
-          }
-
-          if (status === AllStatus.PENDING) {
-            fieldsToCompare = ['otvet_klientu1'];
-            const isEqualStatus = isEqual(
-              pickFields(ticket, fieldsToCompare),
-              pickFields(existingTicket || {}, fieldsToCompare)
+          try {
+            const existingTicket = tickets?.find(
+              (el: any) => el && (el?.__id === ticket?.__id || el?.nomer_zakaza === ticket?.nomer_zakaza)
             );
 
-            if (!isEqualStatus) {
-              ordersFlag = true;
-              if (webSubscriptions?.length) {
-                sendPushNotifications(webSubscriptions, 'Направление предложений', `По заказу №${ticket.nomer_zakaza}`);
+            if (!ticket) return;
+
+            const updateIfChanged = (
+              tabName: string,
+              fields: string[],
+            ): { updatedAtKey: string; changed: boolean } => {
+              const prev: any = existingTicket;
+              const current: any = ticket;
+              const updatedAtKey = `__updatedAt${tabName}`;
+
+              const wasSetBefore = Boolean(prev?.[updatedAtKey]);
+              const wasChangedBefore = Boolean(current?.[updatedAtKey]);
+
+              const isSame = isEqual(
+                pickFields(current, fields),
+                pickFields(prev, fields)
+              );
+
+              const changed = (!wasSetBefore && !wasChangedBefore) || !isSame;
+
+              return { updatedAtKey, changed };
+            };
+
+
+            // Booking
+            const fieldMap2: Record<
+              number,
+              {
+                fio: string;
+                passport: string;
+                answer: string;
+                timeLimit: string;
               }
-              return { ...ticket, isChanged: true };
-            }
-          }
+            > = {
+              1: {
+                fio: 'fio2',
+                passport: 'nomer_a_pasporta_ov_dlya_proverki',
+                answer: 'otvet_klientu',
+                timeLimit: 'taim_limit_dlya_klienta',
+              },
+              2: {
+                fio: 'dopolnitelnye_fio',
+                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
+                answer: 'otvet_klientu_o_bronirovanii_2',
+                timeLimit: 'taim_limit_dlya_klienta_bron_2',
+              },
+              3: {
+                fio: 'fio_passazhira_ov_bron_3',
+                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_3',
+                answer: 'otvet_klientu_o_bronirovanii_3',
+                timeLimit: 'taim_limit_dlya_klienta_bron_3',
+              },
+              4: {
+                fio: 'fio_passazhira_ov_bron_4',
+                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
+                answer: 'otvet_klientu_o_bronirovanii_4',
+                timeLimit: 'taim_limit_dlya_klienta_bron_4',
+              },
+              5: {
+                fio: 'fio_passazhira_ov_bron_5',
+                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_5',
+                answer: 'otvet_klientu_o_bronirovanii_5',
+                timeLimit: 'taim_limit_dlya_klienta_bron_5',
+              },
+              6: {
+                fio: 'fio_passazhira_ov_bron_6',
+                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
+                answer: 'otvet_klientu_o_bronirovanii_6',
+                timeLimit: 'taim_limit_dlya_klienta_bron_6',
+              },
+            };
 
-          if (
-            getStatus(existingTicket) === AllStatus.BOOKED &&
-            status === AllStatus.FORMED &&
-            ticket?.marshrutnaya_kvitanciya
-          ) {
-            ordersFlag = true;
-            if (webSubscriptions?.length) {
-              sendPushNotifications(webSubscriptions, 'Подтверждение оформления', `Подтверждение оформления заказа №${ticket.nomer_zakaza}`);
-            }
-            return { ...ticket, isChanged: true };
-          }
+  // Приоритетные поля для ответа до оформления
+            const preAnswerMap: Record<number, string> = {
+              1: 'otvet_klientu3',
+              2: 'otvet_klientu_pered_oformleniem_bron_2',
+              3: 'otvet_klientu_pered_oformleniem_bron_3',
+              4: 'otvet_klientu_pered_oformleniem_bron_4',
+              5: 'otvet_klientu_pered_oformleniem_bron_5',
+              6: 'otvet_klientu_pered_oformleniem_bron_6',
+            };
 
-          if (status === AllStatus.BOOKED && ticket.otvet_klientu) {
-            fieldsToCompare = [
-              'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
-              'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
-              'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
-              'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
-              'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
-              'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
-              'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
-              'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
-              'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
-              'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
-              'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
+            const bookingFields = Object.values(fieldMap2).flatMap(obj => Object.values(obj))
+              .concat(Object.values(preAnswerMap))
+              .concat('marshrutnaya_kvitanciya');
+            updateIfChanged('Booking', bookingFields);
+
+  // Hotels
+            const hotelFields = [1, 2, 3].flatMap(index => {
+              const suffix = index === 1 ? '' : index;
+              return [
+                `otel${suffix}?.name`,
+                `data_zaezda${suffix}`,
+                `data_vyezda${suffix}`,
+                `kolichestvo_nochei${suffix}`,
+                `tip_nomera${suffix}?.name`,
+                `tip_pitaniya${suffix}?.name`,
+                `stoimost${suffix}?.cents`,
+              ];
+            }).concat('vaucher');
+            updateIfChanged('Hotels', hotelFields);
+
+  // Map
+            updateIfChanged('Map', ['karta_mest_f', 'opisanie_stoimosti_mest']);
+
+  // Transfer
+            const transferFields = [
+              'transfer_f',
+              'prilozhenie_transfer1',
+              'vaucher_transfer',
+              'opisanie_transfera',
+              'otvet_klientu_po_transferu',
+              'informaciya_o_passazhire',
+              'stoimost_dlya_klienta_za_oformlenie_transfera_1',
             ];
+            updateIfChanged('Transfer', transferFields);
 
-            const isEqualStatus = isEqual(
-              pickFields(ticket, fieldsToCompare),
-              pickFields(existingTicket || {}, fieldsToCompare)
-            );
-
-            if (!isEqualStatus) {
-              ordersFlag = true;
-              if (webSubscriptions?.length) {
-                sendPushNotifications(webSubscriptions, 'Актуализация бронирования', `По заказу №${ticket.nomer_zakaza}`);
-              }
-              return { ...ticket, isChanged: true };
-            }
-          }
-
-          if (status === AllStatus.BOOKED && ticket.otvet_klientu) {
-            const fieldsToCompareT = [
-              'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
-              'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
+  // VIP
+            const vipFields = [
+              'vaucher_vipservis',
+              'nazvanie_uslugi_vipservis',
+              'opisanie_uslugi_vipservis',
+              'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
+              'fio_passazhirov_vipservis',
             ];
-            const fieldsToCompareM = ['marshrutnaya_kvitanciya'];
+            updateIfChanged('Vip', vipFields);
 
-            const isEqualStatus1 = isEqual(
-              pickFields(ticket, fieldsToCompareT),
-              pickFields(existingTicket || {}, fieldsToCompareT)
-            );
-            const isEqualStatus2 = isEqual(
-              pickFields(ticket, fieldsToCompareM),
-              pickFields(existingTicket || {}, fieldsToCompareM)
-            );
 
-            if (!(isEqualStatus1 || isEqualStatus2)) {
+            if (ticket?.__updatedAt === existingTicket?.__updatedAt) {
+              const updatedFields = Object.fromEntries(
+                Object.entries(ticket).filter(([key]) => key.includes('updatedAt'))
+              );
+
+              const updatedFieldsChanged = Object.entries(updatedFields).some(
+                ([key, value]) => value !== (existingTicket as any)?.[key]
+              );
+
+              if (updatedFieldsChanged) {
+                ordersFlag = true;
+              }
+
+              return {
+                ...existingTicket,
+                ...updatedFields,
+              };
+            }
+
+
+
+            const isCurrentChanged = existingTicket?.isChanged ?? false;
+            const isNew = !existingTicket;
+            const status = getStatus(ticket);
+            let fieldsToCompare: string[] = [];
+
+            if (isNew) {
               ordersFlag = true;
-              if (webSubscriptions?.length) {
-                sendPushNotifications(webSubscriptions, 'Актуализация бронирования', `По заказу №${ticket.nomer_zakaza}`);
+              messagesFlag = true;
+              if (webSubscriptions?.length && ticket?.nomer_zakaza) {
+                // sendPushNotifications(webSubscriptions, 'Новый заказ', `Поступил новый заказ №${ticket.nomer_zakaza}`);
               }
               return { ...ticket, isChanged: true };
             }
-          }
 
-          return ticket; // <-- теперь точно увидите логи
-        })
+            if ((getStatus(existingTicket) === AllStatus.NEW) && (status === AllStatus.PENDING)) {
+              ordersFlag = true;
+              if (webSubscriptions?.length) {
+                sendPushNotifications(webSubscriptions, 'Принят в работу', `Заказ №${ticket.nomer_zakaza} принят в работу`);
+              }
+              return { ...ticket, isChanged: true };
+            }
+
+            if (status === AllStatus.PENDING) {
+              fieldsToCompare = ['otvet_klientu1'];
+              const isEqualStatus = isEqual(
+                pickFields(ticket, fieldsToCompare),
+                pickFields(existingTicket || {}, fieldsToCompare)
+              );
+
+              if (!isEqualStatus) {
+                ordersFlag = true;
+                if (webSubscriptions?.length) {
+                  sendPushNotifications(webSubscriptions, 'Направление предложений', `По заказу №${ticket.nomer_zakaza}`);
+                }
+                return { ...ticket, isChanged: true };
+              }
+            }
+
+            if (
+              getStatus(existingTicket) === AllStatus.BOOKED &&
+              status === AllStatus.FORMED &&
+              ticket?.marshrutnaya_kvitanciya
+            ) {
+              ordersFlag = true;
+              if (webSubscriptions?.length) {
+                sendPushNotifications(webSubscriptions, 'Подтверждение оформления', `Подтверждение оформления заказа №${ticket.nomer_zakaza}`);
+              }
+              return { ...ticket, isChanged: true };
+            }
+
+            if (status === AllStatus.BOOKED && ticket.otvet_klientu) {
+              fieldsToCompare = [
+                'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
+                'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
+                'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
+                'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
+                'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
+                'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
+                'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
+                'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
+                'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
+                'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
+                'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
+              ];
+
+              const isEqualStatus = isEqual(
+                pickFields(ticket, fieldsToCompare),
+                pickFields(existingTicket || {}, fieldsToCompare)
+              );
+
+              if (!isEqualStatus) {
+                ordersFlag = true;
+                if (webSubscriptions?.length) {
+                  sendPushNotifications(webSubscriptions, 'Бронирование создано', `По заказу №${ticket.nomer_zakaza}`);
+                }
+                return { ...ticket, isChanged: true };
+              }
+            }
+
+            if (status === AllStatus.BOOKED && ticket.otvet_klientu) {
+              const fieldsToCompareT = [
+                'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
+                'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
+              ];
+              const fieldsToCompareM = ['marshrutnaya_kvitanciya'];
+
+              const isEqualStatus1 = isEqual(
+                pickFields(ticket, fieldsToCompareT),
+                pickFields(existingTicket || {}, fieldsToCompareT)
+              );
+              const isEqualStatus2 = isEqual(
+                pickFields(ticket, fieldsToCompareM),
+                pickFields(existingTicket || {}, fieldsToCompareM)
+              );
+
+              if (!(isEqualStatus1 || isEqualStatus2)) {
+                ordersFlag = true;
+                if (webSubscriptions?.length) {
+                  sendPushNotifications(webSubscriptions, 'Актуализация бронирования', `По заказу №${ticket.nomer_zakaza}`);
+                }
+                return { ...ticket, isChanged: true };
+              }
+            }
+
+            console.log('✅ Returning ticket', ticket.nomer_zakaza, ticket.__id);
+            return ticket; // <-- теперь точно увидите логи
+          } catch (err) {
+            console.error('❌ Ошибка при обработке заказа:', ticket?.nomer_zakaza, err);
+            return null; // или ticket с флагом ошибки
+          }
+        });
 
         const messagePromises = mergedOrders.map(async (order: any) => {
           if (!clientId) return;
@@ -2320,16 +2710,18 @@ async function pollNewMessages() {
               // Новое сообщение
               if (!existingMessage) {
                 messagesFlag = true;
-
+                console.log('ЗАШЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЛ');
                 if (
                   message.author !== clientId &&
                   !message.author.includes('00000000-0000-0000-0000-000000000000')
                 ) {
+                  console.log('Перед отправкой пуша:', message);
                   sendPushNotifications(
                     webSubscriptions,
                     `Новое сообщение по заказу ${order.nomer_zakaza}`,
                     `${stripHtml(message?.body)}`
                   );
+                  console.log('После отправки пуша:')
                 }
 
                 return { ...message, isChanged: true };
@@ -2372,6 +2764,8 @@ async function pollNewMessages() {
               return existingMessage;
             });
 
+            allMessagesByOrder[order.nomer_zakaza] ??= [{isChanged: true}];
+
           } catch (error) {
             console.error(`Ошибка при обработке сообщений по заказу ${orderId}:`, error);
           }
@@ -2379,46 +2773,64 @@ async function pollNewMessages() {
 
         // 1️⃣ Сначала обрабатываем и отдаем заказы
         // 1️⃣ Сначала обрабатываем и отдаем заказы
-        const ordersResult = await Promise.all(orderPromises);
-        currentOrders = ordersResult;
 
-        if (ordersFlag) {
-          sendToUser(email, { type: 'orders', orders: currentOrders });
+        const allSetted: Promise<void>[] = [];
 
-          // 🛡 Безопасное сохранение с учетом изменений isChanged
-          const latest = loadUserData(clientId);
-          const finalOrders = mergeIsChanged(latest.orders, currentOrders);
-          const finalMessages = latest.messages;
+        allSetted.push((async () => {
+          const ordersResult = await Promise.all(orderPromises);
+          currentOrders = sortAllTickets(ordersResult.filter(Boolean));
 
-          saveUserData(clientId, {
-            orders: finalOrders,
-            messages: finalMessages,
-          });
-        }
+          const latest = await loadUserData(clientId, true);
+          const ordersActuallyChanged = !isEqual(latest.orders || [], currentOrders || []);
 
-// 2️⃣ Параллельно обрабатываем сообщения
-        Promise.all(messagePromises)
-          .then(() => {
-            if (messagesFlag) {
+          if (ordersFlag || ordersActuallyChanged) {
+            const finalOrders = mergeIsChanged(latest.orders, currentOrders);
+            const finalMessages = latest.messages;
+
+            sendToUser(email, { type: 'orders', orders: currentOrders });
+
+            await saveUserData(clientId, {
+              orders: currentOrders,
+              messages: finalMessages,
+            }, true);
+          }
+        })());
+
+        allSetted.push((async () => {
+          try {
+            await Promise.all(messagePromises);
+
+            const hasNewMessages = Object.keys(allMessagesByOrder).some(key => !(key in messages));
+            const hasChangedMessages = messagesFlag;
+
+            if (hasNewMessages || hasChangedMessages) {
               sendToUser(email, { type: 'messages', messages: allMessagesByOrder });
 
-              // 🛡 Безопасное сохранение сообщений с учетом isChanged
-              const latest = loadUserData(clientId);
+              const latest = await loadUserData(clientId, true);
               const finalOrders = latest.orders;
               const finalMessages = mergeMessagesWithIsChanged(latest.messages, allMessagesByOrder);
 
-              saveUserData(clientId, {
+              await saveUserData(clientId, {
                 orders: finalOrders,
                 messages: finalMessages,
-              });
+              }, true);
             }
-          })
-          .catch(err => console.error('Ошибка фоновой обработки сообщений:', err));
+          } catch (err) {
+            console.error('Ошибка фоновой обработки сообщений:', err);
+          }
+        })());
 
+        await Promise.all(allSetted);
+
+// 2️⃣ Параллельно обрабатываем сообщения
       } catch (error) {
         // // console.error("❌ Ошибка при опросе:", error);
       }
-    }
+        } catch (err) {
+          console.error(`Ошибка при обработке пользователя ${userId}`, err);
+        }
+      })
+    );
   } catch (error) {
     // // console.error("❌ Ошибка при опросе:", error);
   } finally {
