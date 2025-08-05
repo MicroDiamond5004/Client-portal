@@ -1189,7 +1189,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
           </Box>
 
           {/* Main Content */}
-          <Box sx={{ display: 'flex', width: 'auto', overflow: 'hidden', maxHeight: lgUp ? open ? '75vh' : 'auto' : '100vh'}} ref={mainBoxRef}>
+          <Box sx={{ display: 'flex', width: 'auto', overflow: 'hidden', maxHeight: lgUp ? open ? 'calc(100vh - 330px)' : 'auto' : '100vh'}} ref={mainBoxRef}>
             {/* Messages */}
             <Box overflow={'hidden'}>
               <Box

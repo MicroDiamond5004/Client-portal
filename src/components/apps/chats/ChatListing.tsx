@@ -162,7 +162,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
 
       </Box>
       <List sx={{ px: 0 }}>
-        <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '600px' }}>
+        <Scrollbar sx={{ height: { md: 'calc(100vh - 200px)', sm: '100vh' }, maxHeight: 'calc(100vh - 390px)' }}>
           {messageStatus === 'succeeded' && chatData && filteredChats && filteredChats.length ? (
             filteredChats.map((chat) => (
               <ListItemButton 

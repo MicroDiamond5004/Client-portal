@@ -23,7 +23,7 @@ const AppCard = ({ children }: Props) => {
         display: 'flex',
         p: 0,
         overflow: isMobile && isChat ? 'hidden !important' : 'auto',
-        height: isMobile && isChat ? 'auto' : 'auto'
+        height: isMobile && isChat ? 'auto' : 'calc(100vh - 200px)'
       }}
       elevation={isCardShadow ? 9 : 0}
       variant={!isCardShadow ? 'outlined' : undefined}

@@ -136,7 +136,7 @@ const Chats = () => {
             sx={{
               display: 'flex',
               flexDirection: 'column',
-              height: { xs: '100vh', md: 'calc(90vh)' }, // мобильные и десктоп
+              height: { xs: '80vh', md: 'calc(100vh - 200px)' }, // мобильные и десктоп
               overflow: 'hidden',
             }}
           >
@@ -157,6 +157,7 @@ const Chats = () => {
                 position: 'sticky',
                 bottom: 0,
                 zIndex: 10,
+                height: 'auto',
                 backgroundColor: 'background.paper',
               }}
             >

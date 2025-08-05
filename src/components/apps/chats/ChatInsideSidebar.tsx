@@ -81,7 +81,8 @@ export const DialogViewer = React.memo(({ openViewer, handleCloseViewer, pdfBlob
           backgroundColor: '#fff',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '90vh', // ограничение по высоте окна
+          height: 'auto',
+          maxHeight: 'calc(90vh - 200px)', // ограничение по высоте окна
         },
       }}
     >
@@ -313,7 +314,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
           border: '0',
           borderLeft: '1px',
           borderStyle: 'solid',
-          maxHeight: '650px',
+          maxHeight: 'calc(100vh - 200px)',
           right: '0',
           background: (theme) => theme.palette.background.paper,
           boxShadow: lgUp ? null : (theme) => theme.shadows[8],
