@@ -125,6 +125,10 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
   const [files, setFiles] = useState<any[]>([]);
   const [managers, setManagers] = useState<Record<string, string>>({});
 
+  const chatListScrollRef = useRef<HTMLDivElement | null>(null);
+  const scrollPositionRef = useRef<number>(0); // хранение позиции
+
+
   const clientId = useAppSelector(selectClientId);
 
   const [selectedFile, setSelectedFile] = useState<{
@@ -292,12 +296,15 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
   };
 
   const handleChatSelect = (chat: ChatsType) => {
-    setSelectedChat({ ...chat, isChanged: false }); // теперь это наш "manual" setSelectedChat
+    if (chatListScrollRef.current) {
+      scrollPositionRef.current = chatListScrollRef.current.scrollTop;
+    }
+
+    setSelectedChat({ ...chat, isChanged: false });
     localStorage.setItem("lastSelectedChatId", String(chat.id));
 
-    // onClose?.();
     setMobileChatsMenuOpen(false);
-    setIsOpenMsg?.(true)
+    setIsOpenMsg?.(true);
     setChatSearch('');
 
     const updateChange = async () => {
@@ -336,6 +343,15 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
   // selectedChat.messages?.forEach((message) => {
   //   console.log(message, 'm');
   // })
+  useEffect(() => {
+    console.log(chatListScrollRef.current);
+    if (mobileChatsMenuOpen && chatListScrollRef.current) {
+      // Ставим небольшой timeout, чтобы Scrollbar успел отрендериться
+      setTimeout(() => {
+        chatListScrollRef.current!.scrollTop = scrollPositionRef.current;
+      }, 100);
+    }
+  }, [mobileChatsMenuOpen]);
 
 
   useEffect(() => {
@@ -1074,222 +1090,6 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
     }
   }
 
-  if (headerOnly) {
-    return selectedChat ? (
-      <Box
-        sx={{
-          height: { xs: '100vh', md: '80vh' },
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', p: '4px 20px 4px 0px' }}>
-          <Box sx={{ display: { xs: 'block' }, mr: '10px' }} />
-          <ListItem key={selectedChat.name} dense disableGutters>
-            {!lgUp && (
-              <IconButton
-                onClick={() => {
-                  setIsOpenMsg?.(mobileChatsMenuOpen)
-                  setMobileChatsMenuOpen((prevState) => !prevState)
-                }
-                }
-                sx={{ ml: 'auto' }}
-              >
-                <ForumIcon />
-              </IconButton>
-            )}
-            {!lgUp && mobileChatsMenuOpen ? (
-              <Box px={3} py={1}>
-                <TextField
-                  id="outlined-search-2"
-                  placeholder="Поиск по заказам"
-                  size="small"
-                  type="search"
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconSearch size={16} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  fullWidth
-                  onChange={handleSearchChange}
-                />
-              </Box>
-            ) : (
-              <ListItemText
-                primary={
-                  <Typography
-                    className="break-word"
-                    component={Link}
-                    ml={lgUp ? 0 : 2}
-                    fontSize={18}
-                    onClick={() =>
-                      navigate(`/apps/orders?item=${selectedChat.name}`)
-                    }
-                    fontWeight={600}
-                  >
-                    Заказ №{selectedChat.name}
-                  </Typography>
-                }
-                secondary={selectedChat.status}
-              />
-            )}
-            {!lgUp && open && (
-              <Fab
-                color="primary"
-                size="small"
-                onClick={() =>
-                  setMobileSidebarOpen((prevState) => !prevState)
-                }
-              >
-                <InfoIcon />
-              </Fab>
-            )}
-          </ListItem>
-        </Box>
-        <Divider />
-      </Box>
-    ) : null;
-  }
-
-  // ==========================
-  // Content ONLY
-  // ==========================
-  if (contentOnly) {
-    return selectedChat ? (
-      <Box overflow="hidden">
-        <Box
-          ref={messagesContainerRef}
-          sx={{
-            overflowX: 'hidden',
-            overflowY: 'hidden',
-            maxHeight: open ? '100vh' : 'auto',
-            height: open ? (lgUp ? '60vh' : '65vh') : 'auto',
-            width: '100%',
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': {
-              display: 'none',
-            },
-          }}
-        >
-          <Box p={lgUp ? 3 : '15px 10px'} className="chat-text">
-            {open && !lgUp && mobileChatsMenuOpen ? (
-              <>
-                <Box sx={{ height: 'calc(100vh - 50px)' }}>
-                  <Box p={1}>
-                    <Typography variant="h5" mb={2}>
-                      Выберите чат
-                    </Typography>
-                  </Box>
-                  <List sx={{ px: 0 }}>
-                    <Scrollbar
-                      sx={{
-                        height: {
-                          lg: 'calc(100vh - 100px)',
-                          md: '100vh',
-                        },
-                        maxHeight: '600px',
-                      }}
-                    >
-                      {filteredChats && filteredChats.length ? (
-                        filteredChats.map((chat) => (
-                          <ListItemButton
-                            key={chat.name + chat.id}
-                            onClick={() => handleChatSelect(chat)}
-                            sx={{
-                              mb: 0.5,
-                              py: 2,
-                              px: 3,
-                              alignItems: 'center',
-                              textAlign: 'center',
-                            }}
-                            className={
-                              chat.isChanged &&
-                              chat.id !== activeChatId
-                                ? 'gradient-background'
-                                : ''
-                            }
-                            selected={
-                              String(activeChatId) === chat.name
-                            }
-                          >
-                            <ListItemAvatar>
-                              <Typography
-                                variant="subtitle2"
-                                fontWeight={800}
-                                fontSize={17}
-                                mb={0.5}
-                                textAlign="center"
-                              >
-                                {chat.name}
-                              </Typography>
-                            </ListItemAvatar>
-                            {chat.isChanged &&
-                              chat.id !== activeChatId && (
-                                <Typography
-                                  variant="subtitle2"
-                                  fontWeight={600}
-                                  fontSize={17}
-                                  mb={0.5}
-                                  color="#fff"
-                                  textAlign="center"
-                                >
-                                  Новое сообщение!
-                                </Typography>
-                              )}
-                          </ListItemButton>
-                        ))
-                      ) : (
-                        <Box m={2}>
-                          {chatData.length === 0 ? (
-                            <Alert
-                              severity="info"
-                              variant="filled"
-                              sx={{ color: 'white' }}
-                            >
-                              Сообщения загружаются...
-                            </Alert>
-                          ) : (
-                            <Alert
-                              severity="warning"
-                              variant="filled"
-                              sx={{ color: 'white' }}
-                            >
-                              Сообщения не найдены
-                            </Alert>
-                          )}
-                        </Box>
-                      )}
-                    </Scrollbar>
-                  </List>
-                </Box>
-              </>
-            ) : (
-              <>
-                {Object.keys(managers)?.length > 0 ? (
-                  (open
-                      ? sortedMessages
-                      : sortedMessages.slice(
-                        sortedMessages.length > 4
-                          ? sortedMessages.length - 4
-                          : 0
-                      )
-                  )?.map(getMessages)
-                ) : (
-                  <Typography color="textSecondary">
-                    Нет сообщений
-                  </Typography>
-                )}
-                <div ref={messagesEndRef} />
-              </>
-            )}
-          </Box>
-        </Box>
-      </Box>
-    ) : null;
-  }
 
   return selectedChat && messageStatus === 'succeeded' ? (
     <Box overflow={'hidden'}>
@@ -1413,11 +1213,14 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                 },
                 }}
               >
-                <Box p={lgUp ? 3 : '15px 10px'} className="chat-text">
+                <Box p={lgUp ? 3 : '15px 10px'} className="chat-text" ref={chatListScrollRef}>
                   {/* 👇 Мобильное меню чатов */}
                   {open && !lgUp && mobileChatsMenuOpen ? (
                     <>
-                      <Scrollbar sx={{ height: 'calc(100vh - 150px)' }}>
+                      <Scrollbar
+                        sx={{ height: 'calc(100vh - 150px)' }}
+                        ref={chatListScrollRef} // ✅ ref именно сюда
+                      >
                         <Box p={1}>
                           <Typography variant="h5" mb={2}>
                             Выберите чат

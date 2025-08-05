@@ -2374,23 +2374,52 @@ async function pollNewMessages() {
 
             if (!ticket) return;
 
+            const isCurrentChanged = existingTicket?.isChanged ?? false;
+            const isNew = !existingTicket;
+
+            if (isNew) {
+              ordersFlag = true;
+              messagesFlag = true;
+              if (webSubscriptions?.length && ticket?.nomer_zakaza) {
+                // sendPushNotifications(webSubscriptions, 'Новый заказ', `Поступил новый заказ №${ticket.nomer_zakaza}`);
+              }
+              return { ...ticket, isChanged: true };
+            }
+
             const updateIfChanged = (
               tabName: string,
               fields: string[],
             ): { updatedAtKey: string; changed: boolean } => {
+              if (!existingTicket) return { updatedAtKey: `__updatedAt${tabName}`, changed: false };
               const prev: any = existingTicket;
               const current: any = ticket;
               const updatedAtKey = `__updatedAt${tabName}`;
 
-              const wasSetBefore = Boolean(prev?.[updatedAtKey]);
-              const wasChangedBefore = Boolean(current?.[updatedAtKey]);
+              const currentFields = pickFields(current, fields);
+              const prevFields = pickFields(prev, fields);
 
-              const isSame = isEqual(
-                pickFields(current, fields),
-                pickFields(prev, fields)
+              const isSame = isEqual(currentFields, prevFields);
+
+              const changed = (!isSame) || (!prev?.[updatedAtKey]);
+
+              const prevAtRaw = existingTicket[`__updatedAt${tabName}` as keyof typeof existingTicket] as string | undefined;
+              const prevAt = prevAtRaw
+                ? new Date(prevAtRaw).toLocaleString()     // превращаем ISO-строку в читабельный формат
+                : 'undefined';
+
+              console.log(
+                `[${tabName}] prevAt=${prevAt} | isSame=${isSame} | changed=${changed} | ${ticket?.nomer_zakaza}`
               );
 
-              const changed = (!wasSetBefore && !wasChangedBefore) || !isSame;
+
+              if (changed) {
+                ordersFlag = true;
+                // @ts-ignore
+                ticket[updatedAtKey] = new Date().toISOString();
+                // @ts-ignore
+                prev[updatedAtKey] = new Date().toISOString();// или Date.now()
+              }
+
 
               return { updatedAtKey, changed };
             };
@@ -2500,40 +2529,13 @@ async function pollNewMessages() {
             updateIfChanged('Vip', vipFields);
 
 
+// 2️⃣ Если __updatedAt совпадают, ничего больше не делаем
             if (ticket?.__updatedAt === existingTicket?.__updatedAt) {
-              const updatedFields = Object.fromEntries(
-                Object.entries(ticket).filter(([key]) => key.includes('updatedAt'))
-              );
-
-              const updatedFieldsChanged = Object.entries(updatedFields).some(
-                ([key, value]) => value !== (existingTicket as any)?.[key]
-              );
-
-              if (updatedFieldsChanged) {
-                ordersFlag = true;
-              }
-
-              return {
-                ...existingTicket,
-                ...updatedFields,
-              };
+              return existingTicket;
             }
 
-
-
-            const isCurrentChanged = existingTicket?.isChanged ?? false;
-            const isNew = !existingTicket;
             const status = getStatus(ticket);
             let fieldsToCompare: string[] = [];
-
-            if (isNew) {
-              ordersFlag = true;
-              messagesFlag = true;
-              if (webSubscriptions?.length && ticket?.nomer_zakaza) {
-                // sendPushNotifications(webSubscriptions, 'Новый заказ', `Поступил новый заказ №${ticket.nomer_zakaza}`);
-              }
-              return { ...ticket, isChanged: true };
-            }
 
             if ((getStatus(existingTicket) === AllStatus.NEW) && (status === AllStatus.PENDING)) {
               ordersFlag = true;
@@ -2783,9 +2785,20 @@ async function pollNewMessages() {
           const latest = await loadUserData(clientId, true);
           const ordersActuallyChanged = !isEqual(latest.orders || [], currentOrders || []);
 
+
           if (ordersFlag || ordersActuallyChanged) {
             const finalOrders = mergeIsChanged(latest.orders, currentOrders);
             const finalMessages = latest.messages;
+
+            const sample = finalOrders[0];
+            const updatedAtFields = Object.entries(sample)
+              .filter(([key]) => key.startsWith('__updatedAt'))
+              .reduce<Record<string, any>>((acc, [key, value]) => {
+                acc[key] = value;
+                return acc;
+              }, {});
+
+            console.log('[before save] updatedAt fields for sample order:', updatedAtFields);
 
             sendToUser(email, { type: 'orders', orders: currentOrders });
 
