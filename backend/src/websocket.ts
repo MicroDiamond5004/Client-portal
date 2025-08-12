@@ -74,6 +74,31 @@ export function initWebSocket(server: any) {
 
           console.log(`✅ Зарегистрирован email: ${email}`);
           ws.send(JSON.stringify({ type: 'registered', email }));
+        } else if (msg.type === 'disconnect' && msg.email) {
+          // Обработка явного отключения
+          const email = msg.email;
+
+          // Удаляем данные и таймер
+          deleteUserData(email);
+          if (disconnectTimers.has(email)) {
+            clearTimeout(disconnectTimers.get(email)!);
+            disconnectTimers.delete(email);
+          }
+
+          // Закрываем все соединения этого пользователя (если нужно)
+          if (socketConnections.has(email)) {
+            socketConnections.get(email)!.forEach(socket => {
+              if (socket !== ws && socket.readyState === WebSocket.OPEN) {
+                socket.close();
+              }
+            });
+            socketConnections.delete(email);
+          }
+
+          // Закрываем текущее соединение
+          ws.close();
+
+          console.log(`🛑 Явное отключение и удаление данных email=${email}`);
         }
       } catch (e) {
         console.warn('❌ Ошибка разбора сообщения:', e);

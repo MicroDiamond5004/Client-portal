@@ -136,6 +136,7 @@ export const fetchTickets = createAsyncThunk(
       extraReducers: (builder: any) => {
       builder
         .addCase(updateAllMessages.fulfilled, (state, action) => {
+          console.log('ОБНОВИЛ ЧАТ');
           state.prevMessages = state.messages;
           state.messages = action.payload.newMessages;
           state.chatData = action.payload.allChatData;
@@ -153,7 +154,9 @@ export const fetchTickets = createAsyncThunk(
           state.status = "succeeded";
         })
         .addCase(sendMessage.fulfilled, (state: MessageState, action: PayloadAction<ELMAChat>) => {
-          state.messages.push(action.payload);
+          if (Array.isArray(state.messages)) {
+            state.messages = [action.payload, ...state.messages];
+          }
         });
     }
   });

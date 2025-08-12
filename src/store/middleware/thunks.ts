@@ -3,6 +3,8 @@ import { method } from "lodash";
 import { ELMATicket } from "src/mocks/tickets/ticket.type";
 import { ELMAChat } from "src/types/apps/chat";
 import api from "../api";
+import { disconnectWebSocket } from 'src/websocket.ts';
+import { RootState } from 'src/store';
 
   
 function toBase64(file: File): Promise<string> {
@@ -53,7 +55,10 @@ function toBase64(file: File): Promise<string> {
 // );
   export const logoutAll = createAsyncThunk<string | null, {password: string, login: string}>(
     "auth/logoutAll",
-    async (payload) => {
+    async (payload, thunkAPI) => {
+      const state = thunkAPI.getState() as RootState;
+      const email = state.auth.email;
+      disconnectWebSocket(email ?? '');
       const { data } = await api.post('/logoutAll', {
         login: payload.login,
         password: payload.password,

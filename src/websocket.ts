@@ -8,6 +8,27 @@ let currentDispatch: Function | null = null;
 
 const RECONNECT_INTERVAL = 2000; // ms
 
+// Добавляем функцию отключения
+export const disconnectWebSocket = (email: string) => {
+  console.log("🛑 Отключаем WebSocket");
+
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
+
+  if (socket) {
+    socket.send(JSON.stringify({ type: 'disconnect', email }));
+    socket.close();
+    socket.onclose = null; // чтобы не запускать reconnect при закрытии вручную
+    socket = null;
+  }
+
+  currentDispatch = null;
+  currentUserId = '';
+};
+
+
 export const connectWebSocket = (email: string, userId: string, dispatchFn?: Function) => {
   currentUserId = userId;
 

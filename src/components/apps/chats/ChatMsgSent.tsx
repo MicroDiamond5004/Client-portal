@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
@@ -26,6 +26,7 @@ type ChatMsgSentProps = {
   updateChat: (chat: ChatsType | null) => void;
   replyToMsg?: any | null;
   cancelReply?: () => void;
+  setReplyHeight?: (value: number) => void;
 };
 
 const ChatMsgSent = ({
@@ -33,14 +34,25 @@ const ChatMsgSent = ({
   updateChat,
   replyToMsg,
   cancelReply,
+  setReplyHeight,
 }: ChatMsgSentProps) => {
   const dispatch = useAppDispatch();
   const clientName = useAppSelector(selectClientName);
   const tickets = useAppSelector(selectTickets);
   const selectedChat = useAppSelector(selectSelectedchat)
 
+  const replyRef = useRef<HTMLElement>(null);
+  const filesRef = useRef<HTMLElement>(null);
+
+
   const [msg, setMsg] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+
+  useEffect(() => {
+    if (setReplyHeight && (replyRef.current || filesRef.current)) {
+      setReplyHeight((replyRef?.current?.offsetHeight ?? 0) + (filesRef?.current?.offsetHeight ?? 0));
+    }
+  }, [replyRef.current?.offsetHeight, filesRef.current]);
 
   // console.log(tickets);
 
@@ -72,7 +84,6 @@ const ChatMsgSent = ({
       dispatch(fetchMessages(chatId));
       cancelReply?.();
       dispatch(sendComment({ id: commentMessage.messageId ?? commentMessage.id, text: msg, files }));
-      dispatch(fetchMessages(selectedChat?.taskId || currentChat?.taskId || ''));
       setFiles([]);
       // sendPushFromClient(msg, `Заказ - ${currentChat?.name}`);
       setMsg("");
@@ -85,7 +96,6 @@ const ChatMsgSent = ({
     const cleanUrl = match ? match[0] : null;
 
     dispatch(sendElmaMessage({ id: chatId, text: msg, orderNumber, files, url: cleanUrl }));
-    dispatch(fetchMessages(selectedChat?.taskId || currentChat?.taskId || ''));
     setFiles([]);
     // sendPushFromClient(msg, `Заказ - ${orderNumber}`);
     setMsg("");
@@ -111,11 +121,24 @@ const ChatMsgSent = ({
     ? `📎 ${replyToMsg.files[0].__name || replyToMsg.files[0].name}`
     : "[Пустое сообщение]") : '';
 
+  useEffect(() => {
+    if (replyRef && replyToMsg?.length === 0) {
+      replyRef.current?.blur();
+    }
+  }, [replyToMsg]);
+
+  useEffect(() => {
+    if (filesRef && files?.length === 0) {
+      filesRef.current?.blur();
+    }
+  }, [replyToMsg]);
+
   return (
     <Box p={2}>
       {/* Блок ответа на сообщение */}
       {replyToMsg && (
         <Box
+          ref={replyRef}
           display="flex"
           alignItems="center"
           justifyContent="space-between"
@@ -142,7 +165,7 @@ const ChatMsgSent = ({
 
       {/* Selected Files Review */}
       {files.length > 0 && (
-        <Box display="flex" flexWrap="wrap" gap={1} mb={1}>
+        <Box display="flex" ref={filesRef} flexWrap="wrap" gap={1} mb={1}>
           {files.map((file, index) => (
             <Box key={index} position="relative">
               {file.type.startsWith("image/") ? (

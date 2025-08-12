@@ -12,14 +12,17 @@ type MapBlockProps = {
 export const MapBlock: React.FC<MapBlockProps> = ({ ticket }) => {
   const [files, setFiles] = useState<any[]>([]);
 
-  const allFiles = ticket.karta_mest_f || [];
+  const allFiles = ticket.karta_mest_f ?? [];
+
 
   useEffect(() => {
     const fetchFiles = async () => {
       if (allFiles.length > 0) {
         const response = await api.post("/get-files", {
-          fileIds: allFiles.map((file: any) => file.__id),
+          fileIds: allFiles,
         });
+
+        console.log('fffffffffffff', response);
 
         if (response.data.success) {
           const fetchedFiles: any[] = response.data.files;
@@ -33,13 +36,15 @@ export const MapBlock: React.FC<MapBlockProps> = ({ ticket }) => {
     };
 
     fetchFiles();
-  }, [allFiles]);
+  }, [ticket?.karta_mest_f]);
+
+  console.log(files)
 
   const hasData = ticket.opisanie_stoimosti_mest || files.length > 0;
 
   if (!hasData) {
     return (
-      <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+      <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
         <Typography>Нет данных по карте</Typography>
       </Paper>
     );
@@ -49,7 +54,7 @@ export const MapBlock: React.FC<MapBlockProps> = ({ ticket }) => {
     <Box>
       <Paper
         elevation={3}
-        sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}
+        sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: "#f9f9f9" }}
       >
         <Box
           sx={{
@@ -62,13 +67,6 @@ export const MapBlock: React.FC<MapBlockProps> = ({ ticket }) => {
             gap: 0,
           }}
         >
-          <Chip
-            size="small"
-            color="success"
-            variant="outlined"
-            label={formatToRussianDate(ticket?.__updatedAtMap, 'd MMMM yyyy / HH:mm')}
-            sx={{ mt: 0.5, mb: 2 }}
-          />
         </Box>
         {ticket.opisanie_stoimosti_mest && (
           <Typography mb={1}>

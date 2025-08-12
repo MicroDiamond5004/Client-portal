@@ -45,25 +45,15 @@ import { ru } from 'date-fns/locale';
 
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-import { isEqual, uniqueId } from 'lodash';
+import { isEqual, omitBy, uniqueId } from 'lodash';
 import { ELMATicket } from 'src/data/types.ts';
 import { updateSearchTerms, updateTicketsFilter } from 'src/store/slices/ticketsSlice.ts';
 import { store } from 'src/store';
+import { BoxProps } from '@mui/material/Box';
 
 dayjs.extend(isBetween);
 dayjs.locale('ru');
 
-
-const BoxStyled = styled(Box)(() => ({
-  transition: '0.1s ease-in',
-  cursor: 'pointer',
-  color: 'inherit',
-  backgroundColor: '#5D87FF',
-  '&:hover': {
-    transform: 'scale(1.03)',
-    backgroundColor: '#1245d6',
-  },
-}));
 
 export const AllStatus = {
   NEW: 'Новый заказ',
@@ -116,9 +106,6 @@ export const getStatus = (ticket: ELMATicket): string => {
 
   return status;
 }
-
-const state = store.getState();
-const tickets = state.tickets.prevTickets;
 
 export const getStatus2 = (
   ticket: ELMATicket
@@ -211,7 +198,6 @@ const TicketListing = (props: TicketListingProps) => {
 
   const [isDateManuallySelected, setIsDateManuallySelected] = useState(false);
 
-
   const {changeView} = props;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -230,6 +216,7 @@ const TicketListing = (props: TicketListingProps) => {
   //   useContext(TicketContext);
 
   const tickets = useAppSelector(selectTickets) ?? [];
+
   const ticketSearch = useAppSelector(selectSearchTerm) ?? '';
   const filter = useAppSelector(selectTicketsFilter) ?? '';
 
@@ -243,6 +230,23 @@ const TicketListing = (props: TicketListingProps) => {
   const [currentTicket, setCurrentTicket] = useState<ELMATicket>();
 
   const passports = useAppSelector(selectPassports) ?? {};
+
+  interface BoxStyledProps extends BoxProps {
+    disabled?: boolean;
+  }
+
+  const BoxStyled = styled(Box)<BoxStyledProps>(({ disabled }) => ({
+    transition: '0.1s ease-in',
+    cursor: disabled ? 'default' : 'pointer',
+    color: 'inherit',
+    backgroundColor: disabled ? '#c5c5c5' : '#5D87FF',
+    pointerEvents: disabled ? 'none' : 'auto',
+    '&:hover': {
+      transform: disabled ? 'none' : 'scale(1.03)',
+      backgroundColor: disabled ? '#c5c5c5' : '#1245d6',
+    },
+  }));
+
 
   const updateSearchParametrs = (
     tickets: ELMATicket[],
@@ -266,6 +270,7 @@ const TicketListing = (props: TicketListingProps) => {
 
     setSearchParams(params);
   };
+
 
   useEffect(() => {
    if (startDate && (startDate !== endDate)) {
@@ -344,7 +349,6 @@ const TicketListing = (props: TicketListingProps) => {
   }, [ticketSearch, isDateManuallySelected]);
 
 
-
   useEffect(() => {
     if (searchParams.get('item') && (currentTicket?.nomer_zakaza !== searchParams.get('item'))) {
       if (searchParams.get('item')) {
@@ -368,7 +372,7 @@ const TicketListing = (props: TicketListingProps) => {
           setSearchParams({});
         }
       }
-    } else if (searchParams.get('add') && searchParams.get('add') === 'new' && !isShowModal) {
+    } else if (status !== 'loading' && searchParams.get('add') && searchParams.get('add') === 'new' && !isShowModal) {
       // // // console.log(tickets, tickets[0]);
       const allSortedTickets = sortAllTickets(tickets).filter((ticket) => ticket.nomer_zakaza);
       // // console.log('test', tickets[0], Number(allSortedTickets[0]?.nomer_zakaza) + 1);
@@ -467,7 +471,7 @@ const TicketListing = (props: TicketListingProps) => {
           // // // console.log('fff');
       }
     }
-  }, [tickets])
+  }, [searchParams, status])
 
   const handlerCloseModal = (isOpen: boolean) => {
     setCurrentTicket(undefined);
@@ -651,7 +655,7 @@ const TicketListing = (props: TicketListingProps) => {
           />
         </Box>
 
-        <Box sx={{ minWidth: { xs: '100%', sm: '25%' }, flexGrow: 1 }}>
+        <Box sx={{ minWidth: { xs: '100%', sm: '50%' }, flexGrow: 1 }}>
           <TextField
             label="Выберите дату(ы)"
             value={formatted}
@@ -713,16 +717,17 @@ const TicketListing = (props: TicketListingProps) => {
         sx={{ mt: { xs: 6, sm: 0 } }}
       >
         {!isMobile && <BoxStyled
-          onClick={() => setSearchParams({ ...searchParams, add: 'new' })}
+          disabled={status === 'loading'}
+          onClick={() => status !== 'loading' && setSearchParams({ ...searchParams, add: 'new' })}
           sx={{
             width: { xs: '100%', sm: '35%' },
             px: 2,
             height: 38,
-            bgcolor: 'primary.main',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: '9999999999999',
+
             // marginLeft: '3rem !important',
 
           }}
@@ -748,12 +753,12 @@ const TicketListing = (props: TicketListingProps) => {
         </BoxStyled>}
         {isMobile && (
           <BoxStyled
-            onClick={() => setSearchParams({ ...searchParams, add: 'new' })}
+            disabled={status === 'loading'}
+            onClick={() => status !== 'loading' && setSearchParams({ ...searchParams, add: 'new' })}
             sx={{
               width: { xs: '70%', sm: '35%' },
               px: 1,
               height: 38,
-              bgcolor: 'primary.main',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -808,173 +813,174 @@ const TicketListing = (props: TicketListingProps) => {
       </Stack>
     </Box>
   </Grid>
-</Grid>
-
-    <Box mt={1}>
-  <TableContainer sx={{
-    maxHeight: '60vh', // или любая нужная тебе высота
-  }}>
-    <Table>
-      {visibleTickets.length > 0 && (
-        <TableHead sx={{
-          position: 'sticky',
-          top: 0,
-          backgroundColor: 'background.paper',
-          zIndex: 1,
+      <Grid item xs={12}>
+        <TableContainer sx={{
+          maxHeight: '60vh', // или любая нужная тебе высота
         }}>
-          <TableRow>
-            <TableCell>
-              <Typography variant="h6" sx={{width: !isMobile ? '55px' : '50px'}}>{isMobile ? 'Заказ' : 'Номер заказа'}</Typography>
-            </TableCell>
-            {!isMobile && <TableCell>
-              <Typography variant="h6" sx={{width: '60px'}}>Дата создания </Typography>
-            </TableCell>}
-            <TableCell>
-              <Typography variant="h6">Информация</Typography>
-            </TableCell>
-            {!isMobile && <TableCell>
-              <Typography variant="h6">Статус</Typography>
-            </TableCell>}
-            {/* <TableCell align="right">
+          <Table>
+            {visibleTickets.length > 0 && (
+              <TableHead sx={{
+                position: 'sticky',
+                top: 0,
+                backgroundColor: 'background.paper',
+                zIndex: 1,
+              }}>
+                <TableRow>
+                  <TableCell width={'5%'}>
+                    <Typography variant="h6" sx={{width: !isMobile ? '55px' : '50px', textAlign: 'center'}}>{isMobile ? 'Заказ' : 'Номер заказа'}</Typography>
+                  </TableCell>
+                  {!isMobile && <TableCell width={'15%'}>
+                    <Typography variant="h6" sx={{width: '60px'}}>Дата создания </Typography>
+                  </TableCell>}
+                  <TableCell width={'75%'} sx={{ pl: 2 }}>
+                    <Typography variant="h6">Информация</Typography>
+                  </TableCell>
+                  {!isMobile && <TableCell width={'5%'}>
+                    <Typography sx={{position: 'relative', right: '8px'}} textAlign={'center'} variant="h6">Статус</Typography>
+                  </TableCell>}
+                  {/* <TableCell align="right">
               <Typography variant="h6"></Typography>
             </TableCell> */}
-          </TableRow>
-        </TableHead>
-      )}
+                </TableRow>
+              </TableHead>
+            )}
 
-      <TableBody>
-        {visibleTickets.length > 0 ? (
-          sortAllTickets(visibleTickets).map((ticket: ELMATicket) => {
-            const status = getStatus(ticket);
+            <TableBody>
+              {visibleTickets.length > 0 ? (
+                sortAllTickets(visibleTickets).map((ticket: ELMATicket) => {
+                  const status = getStatus(ticket);
 
-            let colorStatus = 'black';
-            let backgroundStatus = 'grey';
+                  let colorStatus = 'black';
+                  let backgroundStatus = 'grey';
 
-            switch (status) {
-              case AllStatus.NEW:
-                colorStatus = 'warning.main';
-                backgroundStatus = 'warning.light';
-                break;
-              case AllStatus.PENDING:
-                colorStatus = 'success.main';
-                backgroundStatus = 'success.light';
-                break;
-              case AllStatus.BOOKED:
-                colorStatus = 'darkpink';
-                backgroundStatus = 'pink';
-                break;
-              case AllStatus.FORMED:
-                colorStatus = 'brown';
-                backgroundStatus = '#a52a2a1f';
-                break;
-              default:
-                colorStatus = 'error.main';
-                backgroundStatus = 'error.light';
-                break;
-            }
+                  switch (status) {
+                    case AllStatus.NEW:
+                      colorStatus = 'warning.main';
+                      backgroundStatus = 'warning.light';
+                      break;
+                    case AllStatus.PENDING:
+                      colorStatus = 'success.main';
+                      backgroundStatus = 'success.light';
+                      break;
+                    case AllStatus.BOOKED:
+                      colorStatus = 'darkpink';
+                      backgroundStatus = 'pink';
+                      break;
+                    case AllStatus.FORMED:
+                      colorStatus = 'brown';
+                      backgroundStatus = '#a52a2a1f';
+                      break;
+                    default:
+                      colorStatus = 'error.main';
+                      backgroundStatus = 'error.light';
+                      break;
+                  }
 
-            const clickTicketHandler = () => {
-              updateSearchParametrs(tickets, ticket, true, startDate, endDate)
-              if (ticket.isChanged) {
-                const updateChange = async () => {
-                  await api.post('/updateChange', {
-                    type: 'order',
-                    id: ticket.__id,
-                  });
-                  dispatch(fetchUserOrders());
-                };
-                updateChange();
-              }
-            };
+                  const clickTicketHandler = () => {
+                    updateSearchParametrs(tickets, ticket, true, startDate, endDate)
+                    if (ticket.isChanged) {
+                      const updateChange = async () => {
+                        await api.post('/updateChange', {
+                          type: 'order',
+                          id: ticket.__id,
+                        });
+                        dispatch(fetchUserOrders());
+                      };
+                      updateChange();
+                    }
+                  };
 
 
-            const info = ticket.otvet_klientu1
-              ? `${ticket.otvet_klientu1}`
-              : ticket.zapros;
+                  const info = ticket.otvet_klientu1
+                    ? `${ticket.otvet_klientu1}`
+                    : ticket.zapros;
 
-            return (
-              <TableRow
-                className={ticket.isChanged ? 'gradient-background' : ''}
-                key={ticket.__id ?? uniqueId()}
-                hover
-                onClick={clickTicketHandler}
-              >
-                <TableCell
-                  sx={{
-                  // На xs экранах фиксированная ширина, на sm+ — auto
-                  width: { xs: 40, },
-                  minWidth: { xs: 40, sm: '55px' },
-
-                  padding: { xs: '1.5rem 0px'},
-
-                  // На мобилке разрешаем перенос текста, на десктопе — нет
-                  whiteSpace: { xs: 'normal', sm: 'nowrap' },
-
-                  // Автоматический разрыв длинных слов/строк
-                  wordBreak: 'break-word',
-                  overflowWrap: 'break-word',
-                  textAlign: 'center',
-                  py: 1,
-                }}>{ticket.nomer_zakaza}{isMobile && <><br/>
-                  {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}<br/><Chip
-                    sx={{
-                      backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus,
-                    }}
-                    size="small"
-                    label={status}
-                  /></>}</TableCell>
-                {!isMobile && <TableCell>
-                  <Typography variant="subtitle1" sx={{width: '70px', textAlign: 'center'}}>
-                    {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}
-                  </Typography>
-                </TableCell>}
-                <TableCell>
-                  <Box>
-                    {(ticket.__status?.status || 0) > 3 && ticket.otvet_klientu && (
-                      <>
-                        {ticket?.fio2?.map((currentId) => (
-                          <Typography
-                            key={uniqueId()}
-                            variant="h6"
-                            fontWeight={600}
-                            sx={{
-                              width: isMobile ? '100%' : '50%',
-                              wordBreak: 'break-word',
-                              whiteSpace: 'pre-wrap',
-                              overflowWrap: 'break-word',
-                            }}
-                          >
-                            {passports[currentId]?.[0]} - {passports[currentId]?.[1]}
-                          </Typography>
-                        ))}
-                      </>
-                    )}
-                    <Typography
-                      color="textSecondary"
-                      sx={{
-                        maxWidth: '400px',
-                        display: '-webkit-box',
-                        WebkitBoxOrient: 'vertical',
-                        WebkitLineClamp: 2,
-                        overflow: 'hidden',
-                      }}
-                      variant="subtitle2"
-                      fontWeight={400}
+                  return (
+                    <TableRow
+                      className={ticket.isChanged ? 'gradient-background' : ''}
+                      key={ticket.__id ?? uniqueId()}
+                      hover
+                      onClick={clickTicketHandler}
                     >
-                      {(info?.length ?? 0) > 53 ? `${info?.slice(0, 53)}...` : info}
-                    </Typography>
-                  </Box>
-                </TableCell>
-                {!isMobile && <TableCell>
-                  <Chip
-                    sx={{
-                      backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus,
-                    }}
-                    size="small"
-                    label={status}
-                  />
-                </TableCell>}
-                {/* <TableCell align="right">
+                      <TableCell
+                        sx={{
+                          // На xs экранах фиксированная ширина, на sm+ — auto
+                          width: { xs: 40, },
+                          minWidth: { xs: 40, sm: '55px' },
+
+                          padding: { xs: '1.5rem 0px'},
+
+                          // На мобилке разрешаем перенос текста, на десктопе — нет
+                          whiteSpace: { xs: 'normal', sm: 'nowrap' },
+
+                          // Автоматический разрыв длинных слов/строк
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          textAlign: 'center',
+                          py: 1,
+                        }}>{ticket.nomer_zakaza}{isMobile && <><br/>
+                        {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}<br/><Chip
+                          sx={{
+                            backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus,
+                          }}
+                          size="small"
+                          label={status}
+                        /></>}</TableCell>
+                      {!isMobile && <TableCell>
+                        <Typography variant="subtitle1" sx={{width: '70px', textAlign: 'center'}}>
+                          {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}
+                        </Typography>
+                      </TableCell>}
+                      <TableCell>
+                        <Box>
+                          {(ticket.__status?.status || 0) > 3 && ticket.otvet_klientu && (
+                            <>
+                              {ticket?.fio2?.map((currentId) => (
+                                <Typography
+                                  key={uniqueId()}
+                                  variant="h6"
+                                  fontWeight={600}
+                                  sx={{
+                                    width: isMobile ? '100%' : '50%',
+                                    wordBreak: 'break-word',
+                                    whiteSpace: 'pre-wrap',
+                                    overflowWrap: 'break-word',
+                                  }}
+                                >
+                                  {passports[currentId]?.[0]} - {passports[currentId]?.[1]}
+                                </Typography>
+                              ))}
+                            </>
+                          )}
+                          <Typography
+                            color="textSecondary"
+                            sx={{
+                              maxWidth: '400px',
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 2,
+                              overflow: 'hidden',
+                            }}
+                            variant="subtitle2"
+                            fontWeight={400}
+                          >
+                            {(info?.length ?? 0) > 53 ? `${info?.slice(0, 53)}...` : info}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      {!isMobile &&
+                        <TableCell>
+                          <Box sx={{position: 'relative', right: '8px'}} textAlign={'center'}>
+                            <Chip
+                              sx={{
+                                backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus,
+                              }}
+                              size="small"
+                              label={status}
+                            />
+                          </Box>
+                      </TableCell>}
+                      {/* <TableCell align="right">
                   <Tooltip title="Открыть">
                     <IconButton
                       sx={{ color: ticket.isChanged ? '#FFF' : 'inherit' }}
@@ -987,53 +993,55 @@ const TicketListing = (props: TicketListingProps) => {
                     </IconButton>
                   </Tooltip>
                 </TableCell> */}
-              </TableRow>
-            );
-          })
-        ) : status === 'loading' ?  (
-          <TableRow>
-            <TableCell colSpan={5} align="center">
-              <Box py={5}>
-                <Typography variant="h6" gutterBottom color="textSecondary">
-                  Загрузка...
-                </Typography>
-                <Typography variant="body1" color="textSecondary">
-                  Подождите пожалуйста, ваши заказы загружаются!
-                </Typography>
-              </Box>
-            </TableCell>
-          </TableRow>
-        ) : filter !== 'total_tickets' ? (
-          <TableRow>
-            <TableCell colSpan={5} align="center">
-              <Box py={5}>
-                <Typography variant="h6" gutterBottom color="textSecondary">
-                  По фильтру "{filter}" не найдено заказов
-                </Typography>
-                <Typography variant="body1" color="textSecondary">
-                  Пожалуйста, смените фильтр!
-                </Typography>
-              </Box>
-            </TableCell>
-          </TableRow>
-        ) : (
-          <TableRow>
-            <TableCell colSpan={5} align="center">
-              <Box py={5}>
-                <Typography variant="h6" gutterBottom color="textSecondary">
-                  Заказов пока нет!
-                </Typography>
-                <Typography variant="body1" color="textSecondary">
-                  Вы можете создать новый заказ, используя кнопку в правом верхнем углу.
-                </Typography>
-              </Box>
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
-  </TableContainer>
-</Box>
+                    </TableRow>
+                  );
+                })
+              ) : status === 'loading' ?  (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Box py={5}>
+                      <Typography variant="h6" gutterBottom color="textSecondary">
+                        Загрузка...
+                      </Typography>
+                      <Typography variant="body1" color="textSecondary">
+                        Подождите пожалуйста, ваши заказы загружаются!
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ) : filter !== 'total_tickets' ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Box py={5}>
+                      <Typography variant="h6" gutterBottom color="textSecondary">
+                        По фильтру "{filter}" не найдено заказов
+                      </Typography>
+                      <Typography variant="body1" color="textSecondary">
+                        Пожалуйста, смените фильтр!
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Box py={5}>
+                      <Typography variant="h6" gutterBottom color="textSecondary">
+                        Заказов пока нет!
+                      </Typography>
+                      <Typography variant="body1" color="textSecondary">
+                        Вы можете создать новый заказ, используя кнопку в правом верхнем углу.
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Grid>
+</Grid>
+
 
     <ModalTicket show={isShowModal} ticket={isShowModal ? currentTicket ?? tickets?.[0] ?? null : null} close={handlerCloseModal}/>
     </>);

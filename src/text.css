@@ -42,3 +42,9 @@ select {
 .rbc-off-range {
     color: rgba(0, 0, 0, 0.2) !important; /* Можно изменить значение прозрачности по желанию */
 }
+
+@media (min-width: 0px) {
+    .css-dku4l0 {
+        height: calc(100vh - 100px) !important;
+    }
+}

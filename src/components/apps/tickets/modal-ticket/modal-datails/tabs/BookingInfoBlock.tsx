@@ -105,8 +105,8 @@ export const BookingInfoBlock: React.FC<BookingInfoBlockProps> = ({
 
   return (
     <Paper
-      elevation={3}
-      sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}
+      elevation={0}
+      sx={{ p: '0px 15px', my: 0, borderRadius: 2, border: 'none', boxShadow: 'none' }}
     >
 
       {fullNames && (
@@ -134,7 +134,7 @@ export const BookingInfoBlock: React.FC<BookingInfoBlockProps> = ({
               </Typography>
             ))
           ) : (
-            <Typography
+            <Typography mb={1}
               sx={{
                 whiteSpace: 'pre-line',
                 wordBreak: 'break-word',
@@ -163,7 +163,7 @@ export const BookingInfoBlock: React.FC<BookingInfoBlockProps> = ({
         </Typography>
       )}
 
-      {[AllStatus.NEW, AllStatus.PENDING].includes(getStatus(ticket)) && (
+      {[AllStatus.NEW, AllStatus.PENDING, AllStatus.BOOKED].includes(getStatus(ticket)) && (
         <Typography mb={1}>
           <strong>Тайм-лимит:</strong> До {formatToRussianDate(timeLimit)}
         </Typography>

@@ -66,7 +66,7 @@ import { selectPath, selectPrevPath } from 'src/store/selectors/appSelector.ts';
 
 
 
-const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, openMobileChats, headerOnly, contentOnly, setIsOpenMsg }:
+const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, replyedHeight, openMobileChats, headerOnly, contentOnly, setIsOpenMsg }:
                      { onReply: (message: any) => void,
                        replyToMsg: any | null,
                        cancelReply: () => void,
@@ -75,6 +75,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                        contentOnly?: boolean,
                        openMobileChats?: (open: boolean) => void
                        setIsOpenMsg?: (value: boolean) => void;
+                       replyedHeight?: number;
                      }) => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up("lg"));
 
@@ -92,6 +93,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
   const selectedChat = useAppSelector(selectSelectedchat);
   const setSelectedChat = (value: any) => dispatch(updateSelectedChat(value));
 
+
   const activeChatId = selectedChat?.id;
   const chatSearch = useAppSelector(selectChatSearch) ?? '';
   const setChatSearch = (value: any) => dispatch(updateChatSearch(value));
@@ -102,7 +104,14 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
     const orderMatch = String(chat.name).includes(chatSearch);
     const fioMatch = order.result.result.find((task: ELMATicket) => task.__id === chat.taskId)?.fio2?.some((fio: string) => passports[fio]?.[0]?.toLocaleLowerCase()?.includes(chatSearch.toLocaleLowerCase()));
     return nameMatch || orderMatch || fioMatch;
-  }).sort((a, b) => Number(b.name) - Number(a.name));
+  }).sort((a, b) => {
+    // Сначала сортировка по isChanged: true выше false
+    if (a.isChanged !== b.isChanged) {
+      return a.isChanged ? -1 : 1;
+    }
+    // Если isChanged одинаковы — сортировка по name по убыванию
+    return Number(b.name) - Number(a.name);
+  });
 
 
   const prevChat = useRef(selectedChat);
@@ -788,13 +797,13 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                   )}
 
       {chat.files && chat.files.length > 0 && (
-          <Box mt={1}>
+          <Box mt={1} key={uniqueId()}>
             {chat.files.map((file: any, index: number) => {
               const url = files?.find((file2) => file2.fileId === file?.__id)?.url;
               const extension = file.__name.split('.').at(-1)?.toLowerCase();
               if (['png', 'jpg', 'jpeg'].includes(extension)) {
                 return (
-                  url ? <Box sx={{ position: 'relative', marginRight: 4, mb: 2 }}>
+                  url ? <Box sx={{ position: 'relative', marginRight: 4, mb: 2 }} key={uniqueId()}>
                       <img
                       key={file.fileId}
                       src={url ?? ''} // именно файл, не .url
@@ -825,12 +834,12 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                         color: "primary.main"
                       }}
                     /> */}
-                  </Box> : <p>Файл загружается...</p>
+                  </Box> : <p key={uniqueId()}>Файл загружается...</p>
                 );
                 } else {
                   return(
                   url ? (
-                  <Box sx={{ position: 'relative', marginRight: 4, mb: 2 }}>
+                  <Box sx={{ position: 'relative', marginRight: 4, mb: 2 }} key={uniqueId()}>
                     <Button
                       key={file.fileId}
                       variant="outlined"
@@ -1026,7 +1035,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                   if (['png', 'jpg', 'jpeg'].includes(extension)) {
                     return (
                       url ? <img
-                        key={file.fileId}
+                        key={uniqueId()}
                         src={url ?? ''} // именно файл, не .url
                         alt="Uploaded image"
                         style={{ maxWidth: '200px', height: 'auto' }}
@@ -1044,13 +1053,13 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                         }
                       }
 
-                      /> : <p>Файл загружается...</p>
+                      /> : <p key={uniqueId()}>Файл загружается...</p>
                     );
                   } else {
                     return(
                     url ? (
                       <>
-                      <Typography className="break-word">{file.originalName}</Typography>
+                      <Typography key={uniqueId()} className="break-word">{file.originalName}</Typography>
                       <Button
                         key={uniqueId()}
                         variant="outlined"
@@ -1074,7 +1083,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                       </Button>
                     </>
                     ) : (
-                      <p>Файл загружается...</p>
+                      <p key={uniqueId()}>Файл загружается...</p>
                     )
                   )}
                 })}
@@ -1114,7 +1123,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                   {!lgUp && (
                     <IconButton onClick={() => {
                       setIsOpenMsg?.(mobileChatsMenuOpen)
-                      setMobileChatsMenuOpen((prevState) => !prevState)}} sx={{ ml: 'auto' }}>
+                      setMobileChatsMenuOpen((prevState) => !prevState)}} sx={{ ml: '4%' }}>
                       <ForumIcon /> {/* или любой другой иконкой, напр. IconMessage */}
                     </IconButton>
                   )}
@@ -1161,7 +1170,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                     primary={
                       <Typography className="break-word"
                                   component={Link}
-                                  ml={lgUp ? 0 : 2}
+                                  ml={lgUp ? "2vh" : '30%'}
                                   fontSize={18}
                                   onClick={() =>
                                     navigate(`/apps/orders?item=${selectedChat.name}`)
@@ -1178,6 +1187,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                       color="primary"
                       size="small"
                       onClick={() => setMobileSidebarOpen((prevState) => !prevState)}
+                      sx={{ mr: '2.5%' }}
                     >
                       <InfoIcon />
                     </Fab>
@@ -1189,7 +1199,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
           </Box>
 
           {/* Main Content */}
-          <Box sx={{ display: 'flex', width: 'auto', overflow: 'hidden', maxHeight: lgUp ? open ? 'calc(100vh - 330px)' : 'auto' : '100vh'}} ref={mainBoxRef}>
+          <Box sx={{ display: 'flex', width: 'auto', overflow: 'hidden', maxHeight: lgUp ? open ? 'calc(var(--app-height) - 330px)' : 'auto' : `calc(var(--app-height) - 100px - ${replyedHeight ?? 0}px)`}} ref={mainBoxRef}>
             {/* Messages */}
             <Box overflow={'hidden'}>
               <Box
@@ -1198,7 +1208,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                   overflowX: 'hidden',
                   overflowY: 'auto',
                   maxHeight: open ? 'auto' : 'auto',
-                  height: open ? lgUp ? '100%' : '70vh' : 'auto',
+                  height: open ? lgUp ? '70vh' : `calc(var(--app-height) - 195px - ${replyedHeight ?? 0}px)` : 'auto',
                   width: lgUp
                     ? !open
                       ? '100%'
@@ -1213,12 +1223,12 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                 },
                 }}
               >
-                <Box p={lgUp ? 3 : '15px 10px'} className="chat-text" ref={chatListScrollRef}>
+                <Box p={lgUp ? 3 : '15px 10px'} className="chat-text" maxHeight={lgUp ? open ? '100%' : '50vh' : '100%'} ref={chatListScrollRef}>
                   {/* 👇 Мобильное меню чатов */}
                   {open && !lgUp && mobileChatsMenuOpen ? (
                     <>
                       <Scrollbar
-                        sx={{ height: 'calc(100vh - 150px)' }}
+                        sx={{ height: '100%' }}
                         ref={chatListScrollRef} // ✅ ref именно сюда
                       >
                         <Box p={1}>
@@ -1229,7 +1239,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, open
                         </Box>
 
                         <List sx={{ px: 0 }}>
-                          <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '600px' }}>
+                          <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh', sm: 'calc(100vh - 100px)' }, maxHeight: '100vh' }}>
                             {filteredChats && filteredChats.length ? (
                               filteredChats.map((chat) => (
                                 <ListItemButton

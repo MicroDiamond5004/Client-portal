@@ -43,9 +43,16 @@ const ModalTicket = (props: ModalTicketProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const [isUploadingImage, setUploadingImage] = useState<boolean>(false);
+
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setImages([...images, ...Array.from(event.target.files)]);
+      if (event.target.files.length >= 1) {
+        setUploadingImage(true);
+      } else {
+        setUploadingImage(false);
+      }
     }
   };
 
@@ -59,7 +66,6 @@ const ModalTicket = (props: ModalTicketProps) => {
     const dispatch = useAppDispatch();
 
     const {show, close, ticket} = props;
-
 
     const textRef = useRef<HTMLTextAreaElement>(null);
 
@@ -259,7 +265,7 @@ const ModalTicket = (props: ModalTicketProps) => {
               Пожалуйста, подождите...
             </Typography>
             <Typography variant="body2" mt={1} textAlign="center" color="text.secondary">
-              Загружаем файлы и сохраняем заказ
+              {isUploadingImage ? 'Загружаем файлы и сохраняем заказ' : 'Сохраняем заказ'}
             </Typography>
           </Box>) : ticket?.__id ? (
           <Box>
@@ -371,6 +377,7 @@ const ModalTicket = (props: ModalTicketProps) => {
                   } catch (e) {
                     console.error('Ошибка при отправке заказа:', e);
                   } finally {
+                    setUploadingImage(false)
                     setUploading(false);
                   }
                 }}

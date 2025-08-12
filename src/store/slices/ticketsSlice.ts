@@ -69,53 +69,57 @@ const ticketsSlice = createSlice({
       state.endDate = action.payload.endDate;
     },
     updateAllTickets(state, action: PayloadAction<any>) {
-      console.log('ОБНОВИЛ');
-      state.prevTickets = [...state.tickets]; // сохранить копию до изменений
-      const AllTickets = sortAllTickets(action.payload);
-      state.tickets = AllTickets;
-      state.fullOrder = {
-        result: {
-          result: AllTickets,
-          total: AllTickets?.length,
-        },
-        success: true,
-        error: ''
-      };
+      const AllTickets: ELMATicket[] = sortAllTickets(action.payload);
+      if (!isEqual(state.tickets, AllTickets)) {
+        console.log('ОБНОВИЛ');
+        state.prevTickets = [...state.tickets]; // сохранить копию до изменений
 
-      const todosData = AllTickets;
+        state.tickets = AllTickets;
+        state.fullOrder = {
+          result: {
+            result: AllTickets,
+            total: AllTickets?.length,
+          },
+          success: true,
+          error: ''
+        };
 
-      const categoriesTickets: any = {
-        [AllStatus.NEW]: [],
-        [AllStatus.PENDING]: [],
-        [AllStatus.BOOKED]: [],
-        [AllStatus.FORMED]: [],
-        [AllStatus.CLOSED]: [],
-      };
+        const todosData = AllTickets;
 
-      todosData.forEach((ticket: ELMATicket) => {
-        if (ticket.__status?.status) {
-          categoriesTickets[getStatus(ticket)].push(ticket);
-        }
-      });
+        const categoriesTickets: any = {
+          [AllStatus.NEW]: [],
+          [AllStatus.PENDING]: [],
+          [AllStatus.BOOKED]: [],
+          [AllStatus.FORMED]: [],
+          [AllStatus.CLOSED]: [],
+        };
 
-      const categories: any = [];
-
-      Object.entries(categoriesTickets).forEach(([key, value], index) => {
-        categories.push(
-          {
-            id: index + 1,
-            name: key,
-            child: value
+        todosData.forEach((ticket: ELMATicket) => {
+          if (ticket.__status?.status) {
+            categoriesTickets[getStatus(ticket)].push(ticket);
           }
-        )
-      })
+        });
 
-      state.todoCategories = categories;
+        const categories: any = [];
+
+        Object.entries(categoriesTickets).forEach(([key, value], index) => {
+          categories.push(
+            {
+              id: index + 1,
+              name: key,
+              child: value
+            }
+          )
+        })
+
+        state.todoCategories = categories;
+      }
     }
   },
   extraReducers: (builder) => {
     builder
       .addCase(logoutAll.fulfilled, (state) => {
+        console.log('вышел!')
         state.tickets = [];
         state.prevTickets = [];
         state.passporta = {};

@@ -60,6 +60,8 @@ type ModalTicketProps = {
 const ModalDetails = (props: ModalTicketProps) => {
   const { ticket, onClose } = props;
 
+  console.log(ticket.__updatedAtBooking, '-----------------');
+
   const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null); // точка, уезжающая вверх
@@ -159,7 +161,6 @@ const ModalDetails = (props: ModalTicketProps) => {
     messages: ticket?.nomer_zakaza ? currentChats?.[ticket.nomer_zakaza] : [],
   };
 
-
   const status = getStatus(ticket);
 
   let colorStatus = 'black';
@@ -195,6 +196,8 @@ const ModalDetails = (props: ModalTicketProps) => {
     setTabIndex(newIndex);
   };
 
+
+
   const fieldMap: Record<
     number,
     {
@@ -202,6 +205,7 @@ const ModalDetails = (props: ModalTicketProps) => {
       passport: string;
       answer: string;
       timeLimit: string;
+      oform: string;
     }
   > = {
     1: {
@@ -209,36 +213,42 @@ const ModalDetails = (props: ModalTicketProps) => {
       passport: 'nomer_a_pasporta_ov_dlya_proverki',
       answer: 'otvet_klientu',
       timeLimit: 'taim_limit_dlya_klienta',
+      oform: 'otvet_klientu3'
     },
     2: {
       fio: 'dopolnitelnye_fio',
       passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
       answer: 'otvet_klientu_o_bronirovanii_2',
       timeLimit: 'taim_limit_dlya_klienta_bron_2',
+      oform: 'otvet_klientu_pered_oformleniem_bron_2'
     },
     3: {
       fio: 'fio_passazhira_ov_bron_3',
       passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_3',
       answer: 'otvet_klientu_o_bronirovanii_3',
       timeLimit: 'taim_limit_dlya_klienta_bron_3',
+      oform: 'otvet_klientu_pered_oformleniem_bron_3'
     },
     4: {
       fio: 'fio_passazhira_ov_bron_4',
       passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
       answer: 'otvet_klientu_o_bronirovanii_4',
       timeLimit: 'taim_limit_dlya_klienta_bron_4',
+      oform: 'otvet_klientu_pered_oformleniem_bron_4'
     },
     5: {
       fio: 'fio_passazhira_ov_bron_5',
       passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_5',
       answer: 'otvet_klientu_o_bronirovanii_5',
       timeLimit: 'taim_limit_dlya_klienta_bron_5',
+      oform: 'otvet_klientu_pered_oformleniem_bron_5'
     },
     6: {
       fio: 'fio_passazhira_ov_bron_6',
       passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
       answer: 'otvet_klientu_o_bronirovanii_6',
       timeLimit: 'taim_limit_dlya_klienta_bron_6',
+      oform: 'otvet_klientu_pered_oformleniem_bron_6'
     },
   };
 
@@ -248,8 +258,10 @@ const ModalDetails = (props: ModalTicketProps) => {
 
     const fioList = ticket[fields.fio];
     const passportData = ticket[fields.passport];
-    const routeInfo = ticket[fields.answer];
+    const routeInfo = ticket[fields.oform] ?? ticket[fields.answer];
     const timeLimit = ticket[fields.timeLimit];
+
+
 
     return !!(
       routeInfo && (
@@ -284,23 +296,29 @@ const ModalDetails = (props: ModalTicketProps) => {
     val ? `${(val.cents / 100).toLocaleString('ru-RU')} ${val.currency}` : null;
 
   const AllTabs = ["Отели", "Трансфер", "ВИП сервис", "Карта мест"].map((data, index) => {
-    let flagTab = true
+    let flagTab = false
     switch (index) {
       case 0:
         [1, 2, 3].map((index) => {
-          const suffix = index === 1 ? '' : index;
-          const hotel = ticket[`otel${suffix}`]?.name;
+          const c = index === 1 ? '' : null;
+          const isThird = index === 3 ? '_' : null;
+          const suffix = index;
+          const hotel = ticket[`otel${suffix}`];
           const checkIn = ticket[`data_zaezda${suffix}`];
           const checkOut = ticket[`data_vyezda${suffix}`];
-          const nights = ticket[`kolichestvo_nochei${suffix}`];
-          const roomType = ticket[`tip_nomera${suffix}`]?.name;
-          const foodType = ticket[`tip_pitaniya${suffix}`]?.name;
-          const price = ticket[`stoimost${suffix}`]?.cents > 0 ? formatMoney(ticket[`stoimost${suffix}`]) : null;
+          const nights = ticket[`kolichestvo_nochei${isThird ?? ''}${suffix}`];
+          const roomType = ticket[`tip_nomera${suffix}`];
+          const foodType = ticket[`${index === 2 ? 'tip_pitani' : 'tip_pitaniya'}${suffix}`];
+          const price = ticket[`stoimost${c ?? suffix}`]?.cents > 0 ? formatMoney(ticket[`stoimost${suffix}`]) : null;
+
+          console.log(`kolichestvo_nochei${isThird ?? ''}${c ?? suffix}`, index, ticket[`stoimost${c ?? suffix}`])
 
           const isEmpty =
             !hotel && !checkIn && !checkOut && !nights && !roomType && !foodType && !price;
 
-          flagTab = !isEmpty;
+          if (!flagTab) {
+            flagTab = !isEmpty;
+          }
         });
         break;
       case 1:
@@ -366,7 +384,7 @@ const ModalDetails = (props: ModalTicketProps) => {
       return (
         <>
           {aviabilety.some(Boolean) ? (<>
-              <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+              <Paper sx={{ p: {md: 3, sm: 1}, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
                 <Box
                   sx={{
                     display: 'flex',
@@ -379,19 +397,19 @@ const ModalDetails = (props: ModalTicketProps) => {
                   }}
                 >
                   {/* Тут ваши дочерние элементы */}
-                  <Chip
+                  {ticket?.__updatedAtBooking && <Chip
                     size="small"
                     color="success"
                     variant="outlined"
                     label={formatToRussianDate(ticket?.__updatedAtBooking, 'd MMMM yyyy / HH:mm')}
                     sx={{ mt: 0.5, mb: 2 }}
-                  />
+                  />}
                 </Box>
               {aviabilety.map((el) => el)}
               </Paper>
             </>
           ) : (
-            <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+            <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
               <Box
                 sx={{
                   display: 'flex',
@@ -404,13 +422,13 @@ const ModalDetails = (props: ModalTicketProps) => {
                 }}
               >
                 {/* Тут ваши дочерние элементы */}
-                <Chip
+                {ticket?.__updatedAtBooking && <Chip
                   size="small"
                   color="success"
                   variant="outlined"
-                  label={formatToRussianDate(ticket?.__updatedAtBooking, 'd MMMM yyyy / HH:mm')}
+                  label={formatToRussianDate(ticket.__updatedAtBooking, 'd MMMM yyyy / HH:mm')}
                   sx={{ mt: 0.5, mb: 2 }}
-                />
+                />}
               </Box>
               {ticket.otvet_klientu1 ? (
                 <Typography mb={1}>
@@ -578,15 +596,170 @@ const ModalDetails = (props: ModalTicketProps) => {
           </Toolbar>
         </AppBar>
 
-
-        <Container maxWidth={"100%"} sx={{ mt: isMobile ? 1.5 : 2 }}>
-          <Grid container spacing={3}>
-            {/* Left Column */}
-            <Grid item xs={12} sm={8}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={ticket.zapros || zaprosFiles.length ? 4 : 12}>
+        {!isMobile ? (
+          <Container maxWidth="100%" sx={{ maxHeight: '80vh', overflow: 'auto' }}>
+            <Grid container spacing={2} sx={{ maxHeight: '100%' }}>
+              {/* Left Column */}
+              <Grid item xs={12} sm={3} sx={{ maxHeight: '80vh' }}>
+                <Box
+                  sx={{
+                    height: '66vh',
+                    overflowY: 'auto',
+                    p: 2,
+                    bgcolor: 'background.paper',
+                    borderRadius: 1,
+                  }}
+                >
                   <Paper variant="outlined">
                     <Box p={3} display="flex" flexDirection="column" gap={1}>
+                      {ticket.zapros && (
+                        <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                          {ticket.zapros}
+                        </Typography>
+                      )}
+                      {zaprosFiles.map((file) => {
+                        const filename = decodeURIComponent(file.filename);
+                        const ext = filename.split('.').pop()?.toLowerCase() || '';
+                        const isImage = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(ext);
+                        return (
+                          <Stack key={file.fileId} direction="row" gap={2} alignItems="center">
+                            {isImage ? (
+                              <Box
+                                component="img"
+                                src={file.url}
+                                alt={filename}
+                                sx={{
+                                  width: 100,
+                                  height: 100,
+                                  objectFit: 'cover',
+                                  borderRadius: 1,
+                                  border: '1px solid #ccc',
+                                  cursor: 'pointer',
+                                }}
+                                onClick={() =>
+                                  dispatch(
+                                    showFilePreview({
+                                      url: file.url ?? '',
+                                      name: file.filename ?? '',
+                                      type: '',
+                                    })
+                                  )
+                                }
+                              />
+                            ) : (
+                              <Avatar variant="rounded" sx={{ width: 48, height: 48, bgcolor: 'grey.100' }}>
+                                <IconFile />
+                              </Avatar>
+                            )}
+                            <Box flexGrow={1} overflow="hidden">
+                              <Typography noWrap>{filename}</Typography>
+                            </Box>
+                            <IconButton onClick={() => handleDownloadFile(file)}>
+                              <IconDownload />
+                            </IconButton>
+                          </Stack>
+                        );
+                      })}
+                    </Box>
+                  </Paper>
+                </Box>
+              </Grid>
+
+              {/* Middle Column */}
+              <Grid item xs={12} sm={5} sx={{ maxHeight: '80vh' }}>
+                <Box
+                  sx={{
+                    maxHeight: '66vh',
+                    overflowY: 'auto',
+                    p: 2,
+                    bgcolor: 'background.paper',
+                    borderRadius: 1,
+                  }}
+                >
+                  <Paper variant="outlined" sx={{ maxHeight: '95%', display: 'flex', flexDirection: 'column' }}>
+                    {/* Sticky Tabs */}
+                    <Box
+                      sx={{
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 10,
+                        bgcolor: 'background.paper',
+                        borderBottom: '1px solid #e0e0e0',
+                      }}
+                    >
+                      <Tabs
+                        value={tabIndex}
+                        onChange={handleTabChange}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                      >
+                        <Tab label="Авиабилеты" />
+                        {visibleTabs}
+                      </Tabs>
+                    </Box>
+                    {/* Scrollable Tab Content */}
+                    <Box mt={0} flexGrow={1} overflow="auto">
+                      {renderTabContent()}
+                    </Box>
+                  </Paper>
+                </Box>
+              </Grid>
+
+               {/*Right Column: Sticky Chat*/}
+              <Grid item xs={12} sm={4} sx={{ maxHeight: '80vh' }}>
+                <Box
+                  sx={{
+                    position: 'sticky',
+                    p: 2,
+                    // remove overflow
+                    // overflowY: 'auto',
+                  }}
+                >
+                  {/* MiniChat */}
+                  {ticket.__id && selectedChat.messages && (
+                    <MiniChat selectedChat={selectedChat} />
+                  )}
+              
+                  {/* Кнопки под чатом */}
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="space-around"
+                    textAlign="center"
+                    gap={1}
+                    mt={2}
+                  >
+                    <Button
+                      sx={{ width: '200px' }}
+                      variant="contained"
+                      color="secondary"
+                      component={Link}
+                      to={`/apps/chats?item=${ticket.nomer_zakaza}`}
+                    >
+                      Перейти в чат
+                    </Button>
+                    <Button
+                      sx={{ width: '200px' }}
+                      variant="contained"
+                      color="primary"
+                      onClick={onClose}
+                    >
+                      Перейти к заказам
+                    </Button>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          </Container>
+        ) : (
+          <Container maxWidth="100%" sx={{ height: '100%' }}>
+          <Grid container spacing={0} sx={{ height: '100%' }}>
+            {/* Left Column */}
+            <Grid item xs={12} sm={8} sx={{ height: '100%' }}>
+              <Grid container spacing={0}>
+                <Grid item xs={12} sm={ticket.zapros || zaprosFiles.length ? 4 : 12}>
+                  <Paper variant="outlined">
+                    <Box p={2} display="flex" flexDirection="column" gap={1}>
                       {ticket.zapros && (
                         <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
                           {ticket.zapros}
@@ -625,20 +798,22 @@ const ModalDetails = (props: ModalTicketProps) => {
                 </Grid>
 
                 {/* Tabs */}
-                <Grid item xs={12} sm={8} sx={{ mt: { xs: 1, sm: 0 } }}>
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Tabs
-                      value={tabIndex}
-                      onChange={handleTabChange}
-                      variant="scrollable"
-                      scrollButtons="auto"
-                    >
-                      <Tab label="Авиабилеты" />
-                      {visibleTabs}
-                    </Tabs>
+                <Grid item xs={12} sm={8} sx={{ mt: { xs: 1, sm: 0 }, maxHeight: '100vh', overflow: 'auto' }}>
+                  <Paper variant="outlined" sx={{ p: 0 }}>
+                    <Box>
+                      <Tabs
+                        value={tabIndex}
+                        onChange={handleTabChange}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                      >
+                        <Tab label="Авиабилеты" />
+                        {visibleTabs}
+                      </Tabs>
 
-                    <Box mt={2}>
-                      {renderTabContent()}
+                      <Box mt={2}>
+                        {renderTabContent()}
+                      </Box>
                     </Box>
                   </Paper>
                 </Grid>
@@ -648,7 +823,7 @@ const ModalDetails = (props: ModalTicketProps) => {
             {/* Right Column: Sticky Chat */}
             <Grid item xs={12} sm={4}>
               {ticket.__id && selectedChat.messages && (
-                <Box sx={{ position: 'sticky', top: theme => theme.spacing(15), zIndex: 1000 }}>
+                <Box sx={{ zIndex: 1000 }}>
                   {!isMobile && <MiniChat selectedChat={selectedChat} />}
                   <Box display="flex" flexDirection="row" justifyContent={'space-around'} textAlign="center" gap={1} mt={2}>
                     <Button sx={{width: '200px'}} variant="contained" color="secondary" state={{ item: ticket.nomer_zakaza }} component={Link} to={`/apps/chats?item=${ticket.nomer_zakaza}`}>Перейти в чат</Button>
@@ -658,7 +833,7 @@ const ModalDetails = (props: ModalTicketProps) => {
               )}
             </Grid>
           </Grid>
-        </Container>
+        </Container>)}
       </Box>
     </InvoiceProvider>
   )

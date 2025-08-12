@@ -58,7 +58,7 @@ export const TransferBlock: React.FC<TransferBlockProps> = ({ ticket }) => {
 
   if (isEmpty) {
     return (
-      <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+      <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
         <Typography>Нет данных по трансферу</Typography>
       </Paper>
     );
@@ -66,7 +66,7 @@ export const TransferBlock: React.FC<TransferBlockProps> = ({ ticket }) => {
 
   return (
     <Box>
-      <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+      <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
         <Box
           sx={{
             display: 'flex',
@@ -78,13 +78,13 @@ export const TransferBlock: React.FC<TransferBlockProps> = ({ ticket }) => {
             gap: 0,
           }}
         >
-          <Chip
+          {ticket?.__updatedAtTransfer && <Chip
             size="small"
             color="success"
             variant="outlined"
             label={formatToRussianDate(ticket?.__updatedAtTransfer, 'd MMMM yyyy / HH:mm')}
             sx={{ mt: 0.5, mb: 2 }}
-          />
+          />}
         </Box>
 
         {opisanie_transfera && (

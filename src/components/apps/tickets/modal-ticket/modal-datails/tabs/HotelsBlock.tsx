@@ -40,14 +40,18 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
   }, [ticket.vaucher?.__id]);
 
   const hotelItems = [1, 2, 3].map((index) => {
-    const suffix = index === 1 ? '' : index;
-    const hotel = ticket[`otel${suffix}`]?.name;
+    const c = index === 1 ? '' : null;
+    const isThird = index === 3 ? '_' : null;
+    const suffix = index;
+    const hotel = ticket[`nazvanie_otelya${suffix}`];
+    const roomType = ticket[`tip_nomera${suffix}_nazvanie`];
+    const foodType = ticket[`tip_pitaniya${suffix}_nazvanie`];
     const checkIn = ticket[`data_zaezda${suffix}`];
     const checkOut = ticket[`data_vyezda${suffix}`];
-    const nights = ticket[`kolichestvo_nochei${suffix}`];
-    const roomType = ticket[`tip_nomera${suffix}`]?.name;
-    const foodType = ticket[`tip_pitaniya${suffix}`]?.name;
-    const price = ticket[`stoimost${suffix}`]?.cents > 0 ? formatMoney(ticket[`stoimost${suffix}`]) : null;
+    const nights = ticket[`kolichestvo_nochei${isThird ?? ''}${suffix}`];
+    const price = ticket[`stoimost${c ?? suffix}`]?.cents > 0 ? formatMoney(ticket[`stoimost${suffix}`]) : null;
+
+    console.log(suffix, hotel, checkIn, checkOut, nights, roomType, foodType, price)
 
     const isEmpty =
       !hotel && !checkIn && !checkOut && !nights && !roomType && !foodType && !price;
@@ -58,7 +62,7 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
       <Paper
         key={index}
         elevation={3}
-        sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}
+        sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#fff' }}
       >
         <Box
           sx={{
@@ -71,13 +75,6 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
             gap: 0,
           }}
         >
-          <Chip
-            size="small"
-            color="success"
-            variant="outlined"
-            label={formatToRussianDate(ticket?.__updatedAtHotels, 'd MMMM yyyy / HH:mm')}
-            sx={{ mt: 0.5, mb: 2 }}
-          />
         </Box>
         {hotel && <Typography mb={1}><strong>Название отеля:</strong> {hotel}</Typography>}
         {ticket.kolichestvo_nomerov && index === 1 && (
@@ -98,17 +95,36 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
 
   if (!hasMainData && !hasExtraData) {
     return (
-        <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+        <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#fff' }}>
             <Typography>Нет данных по размещению</Typography>
         </Paper>
     );
   }
 
   return (
-    <Box>
+    <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: {
+            xs: 'column', // для мобильных (xs и меньше)
+            sm: 'row',    // от sm и выше — в строку
+          },
+          justifyContent: 'space-between',
+          gap: 0,
+        }}
+      >
+        {ticket?.__updatedAtMap && <Chip
+        size="small"
+        color="success"
+        variant="outlined"
+        label={formatToRussianDate(ticket?.__updatedAtMap, 'd MMMM yyyy / HH:mm')}
+        sx={{ mt: 0.5, mb: 1 }}
+      />}
+      </Box>
       {hotelItems}
       {(hasExtraData) && (
-        <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+        <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#fff' }}>
           {ticket.kommentarii_k_predlozheniyu && <Typography mb={1}><strong>Комментарий:</strong> {ticket.kommentarii_k_predlozheniyu ? ticket.kommentarii_k_predlozheniyu.split('\n').map((line: string, i: number) => (
               <Fragment key={i}>
                 {line}
@@ -128,7 +144,7 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
           )}
         </Paper>
       )}
-    </Box>
+    </Paper>
   );
 };
 

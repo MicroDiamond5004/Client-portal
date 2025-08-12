@@ -17,6 +17,7 @@ import './text.css';
 import { fetchMessages } from 'src/store/middleware/thunks/messageThunks.ts';
 import { fetchUserOrders } from 'src/store/middleware/thunks/ordersThunks.ts';
 import { setPath } from 'src/store/slices/appSlice.ts';
+import useDynamicVh from 'src/hooks/useDinamivVH.ts';
 
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
   const token = useAppSelector(selectToken);
   const email = useAppSelector(selecttClientEmail);
 
-
+  useDynamicVh();
 
   useEffect(() => {
     if ((token?.length ?? 0) > 1) {

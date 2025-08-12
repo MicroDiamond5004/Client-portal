@@ -40,13 +40,15 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
   }, [originalVoucherFiles, ticket]);
 
   const {
-    nazvanie_uslugi_vipservis,
+    nazvanie_uslugi,
     opisanie_uslugi_vipservis,
     stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis,
     fio_passazhirov_vipservis,
     stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2,
     fio_passazhirov_vipservis_2
   } = ticket;
+
+  console.log(fio_passazhirov_vipservis )
 
   const fioList = (fio_passazhirov_vipservis ?? [])
     .map((id: string) => passports?.[id])
@@ -57,7 +59,7 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
     .filter(Boolean);
 
   const isEmpty =
-    !nazvanie_uslugi_vipservis &&
+    !nazvanie_uslugi &&
     !opisanie_uslugi_vipservis &&
     !stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis &&
     fioList.length === 0 &&
@@ -65,7 +67,7 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
 
   if (isEmpty) {
     return (
-      <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+      <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
         <Typography>Нет данных по VIP-услугам</Typography>
       </Paper>
     );
@@ -73,7 +75,7 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
 
   return (
     <Box>
-      <Paper sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+      <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
         <Box
           sx={{
             display: 'flex',
@@ -85,20 +87,32 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
             gap: 0,
           }}
         >
-          <Chip
+          {ticket?.__updatedAtVip && <Chip
             size="small"
             color="success"
             variant="outlined"
             label={formatToRussianDate(ticket?.__updatedAtVip, 'd MMMM yyyy / HH:mm')}
             sx={{ mt: 0.5, mb: 2 }}
-          />
+          />}
         </Box>
 
-        {nazvanie_uslugi_vipservis && (
-          <Typography mb={1}><strong>Название услуги:</strong> {nazvanie_uslugi_vipservis}</Typography>
+        {stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis && (
+          <Typography mb={2}>
+            <strong>Стоимость услуги (№ 1):</strong>{' '}
+            {formatMoney(stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis)}
+          </Typography>
         )}
+
+        {stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2 && (
+          <Typography mb={2}>
+            <strong>Стоимость услуги (№ 2):</strong>{' '}
+            {formatMoney(stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2
+            )}
+          </Typography>
+        )}
+
         {opisanie_uslugi_vipservis && (
-          <Typography mb={1}><strong>Описание услуги:</strong> {opisanie_uslugi_vipservis ? opisanie_uslugi_vipservis.split('\n').map((line: string, i: number) => (
+          <Typography mb={2}><strong>Описание услуги:</strong> {opisanie_uslugi_vipservis ? opisanie_uslugi_vipservis.split('\n').map((line: string, i: number) => (
               <Fragment key={i}>
                 {line}
                 <br />
@@ -106,12 +120,11 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
             ))
             : null}</Typography>
         )}
-        {stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis && (
-          <Typography mb={2}>
-            <strong>Стоимость услуги (№ 1):</strong>{' '}
-            {formatMoney(stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis)}
-          </Typography>
+
+        {nazvanie_uslugi && (
+          <Typography mb={2}><strong>Название услуги:</strong> {nazvanie_uslugi}</Typography>
         )}
+
         {fioList.length > 0 && (
           <Box mb={2}>
             <Typography><strong>ФИО пассажира(ов)(№1):</strong></Typography>
@@ -120,13 +133,7 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
             ))}
           </Box>
         )}
-        {stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2 && (
-          <Typography mb={2}>
-            <strong>Стоимость услуги (№ 2):</strong>{' '}
-            {formatMoney(stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2
-            )}
-          </Typography>
-        )}
+
         {fioList2.length > 0 && (
           <Box mb={2}>
             <Typography><strong>ФИО пассажира(ов)(№2):</strong></Typography>
@@ -135,6 +142,7 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
             ))}
           </Box>
         )}
+
         {voucherFiles.length > 0 && (
           <FileListBlock
             title="Ваучер VIP-услуг"

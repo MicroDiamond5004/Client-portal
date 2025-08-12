@@ -352,23 +352,29 @@ app.post('/api/logoutAll', async (req, res) => {
   const login = req.body.login;
   const password = req.body.password;
 
-  const firstLogin = await axios.post(loginURL, {
-    auth_login: login,
-    password: password,
-    portal: 'work_orders',
-  }, {
-    withCredentials: true,
-  });
+  try {
+    const firstLogin = await axios.post(loginURL, {
+      auth_login: login,
+      password: password,
+      portal: 'work_orders',
+    }, {
+      withCredentials: true,
+    });
 
-  // console.log(firstLogin.headers);
+    // console.log(firstLogin.headers);
 
-  const setCookiePrev = firstLogin.headers['set-cookie'];
-  if (!setCookiePrev) throw new Error('⛔ Не получены cookie от первого логина');
+    const setCookiePrev = firstLogin.headers['set-cookie'];
+    if (!setCookiePrev) throw new Error('⛔ Не получены cookie от первого логина');
 
-  // 2️⃣ Logout
-  await axios.post(logoutURL, {}, {
-    headers: { Cookie: setCookiePrev },
-  });
+    // 2️⃣ Logout
+    await axios.post(logoutURL, {}, {
+      headers: { Cookie: setCookiePrev },
+    });
+  } catch (error) {
+
+  }
+
+  res.status(200).json({ message: 'Success' });
 })
 
 app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
@@ -395,12 +401,19 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
       sendToUser(email, {type: 'orders', orders: currentOrders});
     }
   } else if (type === 'message') {
-    const orderNumber = currentOrders.find((el) => el.__id === id)?.nomer_zakaza;
-    currentOrders.forEach((el) => {
-      console.log(el.nomer_zakaza)
-    },);
+    let orderNumber = currentOrders.find((el) => el.__id === id)?.nomer_zakaza;
+
+
+
     console.log(clientId,currentOrders?.length, currentOrders?.filter(el => el.nomer_zakaza).length);
     let found = false;
+
+    let testNumber: null | string = null;
+
+    // if (id === '01987a28-4ac9-7c7f-b97c-2edf912d5302') {
+    //   testNumber = '1128';
+    //   orderNumber = '1128';
+    // }
 
     if (!orderNumber) {
       return res.status(404).json({ error: 'Сообщение не найдено' });
@@ -419,7 +432,22 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
       }));
     }
 
-    const newData = { orders: currentOrders, messages: currentMessages };
+    let testOrders: ELMATicket[] | null;
+
+    if (testNumber) {
+      const index = currentOrders.findIndex((el) => el.__id === '01987a28-4ac9-7c7f-b97c-2edf912d5302');
+
+      if (index !== -1) {
+        testOrders = [
+          ...currentOrders.slice(0, index),
+          {...currentOrders[index], nomer_zakaza: testNumber},
+          ...currentOrders.slice(index + 1),
+        ]
+      }
+    }
+
+    // @ts-ignore
+    const newData = { orders: testOrders ?? currentOrders, messages: currentMessages };
     await saveUserData(clientId, newData);
 
     sendToUser(email, {type: 'messages', messages: currentMessages});
@@ -1367,29 +1395,63 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
 
     const orderId = elmaResponse.data?.__id; // замените на нужный ID
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    interface ElmaOrderResponse {
+      success: boolean;
+      error: string;
+      item: Record<string, any>;
+    }
 
-    const response = await axios.post(
-      `https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/${orderId}/get`,
-      {},
+    async function pollOrder(
+      orderId: string,
       {
-        headers: {
-          'Authorization': `${TOKEN}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json, text/plain, */*',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-Language': 'ru-RU',
-          'X-Timezone': 'Europe/Moscow',
-          'Sec-CH-UA': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"',
-          'Sec-CH-UA-Mobile': '?0',
-          'Sec-CH-UA-Platform': '"Windows"',
-          'Referer': 'https://portal.dev.lead.aero/admin/process/01957f60-8641-75f6-a8f9-b41a57782729/settings',
-          'Origin': 'https://portal.dev.lead.aero'
-        },
-        withCredentials: true
-      }
-    );
+        interval = 1000,   // как часто опрашивать, в мс
+        timeout = 10000,   // общее время ожидания, в мс
+      }: { interval?: number; timeout?: number } = {}
+    ): Promise<ElmaOrderResponse['item']> {
+      const start = Date.now();
 
+      while (true) {
+        // Выполняем запрос
+        const response = await axios.post<ElmaOrderResponse>(
+          `https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/${orderId}/get`,
+          {},
+          {
+            headers: {
+              Authorization: `${TOKEN}`,
+              'Content-Type': 'application/json',
+              Accept: 'application/json, text/plain, */*',
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-Language': 'ru-RU',
+              'X-Timezone': 'Europe/Moscow',
+              Referer:
+                'https://portal.dev.lead.aero/admin/process/01957f60-8641-75f6-a8f9-b41a57782729/settings',
+              Origin: 'https://portal.dev.lead.aero',
+            },
+            withCredentials: true,
+          }
+        );
+
+        const item = response.data.item;
+        const link = item.ssylka_na_kartochku;
+        const nomer_zakaza = item.nomer_zakaza;
+
+        // Если поле есть — возвращаем item
+        if (typeof link === 'string' && link?.trim() !== '' && nomer_zakaza) {
+          return response;
+        }
+
+        // Проверяем таймаут
+        if (Date.now() - start >= timeout) {
+          throw new Error(`Timeout: поле ssylka_na_kartochku не появилось за ${timeout} мс`);
+        }
+
+        // Ждём interval перед следующим запросом
+        await new Promise((resolve) => setTimeout(resolve, interval));
+      }
+    }
+
+
+    const response = await pollOrder(orderId, { interval: 500, timeout: 10000 });
 
     const newOrderId = response.data?.__id;
 
@@ -2088,12 +2150,14 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
     const AllPassports = new Set<string>();
 
     mergedOrders?.forEach((order: any) => {
-      order.fio2.forEach((fio: string) => AllPassports.add(fio));
-      order.dopolnitelnye_fio.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhira_ov_bron_3.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhira_ov_bron_4.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhira_ov_bron_5.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhira_ov_bron_6.forEach((fio: string) => AllPassports.add(fio));
+      order.fio2?.forEach((fio: string) => AllPassports.add(fio));
+      order.dopolnitelnye_fio?.forEach((fio: string) => AllPassports.add(fio));
+      order.fio_passazhira_ov_bron_3?.forEach((fio: string) => AllPassports.add(fio));
+      order.fio_passazhira_ov_bron_4?.forEach((fio: string) => AllPassports.add(fio));
+      order.fio_passazhira_ov_bron_5?.forEach((fio: string) => AllPassports.add(fio));
+      order.fio_passazhira_ov_bron_6?.forEach((fio: string) => AllPassports.add(fio));
+      order.fio_passazhirov_vipservis?.forEach((fio: string) => AllPassports.add(fio));
+      order.fio_passazhirov_vipservis_2?.forEach((fio: string) => AllPassports.add(fio));
     });
 
     const passports: Record<string, [string | undefined, string | undefined]> = {};
@@ -2132,15 +2196,22 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
       }
     };
 
-    const prevTickets = localData.orders;
+    const prevTickets = localData.orders || [];
 
-    const currentOrders: any[] = allData?.result?.result.map((ticket: ELMATicket, index: number) => {
-      if ((prevTickets?.find((el) => el.__id === ticket.__id)?.isChanged)) {
-        // // // // // // console.log({...ticket, __updatedAt: '', __updatedBy: ''}, {...prevTickets?.[index], __updatedAt: '', __updatedBy: ''});
-        return {...ticket, isChanged: true}
+// Мёржим __updatedAt* и isChanged из prevTickets в mergedOrders
+    const currentOrders: any[] = mergedOrders.map((ticket: ELMATicket) => {
+      const prev = prevTickets.find(el => el.__id === ticket.__id);
+      if (prev) {
+        return {
+          // все ваши флаги isChanged и все timestamp-поля
+          ...prev,
+          ...ticket,
+          isChanged: prev.isChanged,
+        };
       }
-      return ticket;
-    })
+      // новый заказ – ставим isChanged = true, остальные флаги пустые
+      return { ...ticket, isChanged: true };
+    });
 
 
     const newData = { orders: currentOrders.length > 0 ? currentOrders : allData.result.result, messages: localData.messages };
@@ -2213,14 +2284,20 @@ function mergeIsChanged<T extends { __id: string; isChanged?: boolean }>(
   return newItems.map(newItem => {
     const oldItem = map.get(newItem.__id);
 
-    // если isChanged был сброшен вручную — не затираем
-    if (oldItem && oldItem.isChanged === false && newItem.isChanged === true) {
-      return { ...newItem, isChanged: false };
+    if (oldItem) {
+      return {
+        ...oldItem,
+        ...newItem,
+        isChanged: oldItem.isChanged === false && newItem.isChanged === true
+          ? false
+          : newItem.isChanged
+      };
     }
 
     return newItem;
   });
 }
+
 
 function mergeMessagesWithIsChanged(
   oldMessages: Record<string, any[]>,
@@ -2270,6 +2347,7 @@ async function pollNewMessages() {
 
       const email = subscriptions[0]?.email ?? findAuthFileByUserId(userId)?.email;
 
+
       // // // console.log(' - Юзер ', email);
 
       const clientId = userId;
@@ -2302,6 +2380,7 @@ async function pollNewMessages() {
         const contactData = getContact.data?.result?.result[0];
         const kontakt = contactData?.__id;
 
+
         if (!kontakt) return;
 
         // ----- Получаем заказы с ЕЛМЫ -----
@@ -2318,7 +2397,7 @@ async function pollNewMessages() {
                 ],
               }
             },
-            size: 1000
+            size: 10000
           },
           {
             params: {
@@ -2374,6 +2453,16 @@ async function pollNewMessages() {
 
             if (!ticket) return;
 
+            if (existingTicket) {
+              // Скопируем все поля __updatedAt* из existingTicket в ticket
+              Object.entries(existingTicket)
+                .filter(([k]) => k.startsWith('__updatedAt') && k !== '__updatedAt')
+                .forEach(([k, v]) => {
+                  // @ts-ignore
+                  ticket[k] = v;
+                });
+            }
+
             const isCurrentChanged = existingTicket?.isChanged ?? false;
             const isNew = !existingTicket;
 
@@ -2388,41 +2477,29 @@ async function pollNewMessages() {
 
             const updateIfChanged = (
               tabName: string,
-              fields: string[],
+              fields: string[]
             ): { updatedAtKey: string; changed: boolean } => {
-              if (!existingTicket) return { updatedAtKey: `__updatedAt${tabName}`, changed: false };
-              const prev: any = existingTicket;
-              const current: any = ticket;
               const updatedAtKey = `__updatedAt${tabName}`;
-
-              const currentFields = pickFields(current, fields);
-              const prevFields = pickFields(prev, fields);
-
-              const isSame = isEqual(currentFields, prevFields);
-
-              const changed = (!isSame) || (!prev?.[updatedAtKey]);
-
-              const prevAtRaw = existingTicket[`__updatedAt${tabName}` as keyof typeof existingTicket] as string | undefined;
-              const prevAt = prevAtRaw
-                ? new Date(prevAtRaw).toLocaleString()     // превращаем ISO-строку в читабельный формат
-                : 'undefined';
-
-              console.log(
-                `[${tabName}] prevAt=${prevAt} | isSame=${isSame} | changed=${changed} | ${ticket?.nomer_zakaza}`
-              );
-
+              // @ts-ignore
+              const prevRaw = ticket?.[updatedAtKey];           // теперь ticket уже содержит старое значение
+              const isInitial = !prevRaw;                     // первый заход если его нет
+              const prevFields = pickFields(existingTicket, fields);
+              const currFields = pickFields(ticket, fields);
+              const isSame = isEqual(prevFields, currFields);
+              const changed = isInitial ? true : !isSame;
 
               if (changed) {
                 ordersFlag = true;
+                // console.log(updatedAtKey, isSame, '-----------------------');
+                const now = new Date().toISOString();
+                // проставляем в ticket (он уйдёт в saveUserData)
                 // @ts-ignore
-                ticket[updatedAtKey] = new Date().toISOString();
-                // @ts-ignore
-                prev[updatedAtKey] = new Date().toISOString();// или Date.now()
+                ticket[updatedAtKey] = now;
               }
-
 
               return { updatedAtKey, changed };
             };
+
 
 
             // Booking
@@ -2499,6 +2576,9 @@ async function pollNewMessages() {
                 `tip_nomera${suffix}?.name`,
                 `tip_pitaniya${suffix}?.name`,
                 `stoimost${suffix}?.cents`,
+                `nazvanie_otelya${suffix}`,
+                `tip_nomera${suffix}_nazvanie`,
+                `tip_pitaniya${suffix}_nazvanie`,
               ];
             }).concat('vaucher');
             updateIfChanged('Hotels', hotelFields);
@@ -2604,8 +2684,17 @@ async function pollNewMessages() {
 
             if (status === AllStatus.BOOKED && ticket.otvet_klientu) {
               const fieldsToCompareT = [
+                'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
+                'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
+                'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
+                'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
+                'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
+                'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
+                'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
                 'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
                 'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
+                'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
+                'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
               ];
               const fieldsToCompareM = ['marshrutnaya_kvitanciya'];
 
@@ -2713,6 +2802,7 @@ async function pollNewMessages() {
               if (!existingMessage) {
                 messagesFlag = true;
                 console.log('ЗАШЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЛ');
+
                 if (
                   message.author !== clientId &&
                   !message.author.includes('00000000-0000-0000-0000-000000000000')
@@ -2726,7 +2816,8 @@ async function pollNewMessages() {
                   console.log('После отправки пуша:')
                 }
 
-                return { ...message, isChanged: true };
+
+                return { ...message, isChanged: message.author !== userId && !message.author.includes('00000000-0000-0000-0000-000000000000') };
               }
 
               // Сравнение комментариев
@@ -2782,11 +2873,11 @@ async function pollNewMessages() {
           const ordersResult = await Promise.all(orderPromises);
           currentOrders = sortAllTickets(ordersResult.filter(Boolean));
 
-          const latest = await loadUserData(clientId, true);
-          const ordersActuallyChanged = !isEqual(latest.orders || [], currentOrders || []);
+          const latest = await loadUserData(clientId);
+          // const ordersActuallyChanged = !isEqual(latest.orders || [], currentOrders || []);
 
 
-          if (ordersFlag || ordersActuallyChanged) {
+          if (ordersFlag) {
             const finalOrders = mergeIsChanged(latest.orders, currentOrders);
             const finalMessages = latest.messages;
 
@@ -2819,14 +2910,14 @@ async function pollNewMessages() {
             if (hasNewMessages || hasChangedMessages) {
               sendToUser(email, { type: 'messages', messages: allMessagesByOrder });
 
-              const latest = await loadUserData(clientId, true);
+              const latest = await loadUserData(clientId);
               const finalOrders = latest.orders;
               const finalMessages = mergeMessagesWithIsChanged(latest.messages, allMessagesByOrder);
 
               await saveUserData(clientId, {
                 orders: finalOrders,
                 messages: finalMessages,
-              }, true);
+              });
             }
           } catch (err) {
             console.error('Ошибка фоновой обработки сообщений:', err);

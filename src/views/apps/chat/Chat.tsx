@@ -42,7 +42,9 @@ const Chats = () => {
     },
   ];
 
+  const [replyedHeight, setReplyedHeight] = useState<number>(0);
 
+console.log(replyedHeight);
 
   return (
     <PageContainer
@@ -87,9 +89,13 @@ const Chats = () => {
                 openMobileChats={(open) => setMobileSidebarOpen(open)}
                 onReply={(message: ChatMessage) => setReplyToMsg(message)}
                 replyToMsg={replyToMsg}
-                cancelReply={() => setReplyToMsg(null)}
+                cancelReply={() => {
+                  setReplyToMsg(null);
+                  setReplyedHeight(0);
+                }}
                 needSidebar={true}
                 setIsOpenMsg={(value) => setIsShowMsg(value)}
+                replyedHeight={replyedHeight}
               />
             </Box>
 
@@ -117,6 +123,7 @@ const Chats = () => {
                 width: '100%',
                 zIndex: 11,
                 backgroundColor: 'background.paper',
+                borderTop: '1px solid #c0bdbd7d',
               }}
               display={!isShowMsg && isMobile ? 'none' : 'block'}
             >
@@ -124,7 +131,11 @@ const Chats = () => {
                 currentChat={selectedChat}
                 updateChat={(chat) => setSelectedChat(chat)}
                 replyToMsg={replyToMsg}
-                cancelReply={() => setReplyToMsg(null)}
+                cancelReply={() => {
+                  setReplyToMsg(null);
+                  setReplyedHeight(0);
+                }}
+                setReplyHeight={(value) => setReplyedHeight(value)}
               />
             </Box>
           </Box>

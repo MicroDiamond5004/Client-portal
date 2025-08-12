@@ -476,7 +476,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
 
           <br />
           </>}
-          {ticket && getStatus(ticket) === AllStatus.PENDING && ticket.taim_limit_dlya_klienta && <><Typography fontWeight={600}>Тайм-лимит:</Typography>
+          {ticket && (getStatus(ticket) === AllStatus.PENDING || getStatus(ticket) === AllStatus.BOOKED) && ticket.taim_limit_dlya_klienta && <><Typography fontWeight={600}>Тайм-лимит:</Typography>
           <Typography>До {formatToRussianDate(ticket.taim_limit_dlya_klienta)}</Typography>
           <br />
           </>}
