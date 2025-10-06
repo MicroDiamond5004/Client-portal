@@ -91,7 +91,7 @@ const BigCalendar = () => {
 
   const [open, setOpen] = useState<boolean>(false);
 
-  const [currentView, setCurrentView] = useState<any>(Views.MONTH);
+  const [currentView, setCurrentView] = useState<any>(Views.WEEK);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   const [showMoreOpen, setShowMoreOpen] = useState(false);
@@ -210,7 +210,7 @@ const BigCalendar = () => {
               <Button
                 key={day.toISOString()}
                 variant={isActive ? 'contained' : 'outlined'}
-                sx={{ minWidth: '30px', width: '10vw', color: (isActive || isEventDay) ? '#fff' : '',  border: isToday ? '2px solid #1ad835' : '2px solid transparent', backgroundColor: isActive ? '#5d87ff' : isEventDay ? '#fa896b' : 'none' }}
+                sx={{ minWidth: '30px', width: '10vw', color: (isActive || isEventDay) ? '#fff' : '',  border: isToday ? '2px solid ##b5c7ef' : '2px solid transparent', backgroundColor: isActive ? '#5d87ff' : isEventDay ? '#0F52BA' : 'none' }}
                 onClick={() => setSelectedDay(day)}
               >
                 {getShortDay(day)}<br />{format(day, 'dd')}
@@ -384,7 +384,7 @@ const BigCalendar = () => {
                 eventPropGetter={(event) => ({
                   className: 'custom-event',
                   style: {
-                    backgroundColor: '#1976d2',
+                    backgroundColor: '#0F52BA',
                     color: 'white',
                     borderRadius: '4px',
                     padding: '2px 6px',

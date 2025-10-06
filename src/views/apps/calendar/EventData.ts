@@ -56,9 +56,14 @@ const getEvents = (tickets: ELMATicket[], passports:  Record<string, [string | u
       { label: 'Тайм лимит (Бронь №6)', value: taim_limit_dlya_klienta_bron_6 },
     ];
 
+    if (getStatus(ticket as any) !== AllStatus.BOOKED) return;
+
     const allDates = [
       ...(data_vyleta ? [{ type: 'Вылет', value: data_vyleta }] : []),
-      ...timeLimits.filter(t => t.value).map(t => ({ type: t.label, value: t.value! })),
+      ...timeLimits.filter(t => t.value).map(t => {
+
+        return ({ type: t.label, value: t.value! })
+      }),
     ];
 
     allDates.forEach(({ type, value }, index) => {
@@ -80,7 +85,7 @@ const getEvents = (tickets: ELMATicket[], passports:  Record<string, [string | u
           return passports[fio]?.[0]?.split('/').join(' ');
         }) ?? [],
         vylet: type === 'Вылет' ? [value] : [],
-        timeLimit: type.includes('Тайм лимит') ? [value] : [],
+        timeLimit: type?.includes('Тайм лимит') ? [value] : [],
         nomerZakaza: ticket.nomer_zakaza,
       });
     });

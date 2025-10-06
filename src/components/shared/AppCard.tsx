@@ -5,10 +5,10 @@ import React, { useContext } from 'react';
 import { Card } from '@mui/material';
 
 import { CustomizerContext } from 'src/context/CustomizerContext';
-import { Theme, useMediaQuery } from '@mui/system';
+import { SxProps, Theme, useMediaQuery } from '@mui/system';
 
 type Props = {
-  children: any | any[]
+  children: any | any[];
 };
 
 const AppCard = ({ children }: Props) => {
@@ -23,7 +23,7 @@ const AppCard = ({ children }: Props) => {
         display: 'flex',
         p: 0,
         overflow: isMobile && isChat ? 'hidden !important' : 'auto',
-        height: isMobile && isChat ? 'auto' : 'calc(100vh - 200px)'
+        height: isMobile && isChat ? 'auto' : 'calc(var(--app-height) - 200px)',
       }}
       elevation={isCardShadow ? 9 : 0}
       variant={!isCardShadow ? 'outlined' : undefined}

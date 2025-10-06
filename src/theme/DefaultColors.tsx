@@ -2,19 +2,19 @@ const baselightTheme = {
   direction: 'ltr',
   palette: {
     primary: {
-      main: '#5D87FF',
+      main: '#26428B',
       light: '#ECF2FF',
       dark: '#4570EA',
     },
     secondary: {
-      main: '#49BEFF',
+      main: '#26428B',
       light: '#E8F7FF',
       dark: '#23afdb',
     },
     success: {
-      main: '#13DEB9',
-      light: '#E6FFFA',
-      dark: '#02b3a9',
+      main: '#26428B',
+      light: '#26428B',
+      dark: '#26428B',
       contrastText: '#ffffff',
     },
     info: {
@@ -68,19 +68,19 @@ const baseDarkTheme = {
   direction: 'ltr',
   palette: {
     primary: {
-      main: '#5D87FF',
+      main: '#26428B',
       light: '#ECF2FF',
       dark: '#4570EA',
     },
     secondary: {
-      main: '#777e89',
-      light: '#1C455D',
-      dark: '#173f98',
+      main: '#26428B',
+      light: '#26428B',
+      dark: '#26428B',
     },
     success: {
-      main: '#13DEB9',
-      light: '#1B3C48',
-      dark: '#02b3a9',
+      main: '#26428B',
+      light: '#26428B',
+      dark: '#26428B',
       contrastText: '#ffffff',
     },
     info: {

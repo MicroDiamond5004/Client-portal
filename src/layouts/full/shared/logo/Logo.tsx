@@ -18,7 +18,11 @@ const StyledLogo = styled('img')<LogoProps>(({ width, height }) => ({
   height: height || 'auto',
 }));
 
-const Logo: FC = () => {
+interface LogoProps {
+  isLight?: boolean;
+}
+
+const Logo = ({ isLight }: LogoProps) => {
   const { isCollapse, isSidebarHover, activeDir, activeMode } = useContext(CustomizerContext);
   const TopbarHeight = config.topbarHeight;
   
@@ -30,7 +34,7 @@ const Logo: FC = () => {
     justifyContent: 'center',
   }));
 
-  const logoSrc = activeMode === 'dark' 
+  const logoSrc = (activeMode === 'dark') || isLight
     ? '/src/assets/images/logos/lead_logo_main_white.svg' 
     : '/src/assets/images/logos/lead_logo_main_darkblue.svg';
 

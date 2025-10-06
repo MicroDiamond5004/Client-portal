@@ -42,9 +42,11 @@ interface ItemType {
   level?: number | any;
   pathDirect: string;
   unreadCount?: number;
+  mt?: any;
+  isButton?: boolean;
 }
 
-const NavItem = ({ item, level, pathDirect, hideMenu, onClick, unreadCount }: ItemType) => {
+const NavItem = ({ item, level, isButton, pathDirect, hideMenu, onClick, unreadCount, mt }: ItemType) => {
   const { isBorderRadius } = useContext(CustomizerContext);
 
   const Icon = item?.icon;
@@ -62,23 +64,22 @@ const NavItem = ({ item, level, pathDirect, hideMenu, onClick, unreadCount }: It
     whiteSpace: 'nowrap',
     marginBottom: '2px',
     padding: '8px 10px',
+    border: isButton ? '2px solid #fff' : 'undefined',
     borderRadius: `${isBorderRadius}px`,
+    marginTop: mt,
     backgroundColor: level > 1 ? 'transparent !important' : 'inherit',
-    color:
-      level > 1 && pathDirect === item?.href
-        ? `${theme.palette.primary.main}!important`
-        : theme.palette.text.secondary,
+    color: '#fff',
     paddingLeft: hideMenu ? '10px' : level > 2 ? `${level * 15}px` : '10px',
     '&:hover': {
       backgroundColor: theme.palette.primary.light,
       color: theme.palette.primary.main,
     },
     '&.Mui-selected': {
-      color: 'white',
-      backgroundColor: theme.palette.primary.main,
+      color: '#26428B',
+      backgroundColor: '#fff',
       '&:hover': {
-        backgroundColor: theme.palette.primary.main,
-        color: 'white',
+        backgroundColor: '#fff',
+        color: '#0F52BA',
       },
     },
   }));

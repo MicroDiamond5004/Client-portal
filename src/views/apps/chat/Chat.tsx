@@ -67,10 +67,10 @@ console.log(replyedHeight);
             sx={{
               display: 'flex',
               flexDirection: 'column',
-              height: { xs: '100vh', md: '80vh' }, // мобильные и десктоп
+              maxHeight: { xs: '100vh', md: '80vh' }, // мобильные и десктоп
               overflow: 'hidden',
               position: 'relative',
-              width: '95vw',
+              width: '100%',
               p: 0,
             }}
             overflow={'hidden'}
@@ -79,10 +79,9 @@ console.log(replyedHeight);
             <Box
               sx={{
                 flexShrink: 0,
-                position: 'fixed',
-                top: 64,
-                width: '100%',
+                top: 0,
                 zIndex: 10,
+                width: '100%',
                 backgroundColor: 'background.paper',
               }}>
               <ChatContent
@@ -124,6 +123,7 @@ console.log(replyedHeight);
                 zIndex: 11,
                 backgroundColor: 'background.paper',
                 borderTop: '1px solid #c0bdbd7d',
+                borderLeft: '1px solid #c0bdbd7d',
               }}
               display={!isShowMsg && isMobile ? 'none' : 'block'}
             >

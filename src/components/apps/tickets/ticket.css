@@ -5,7 +5,12 @@
 }
 
 .gradient-background {
-    background: linear-gradient(-45deg, #ff7e5f, #ff3f8e, #bb17e4, #ff9a44);
+    background: linear-gradient(-45deg,
+    #26428B,   /* основной */
+    #3A57A6,   /* светлее */
+    #1B2F66,   /* темнее */
+    #4B6BC9    /* ещё светлее */
+    );
     background-size: 300% 300%;
     animation: gradientAnimation 12s ease infinite;
     transition: opacity 0.5s ease-in;
@@ -21,4 +26,29 @@
 
 .dialog-container form {
     max-width: 100%;
+}
+
+/* Для Chromium (Chrome, Edge, Opera) */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 12px; /* фиксированная ширина скроллбара */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1; /* цвет дорожки */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #888; /* цвет ползунка */
+    border-radius: 6px;
+    border: 3px solid #f1f1f1; /* отступы */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+/* Для Firefox */
+.custom-scrollbar {
+    scrollbar-width: thin; /* thin, auto, none */
+    scrollbar-color: #888 #f1f1f1; /* thumb и track */
 }

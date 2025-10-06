@@ -17,7 +17,7 @@ import {
 import { Box, styled, useMediaQuery, useTheme } from "@mui/system"
 import { ChangeEvent, useContext, useEffect, useRef, useState } from 'react';
 import { AllStatus, getStatus } from "../TicketListing"
-import { IconSend, IconX } from "@tabler/icons-react"
+import { IconFile, IconSend, IconX } from '@tabler/icons-react';
 import { useNavigate } from "react-router"
 import { ChatsType } from "src/types/apps/chat"
 import ModalDetails from "./modal-datails/modal-details"
@@ -307,9 +307,9 @@ const ModalTicket = (props: ModalTicketProps) => {
                   cursor: 'pointer',
                 }}
               >
-                <AddAPhotoIcon sx={{ fontSize: 18 }} />
+                <IconFile sx={{ fontSize: 18 }} />
                 <Typography variant="button" sx={{ color: 'white' }}>
-                  Загрузить фотографии
+                  Загрузить файлы
                 </Typography>
               </label>
 
@@ -344,7 +344,7 @@ const ModalTicket = (props: ModalTicketProps) => {
                   </Box>
                   <Box mt={1}>
                     <Button color="error" onClick={handleClearImages}>
-                      Удалить все фотографии
+                      Удалить все файлы
                     </Button>
                   </Box>
                 </>

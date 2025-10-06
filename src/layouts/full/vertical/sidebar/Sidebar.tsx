@@ -59,37 +59,42 @@ const Sidebar = () => {
           variant="permanent"
           PaperProps={{
             sx: {
-              transition: theme.transitions.create('width', {
+              transition: theme.transitions.create("width", {
                 duration: theme.transitions.duration.shortest,
               }),
+              border: 'none',
               width: toggleWidth,
-              boxSizing: 'border-box',
+              boxSizing: "border-box",
+              display: "flex",          // <---- добавляем flex-контейнер
+              flexDirection: "column",
             },
           }}
         >
           {/* ------------------------------------------- */}
           {/* Sidebar Box */}
           {/* ------------------------------------------- */}
-          <Box
-            sx={{
-              height: '100%',
-            }}
-          >
-            {/* ------------------------------------------- */}
+          <Box sx={{ display: "flex", flexDirection: "column", height: "100%", background: "linear-gradient(180deg, #26428B 0%, #2E57B5 100%)",
+            borderRadius: "16px",
+            color: "white", m: '20px 5px'}}>
             {/* Logo */}
-            {/* ------------------------------------------- */}
-            <Box px={3}>
-              <Logo />
+            <Box px={3} mt={5}>
+              <Logo isLight={true} />
             </Box>
-            <Scrollbar sx={{ height: 'calc(100% - 200px)' }}>
-              {/* ------------------------------------------- */}
-              {/* Sidebar Items */}
-              {/* ------------------------------------------- */}
-              <SidebarItems />
-            </Scrollbar>
-            <Profile />
+
+            {/* Sidebar Items со скроллом */}
+            <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+              <Scrollbar>
+                <SidebarItems />
+              </Scrollbar>
+            </Box>
+
+            {/* Profile внизу */}
+            <Box>
+              <Profile />
+            </Box>
           </Box>
         </Drawer>
+
       </Box>
     );
   }
@@ -103,7 +108,7 @@ const Sidebar = () => {
       PaperProps={{
         sx: {
           width: SidebarWidth,
-
+          background: "linear-gradient(180deg, #26428B 0%, #2E57B5 100%)",
           // backgroundColor:
           //   customizer.activeMode === 'dark'
           //     ? customizer.darkBackground900
@@ -117,8 +122,8 @@ const Sidebar = () => {
       {/* ------------------------------------------- */}
       {/* Logo */}
       {/* ------------------------------------------- */}
-      <Box px={2}>
-        <Logo />
+      <Box px={2} ml={1}>
+        <Logo isLight={true} />
       </Box>
       {/* ------------------------------------------- */}
       {/* Sidebar For Mobile */}

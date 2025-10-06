@@ -47,50 +47,50 @@ const TicketFilter = () => {
       label: 'Все',
       value: tickets.length,
       filter: 'total_tickets',
-      sx: { backgroundColor: 'primary.light', color: 'primary.main' },
+      sx: { backgroundColor: '#C9D1ED', color: '#fff' },
     },
     {
       label: 'Новый заказ',
       value: openC,
       filter: AllStatus.NEW,
-      sx: { backgroundColor: 'warning.light', color: 'warning.main' },
+      sx: { backgroundColor: '#A7B4E2', color: '#fff' },
     },
     {
       label: 'В работе',
       value: pendingC,
       filter: AllStatus.PENDING,
-      sx: { backgroundColor: 'success.light', color: 'success.main' },
+      sx: { backgroundColor: '#8596D6', color: '#fff' },
     },
     {
       label: 'Бронь',
       value: bookedC,
       filter: AllStatus.BOOKED,
-      sx: { backgroundColor: 'pink', color: 'darkpink' },
+      sx: { backgroundColor: '#6279CB', color: '#fff' },
     },
     {
       label: 'Оформлено',
       value: formedC,
       filter: AllStatus.FORMED,
-      sx: { backgroundColor: '#a52a2a1f', color: 'brown' },
+      sx: { backgroundColor: '#405BBF', color: '#fff' },
     },
     {
       label: 'Завершено',
       value: closeC,
       filter: AllStatus.CLOSED,
-      sx: { backgroundColor: 'error.light', color: 'error.main' },
+      sx: { backgroundColor: '#344B9D', color: '#fff' },
     },
   ];
 
   return (
     <MuiGrid container spacing={isMobile ? 2 : 3} justifyContent="center" textAlign="center">
       {cardItems.map((item, index) => (
-        <MuiGrid item key={index} xs={6} sm={4} md={2}>
+        <MuiGrid item key={index} xs={4} sm={4} md={2}>
           <BoxStyled border={filter === item.filter ? '2px solid #5d87ff' : ''} onClick={() => {
             setFilter(item.filter)
             // setSearchParams({...searchParams, filter: item.filter})
           }} sx={{...item.sx, height: isMobile ? '80px' : '127px' }}>
-            <Typography variant="h3">{item.value}</Typography>
-            <Typography variant="h6">{item.label}</Typography>
+            <Typography variant="h3" sx={{lineHeight: isMobile ? '1.25rem' :'undefined', fontSize: isMobile ? '1rem' : 'undefined'}}>{item.value}</Typography>
+            <Typography variant="h6" sx={{lineHeight: isMobile ? '1rem' :'undefined', fontSize: isMobile ? '0.75rem' : 'undefined', width: isMobile ? '85px' : 'undefined'}}>{item.label}</Typography>
           </BoxStyled>
         </MuiGrid>
       ))}

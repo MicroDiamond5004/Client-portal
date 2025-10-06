@@ -21,7 +21,8 @@ export const fetchMessages = createAsyncThunk<ELMAChat[], string>(
   async (id, { dispatch }) => {
     const { data } = await api.get<ELMAChat[]>(`/proxy/543e820c-e836-45f0-b177-057a584463b7/${id}`);
 
-    await dispatch(updateAllMessages(data));
+    dispatch(updateAllMessages(data));
+
     return data;
   }
 );

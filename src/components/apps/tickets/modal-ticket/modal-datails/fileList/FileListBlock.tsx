@@ -44,8 +44,10 @@ export const FileListBlock: React.FC<FileListBlockProps> = ({
         p: 3,
         my: 2,
         borderRadius: 2,
-        backgroundColor: "#f9f9f9",
-      }}
+        backgroundColor: "#fff",
+        border: '1px solid #c5c5c570',
+        boxShadow: '3px 3px 7px 0px #c5c5c5'
+    }}
     >
       <Typography variant="h5" sx={{ mb: 2 }}>
         {title}
@@ -56,7 +58,13 @@ export const FileListBlock: React.FC<FileListBlockProps> = ({
           const file = files.find((el) => el.fileId === fileId);
           if (!file) return null;
 
-          const decodedName = decodeURIComponent(file.filename ?? "Файл");
+          let decodedName = decodeURIComponent(file.filename ?? "Файл");
+
+          if (decodedName.length > 26) {
+            const extension = decodedName.split('.').at(-1);
+            decodedName = `${decodedName.slice(0, 26)}...${extension}`;
+          }
+
 
           return (
             <Stack

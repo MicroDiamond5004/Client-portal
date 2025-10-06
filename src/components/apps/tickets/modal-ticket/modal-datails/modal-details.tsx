@@ -168,22 +168,22 @@ const ModalDetails = (props: ModalTicketProps) => {
 
   switch (status) {
     case AllStatus.NEW:
-      backgroundStatus = 'warning.light';
+      backgroundStatus = '#A7B4E2';
       break;
     case AllStatus.PENDING:
-      backgroundStatus = 'success.light';
+      backgroundStatus = '#8596D6';
       break;
     case AllStatus.BOOKED:
-      backgroundStatus = 'pink';
+      backgroundStatus = '#6279CB';
       break;
     case AllStatus.FORMED:
-      backgroundStatus = '#a52a2a1f';
+      backgroundStatus = '#405BBF';
       break;
     case AllStatus.FORMED:
-      backgroundStatus = 'error.light';
+      backgroundStatus = '#344B9D';
       break;
     default:
-      colorStatus = 'primary'
+      colorStatus = '#C9D1ED'
   }
 
 
@@ -277,7 +277,7 @@ const ModalDetails = (props: ModalTicketProps) => {
     if (!isBookingValid(bookingNumber, ticket)) return null;
 
     return (
-      <Accordion key={index} defaultExpanded={index === 0}>
+      <Accordion key={index} defaultExpanded={index === 0} sx={{ mb: 1, border: '1px solid #c5c5c570', borderRadius: '6px', boxShadow: '3px 3px 7px 0px #c5c5c5' }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography fontWeight="bold">Бронь №{bookingNumber}</Typography>
         </AccordionSummary>
@@ -303,15 +303,13 @@ const ModalDetails = (props: ModalTicketProps) => {
           const c = index === 1 ? '' : null;
           const isThird = index === 3 ? '_' : null;
           const suffix = index;
-          const hotel = ticket[`otel${suffix}`];
+          const hotel = ticket[`nazvanie_otelya${suffix}`];
+          const roomType = ticket[`tip_nomera${suffix}_nazvanie`];
+          const foodType = ticket[`tip_pitaniya${suffix}_nazvanie`];
           const checkIn = ticket[`data_zaezda${suffix}`];
           const checkOut = ticket[`data_vyezda${suffix}`];
           const nights = ticket[`kolichestvo_nochei${isThird ?? ''}${suffix}`];
-          const roomType = ticket[`tip_nomera${suffix}`];
-          const foodType = ticket[`${index === 2 ? 'tip_pitani' : 'tip_pitaniya'}${suffix}`];
           const price = ticket[`stoimost${c ?? suffix}`]?.cents > 0 ? formatMoney(ticket[`stoimost${suffix}`]) : null;
-
-          console.log(`kolichestvo_nochei${isThird ?? ''}${c ?? suffix}`, index, ticket[`stoimost${c ?? suffix}`])
 
           const isEmpty =
             !hotel && !checkIn && !checkOut && !nights && !roomType && !foodType && !price;
@@ -384,7 +382,7 @@ const ModalDetails = (props: ModalTicketProps) => {
       return (
         <>
           {aviabilety.some(Boolean) ? (<>
-              <Paper sx={{ p: {md: 3, sm: 1}, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+              <Paper sx={{ boxShadow: isMobile ?  'none' : 'undefined', p: {md: 3, sm: 1}, my: 0, borderRadius: isMobile ? 0 : 2, backgroundColor: '#fff'}}>
                 <Box
                   sx={{
                     display: 'flex',
@@ -405,11 +403,13 @@ const ModalDetails = (props: ModalTicketProps) => {
                     sx={{ mt: 0.5, mb: 2 }}
                   />}
                 </Box>
-              {aviabilety.map((el) => el)}
+                <Box m={1}>
+                  {aviabilety.map((el) => el)}
+                </Box>
               </Paper>
             </>
           ) : (
-            <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+            <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#fff' }}>
               <Box
                 sx={{
                   display: 'flex',
@@ -463,7 +463,7 @@ const ModalDetails = (props: ModalTicketProps) => {
 
     switch (dynamicTab) {
       case 'Отели':
-        return <HotelsBlock ticket={ticket} />;
+        return <HotelsBlock ticket={ticket} passports={passports} />;
       case 'Трансфер':
         return <TransferBlock ticket={ticket} />;
       case 'ВИП сервис':
@@ -561,7 +561,7 @@ const ModalDetails = (props: ModalTicketProps) => {
                 </Typography>
                 <Chip
                   size="small"
-                  color="secondary"
+                  color="primary"
                   variant="outlined"
                   label={formatToRussianDate(ticket.__createdAt, 'd MMMM yyyy / HH:mm')}
                   sx={{ mt: 1 }} />
@@ -572,7 +572,7 @@ const ModalDetails = (props: ModalTicketProps) => {
               </Typography>
               <Chip
                 size="small"
-                color="secondary"
+                color="primary"
                 variant="outlined"
                 label={formatToRussianDate(ticket.__createdAt, 'd MMMM yyyy / HH:mm')}
                 sx={{ mt: 1.5 }}
@@ -587,7 +587,7 @@ const ModalDetails = (props: ModalTicketProps) => {
             <Chip
               size="small"
               sx={{
-                color: colorStatus,
+                color: '#fff',
                 backgroundColor: backgroundStatus,
                 mt: isMobile ? 2 : 0,
               }}
@@ -671,7 +671,7 @@ const ModalDetails = (props: ModalTicketProps) => {
                   sx={{
                     maxHeight: '66vh',
                     overflowY: 'auto',
-                    p: 2,
+                    m: 2,
                     bgcolor: 'background.paper',
                     borderRadius: 1,
                   }}
@@ -730,9 +730,8 @@ const ModalDetails = (props: ModalTicketProps) => {
                     mt={2}
                   >
                     <Button
-                      sx={{ width: '200px' }}
+                      sx={{ width: '200px', backgroundColor: '#0F52BA' }}
                       variant="contained"
-                      color="secondary"
                       component={Link}
                       to={`/apps/chats?item=${ticket.nomer_zakaza}`}
                     >
@@ -758,7 +757,7 @@ const ModalDetails = (props: ModalTicketProps) => {
             <Grid item xs={12} sm={8} sx={{ height: '100%' }}>
               <Grid container spacing={0}>
                 <Grid item xs={12} sm={ticket.zapros || zaprosFiles.length ? 4 : 12}>
-                  <Paper variant="outlined">
+                  <Paper variant="outlined" sx={{border: '1px solid #c5c5c570', boxShadow: '3px 3px 7px 0px #c5c5c5'}}>
                     <Box p={2} display="flex" flexDirection="column" gap={1}>
                       {ticket.zapros && (
                         <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
@@ -799,8 +798,8 @@ const ModalDetails = (props: ModalTicketProps) => {
 
                 {/* Tabs */}
                 <Grid item xs={12} sm={8} sx={{ mt: { xs: 1, sm: 0 }, maxHeight: '100vh', overflow: 'auto' }}>
-                  <Paper variant="outlined" sx={{ p: 0 }}>
-                    <Box>
+                  <Box sx={{ p: 0 }}>
+                    <AppBar position="sticky" sx={{backgroundColor: '#fff'}} elevation={1}>
                       <Tabs
                         value={tabIndex}
                         onChange={handleTabChange}
@@ -810,12 +809,12 @@ const ModalDetails = (props: ModalTicketProps) => {
                         <Tab label="Авиабилеты" />
                         {visibleTabs}
                       </Tabs>
+                    </AppBar>
 
-                      <Box mt={2}>
-                        {renderTabContent()}
-                      </Box>
+                    <Box mt={2}>
+                      {renderTabContent()}
                     </Box>
-                  </Paper>
+                  </Box>
                 </Grid>
               </Grid>
             </Grid>

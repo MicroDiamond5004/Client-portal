@@ -13,7 +13,7 @@ import config from 'src/context/config';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
-  minHeight: '100vh',
+  maxHeight: '100vh',
   width: '100%',
 }));
 
@@ -68,7 +68,7 @@ const FullLayout: FC = () => {
             {/* PageContent */}
             {/* ------------------------------------------- */}
 
-            <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
+            <Box>
               <ScrollToTop>
                 <Outlet />
               </ScrollToTop>

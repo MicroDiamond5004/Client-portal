@@ -118,6 +118,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
 
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const [usersLoading, setUsersLoading] = useState(false);
 
   const mainBoxRef = useRef<HTMLElement>(null);
   const inBoxRef = useRef<HTMLElement>(null);
@@ -236,16 +237,19 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
 
   useEffect(() => {
     const fetchUsers = async () => {
+      setUsersLoading(true);
       try {
         if (!selectedChat?.messages?.length) return;
 
         const userIds = new Set<string>();
 
-        for (const message of selectedChat.messages) {
-          if (message.senderId) userIds.add(message.senderId);
-          if (message.comments?.length) {
-            for (const comment of message.comments) {
-              if (comment.author) userIds.add(comment.author);
+        for (const currentChat of chatData) {
+          for (const message of currentChat.messages) {
+            if (message.senderId) userIds.add(message.senderId);
+            if (message.comments?.length) {
+              for (const comment of message.comments) {
+                if (comment.author) userIds.add(comment.author);
+              }
             }
           }
         }
@@ -257,18 +261,15 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
           currentUsers.length === knownUserIds.length &&
           currentUsers.every((id) => managers.hasOwnProperty(id));
 
+        setUsersLoading(false);
+
         if (!isSame) {
           const response = await api.post('/getManagers', { users: currentUsers });
 
           const data = response.data; // массив имён
 
-          const updatedManagers: Record<string, string> = {};
-          for (let i = 0; i < currentUsers.length; i++) {
-            const userId = currentUsers[i];
-            updatedManagers[userId] = data[i] || '[unknown]';
-          }
-
-          setManagers((prev) => ({ ...prev, ...updatedManagers }));
+          setManagers((prev) => ({ ...prev, ...data}));
+          setUsersLoading(false);
         }
       } catch (error) {
         console.error('Failed to fetch managers:', error);
@@ -276,7 +277,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
     };
 
     fetchUsers()
-  }, [selectedChat?.id]);
+  }, [selectedChat]);
 
 
   const handleMessageClick = (message: any) => {
@@ -400,6 +401,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
     // Тоже самое делаем для комментариев
     // const commentsHTML = chat?.comments.map((comment: any) => DOMPurify.sanitize(comment.body));
 
+
     if (selectedChat && (chat.senderId === selectedChat.name && !!chat.messageId)) {
       const replyedMessage = chat.prevComment ? {
         attachment: [],
@@ -424,7 +426,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
         cursor: "pointer",
         bgcolor: chat?.__id === replyToMsg?.__id ? "primary.light" : "transparent",
         borderRight: chat?.__id === replyToMsg?.__id ? "4px solid #1976d2" : "none",
-      }} key={replyedMessage.id}>
+      }} key={uniqueId()}>
         <ListItemAvatar>
           <Avatar
                 alt={managers[chat.author]}
@@ -504,7 +506,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
             <Box mt={1}>
               {replyedMessage.files.map((file: any, index: number) => (
                 <Button
-                  key={index}
+                  key={uniqueId()}
                   href={file.url}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -533,7 +535,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
           {replyedMessage.images && replyedMessage.images.length > 0 && (
             <ImageList cols={3} rowHeight={100} sx={{ mt: 1 }}>
               {replyedMessage.images.map((img: any, i: any  ) => (
-                <ImageListItem key={i}>
+                <ImageListItem key={uniqueId()}>
                   <img src={img} alt={`img-${i}`} loading="lazy" />
                 </ImageListItem>
               ))}
@@ -570,7 +572,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                 return (
                   url ? <Box sx={{ position: 'relative', marginRight: 4, mb: 2 }}>
                       <img
-                      key={file.fileId}
+                      key={uniqueId()}
                       src={url ?? ''} // именно файл, не .url
                       alt="Uploaded image"
                       style={{ maxWidth: '200px', height: 'auto' }}
@@ -606,7 +608,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                   url ? (
                   <Box sx={{ position: 'relative', marginRight: 4, mb: 2 }}>
                     <Button
-                      key={file.fileId}
+                      key={uniqueId()}
                       variant="outlined"
                       startIcon={<IconDownload />}
                       onClick={() => {
@@ -669,7 +671,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
 
       return (
         <Box
-          key={index + replyedMessage?.createdAt}
+          key={uniqueId()}
           display="flex"
           justifyContent="flex-end"
           onClick={() => handleMessageClick?.(chat)}
@@ -742,7 +744,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                       <Box mt={1}>
                         {replyedMessage.files.map((file: any, index: number) => (
                           <Button
-                            key={index}
+                            key={uniqueId()}
                             href={file.url}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -770,7 +772,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                     {replyedMessage.images?.length > 0 && (
                       <ImageList cols={3} rowHeight={100} sx={{ mt: 1 }}>
                         {replyedMessage.images.map((img: any, i: number) => (
-                          <ImageListItem key={i}>
+                          <ImageListItem key={uniqueId()}>
                             <img src={img} alt={`img-${i}`} loading="lazy" />
                           </ImageListItem>
                         ))}
@@ -805,7 +807,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                 return (
                   url ? <Box sx={{ position: 'relative', marginRight: 4, mb: 2 }} key={uniqueId()}>
                       <img
-                      key={file.fileId}
+                      key={uniqueId()}
                       src={url ?? ''} // именно файл, не .url
                       alt="Uploaded image"
                       style={{ maxWidth: '200px', height: 'auto' }}
@@ -841,7 +843,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                   url ? (
                   <Box sx={{ position: 'relative', marginRight: 4, mb: 2 }} key={uniqueId()}>
                     <Button
-                      key={file.fileId}
+                      key={uniqueId()}
                       variant="outlined"
                       startIcon={<IconDownload />}
                       sx={{ textTransform: 'none', mt: 1 }}
@@ -887,6 +889,10 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
       );
     }
     else if (selectedChat && (selectedChat.id === chat.senderId) && !chat.messageId) {
+
+      console.log('managers: ', managers);
+      console.log(managers[chat.author], chat.author);
+
       return(
           <Box display="flex" onClick={() => handleMessageClick?.(chat)}
           sx={{
@@ -895,7 +901,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
             cursor: "pointer",
             bgcolor: replyToMsg?.id === chat.id ? "primary.light" : "transparent",
             borderLeft: replyToMsg?.id === chat.id ? "4px solid #1976d2" : "none",
-          }} key={chat.id}>
+          }} key={uniqueId()}>
             <ListItemAvatar>
               <Avatar
                 alt={managers[chat.author]}
@@ -944,7 +950,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                   if (['png', 'jpg', 'jpeg'].includes(extension)) {
                     return url ? (
                       <img
-                        key={file.fileId}
+                        key={uniqueId()}
                         src={url}
                         alt="Uploaded image"
                         style={{ maxWidth: '200px', height: 'auto', cursor: 'pointer' }}
@@ -964,10 +970,10 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
 
                       />
                     ) : (
-                      <p key={file.fileId}>Файл загружается...</p>
+                      <p key={uniqueId()}>Файл загружается...</p>
                     );
                   } else {
-                    return <p key={file.fileId}>{file.fileId}</p>;
+                    return <p key={uniqueId()}>{file.fileId}</p>;
                   }
                 })}
               </Box>
@@ -1100,9 +1106,9 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
   }
 
 
-  return selectedChat && messageStatus === 'succeeded' ? (
+  return selectedChat && (selectedChat.messages.length > 0 ? !usersLoading && Object.keys(managers).length > 0 : true) && messageStatus === 'succeeded' ? (
     <Box overflow={'hidden'}>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap' }} overflow={'hidden'} >
+      <Box sx={{ display: 'flex', flexWrap: 'wrap' }} overflow={'hidden'} maxHeight={'100%'}>
         <Box width="100%" overflow={'hidden'}>
           {/* Header */}
           <Box overflow={'hidden'}>
@@ -1119,13 +1125,16 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                     boxShadow: 1,
                     mr: '10px',
                   }} />
-                <ListItem key={selectedChat.name} dense disableGutters>
+                <ListItem key={uniqueId()} dense disableGutters>
+                  <Box sx={{display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                   {!lgUp && (
-                    <IconButton onClick={() => {
+                    <Box onClick={() => {
                       setIsOpenMsg?.(mobileChatsMenuOpen)
-                      setMobileChatsMenuOpen((prevState) => !prevState)}} sx={{ ml: '4%' }}>
-                      <ForumIcon /> {/* или любой другой иконкой, напр. IconMessage */}
-                    </IconButton>
+                      setMobileChatsMenuOpen((prevState) => !prevState)}} sx={{ ml: '4%', my: mobileChatsMenuOpen ? '11px' : '' }}>
+                      <Box p={'5px 25px'} sx={{backgroundColor: '#26428B'}}>
+                        <Typography variant='body1' color={'#fff'}>Чаты</Typography>
+                      </Box>
+                    </Box>
                   )}
                   {/*<ListItemAvatar>*/}
                   {/*  <Badge*/}
@@ -1170,12 +1179,14 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                     primary={
                       <Typography className="break-word"
                                   component={Link}
-                                  ml={lgUp ? "2vh" : '30%'}
-                                  fontSize={18}
+                                  sx={{textDecoration: 'none', display: 'block !important', width: '100%', textAlign: lgUp ? 'undefined' : 'center' }}
+                                  ml={lgUp ? "2vh" : '0'}
+                                  pr={lgUp ? '0' : '15%'}
+                                  fontSize={17}
                                   onClick={() =>
                                     navigate(`/apps/orders?item=${selectedChat.name}`)
                                   }
-                                  fontWeight={600}
+                                  fontWeight={500}
                       >
                         Заказ №{selectedChat.name}
                       </Typography>
@@ -1192,23 +1203,25 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                       <InfoIcon />
                     </Fab>
                   )}
+                  </Box>
                 </ListItem>
               </Box>
             )}
-            <Divider />
+            {lgUp && <Divider />}
           </Box>
 
           {/* Main Content */}
-          <Box sx={{ display: 'flex', width: 'auto', overflow: 'hidden', maxHeight: lgUp ? open ? 'calc(var(--app-height) - 330px)' : 'auto' : `calc(var(--app-height) - 100px - ${replyedHeight ?? 0}px)`}} ref={mainBoxRef}>
+          <Box sx={{ display: 'flex', borderRadius: 'none', width: 'auto', overflow: 'hidden', minHeight: lgUp ? open ? 'calc(var(--app-height) - 324px)' : 'auto' : `calc((var(--app-height) / 100 * 90) - ${replyedHeight ?? 0}px)`,  maxHeight: lgUp ? open ? 'calc(var(--app-height) - 324px)' : 'auto' : `calc((var(--app-height) / 100 * 90) - ${replyedHeight ?? 0}px)`}} ref={mainBoxRef}>
             {/* Messages */}
-            <Box overflow={'hidden'}>
+            <Box overflow={'hidden'} height={'inherit'} width={'100%'}>
               <Box
                 ref={messagesContainerRef}
                 sx={{
                   overflowX: 'hidden',
                   overflowY: 'auto',
-                  maxHeight: open ? 'auto' : 'auto',
-                  height: open ? lgUp ? '70vh' : `calc(var(--app-height) - 195px - ${replyedHeight ?? 0}px)` : 'auto',
+                  p: lgUp ? '0' : '5px 0px',
+                  maxHeight: open ? lgUp ? '100%' : `calc((var(--app-height) / 100 * 93) - 100px)` : 'auto',
+                  height: open ? lgUp ? 'auto' : `auto` : 'auto',
                   width: lgUp
                     ? !open
                       ? '100%'
@@ -1239,11 +1252,11 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                         </Box>
 
                         <List sx={{ px: 0 }}>
-                          <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh', sm: 'calc(100vh - 100px)' }, maxHeight: '100vh' }}>
+                          <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh', sm: 'calc((var(--app-height) / 100 * 90) - 100px)' }, maxHeight: '100vh' }}>
                             {filteredChats && filteredChats.length ? (
                               filteredChats.map((chat) => (
                                 <ListItemButton
-                                  key={chat.name + chat.id}
+                                  key={uniqueId()}
                                   onClick={() => handleChatSelect(chat)}
                                   sx={{
                                     mb: 0.5,
@@ -1312,7 +1325,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
 
             {/* Right Sidebar - Desktop only */}
             {lgUp && open && (
-              <Box display="flex" flexShrink="0px" ref={inBoxRef}>
+              <Box display="flex" borderRadius={'none'} flexShrink="0px" ref={inBoxRef}>
                 <ChatInsideSidebar isInSidebar chat={selectedChat} />
               </Box>
             )}
@@ -1360,12 +1373,13 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
           '& .MuiDrawer-paper': {
             width: '90%',
             maxWidth: 360,
-            boxShadow: 3,
+            backgroundColor: 'transparent',
+            boxShadow: 'none'
           },
         }}
       >
-        <Box display="flex" justifyContent="flex-end" p={2}>
-          <IconButton onClick={() => setMobileSidebarOpen(false)}>
+        <Box display="flex" justifyContent="flex-end" p={2} border={'none'}>
+          <IconButton onClick={() => setMobileSidebarOpen(false)} sx={{ color: "#fff" }}>
             <CloseIcon />
           </IconButton>
         </Box>

@@ -105,6 +105,7 @@ const Header = () => {
                 backgroundColor: 'primary.light',
                 color: 'textSecondary',
                 borderRadius: 1,
+                marginLeft: 3
               }}
             >
               {Title}

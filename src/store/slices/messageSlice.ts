@@ -5,6 +5,7 @@ import { ELMAChat } from "src/types/apps/chat";
 import { SLiceNames } from "../names/names";
 import { indexOf, isEqual } from "lodash";
 import { RootState } from 'src/store';
+import { ELMATicket } from 'src/data/types.ts';
 
 interface MessageState {
     messages: any;
@@ -34,6 +35,47 @@ function waitForTickets(getState: () => RootState, timeout = 3000): Promise<void
   });
 }
 
+const updateMessageFunction = (newMessages: any, tickets: ELMATicket[]) => {
+  const allChatData = Object.entries(newMessages).map(([ticketNumber, rawMessages]) => {
+    const allFiles: any[] = [];
+
+    const preparedMessages = (rawMessages ?? []).map((m: any) => {
+      m.files?.forEach((f: any) => allFiles.push(f));
+      m.comments?.forEach((c: any) => c.files?.forEach((f: any) => allFiles.push(f)));
+
+      return {
+        id: m.__id,
+        msg: m.body ?? '',
+        createdAt: m.__createdAt,
+        senderId: m.author,
+        comments: m.comments,
+        files: m.files || [],
+      };
+    }).filter((el: any) => !(el.author?.includes('00000000-0000-0000-0000-000000000000')));
+
+    preparedMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+    const taskId = tickets?.find((el) => el.nomer_zakaza === ticketNumber)?.__id;
+
+    const isChanged = rawMessages?.some(
+      (el) => el.isChanged || el.comments?.some((com) => com.isChanged)
+    );
+
+    return {
+      name: ticketNumber,
+      id: ticketNumber,
+      messages: preparedMessages,
+      taskId,
+      files: allFiles,
+      isChanged,
+    };
+  });
+
+  const unreadedChats = Object.values(newMessages)?.filter((messages: any) => messages?.some((el) => !(el?.author?.includes('00000000-0000-0000-0000-000000000000')) && el.isChanged))?.length;
+
+  return {allChatData, unreadedChats};
+}
+
 export const updateAllMessages = createAsyncThunk(
   'messages/updateAllMessages',
   async (newMessages: any, { getState }) => {
@@ -42,42 +84,7 @@ export const updateAllMessages = createAsyncThunk(
 
     const tickets = state.tickets.tickets; // <- данные из другого слайса
 
-    const allChatData = Object.entries(newMessages).map(([ticketNumber, rawMessages]) => {
-      const allFiles: any[] = [];
-
-      const preparedMessages = (rawMessages ?? []).map((m: any) => {
-        m.files?.forEach((f: any) => allFiles.push(f));
-        m.comments?.forEach((c: any) => c.files?.forEach((f: any) => allFiles.push(f)));
-
-        return {
-          id: m.__id,
-          msg: m.body ?? '',
-          createdAt: m.__createdAt,
-          senderId: m.author,
-          comments: m.comments,
-          files: m.files || [],
-        };
-      }).filter((el: any) => !(el.author?.includes('00000000-0000-0000-0000-000000000000')));
-
-      preparedMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-
-      const taskId = tickets?.find((el) => el.nomer_zakaza === ticketNumber)?.__id;
-
-      const isChanged = rawMessages?.some(
-        (el) => el.isChanged || el.comments?.some((com) => com.isChanged)
-      );
-
-      return {
-        name: ticketNumber,
-        id: ticketNumber,
-        messages: preparedMessages,
-        taskId,
-        files: allFiles,
-        isChanged,
-      };
-    });
-
-    const unreadedChats = Object.values(newMessages)?.filter((messages: any) => messages?.some((el) => !(el?.author?.includes('00000000-0000-0000-0000-000000000000')) && el.isChanged))?.length;
+    const {allChatData, unreadedChats} = updateMessageFunction(newMessages, tickets);
 
     return {
       newMessages,
@@ -154,9 +161,9 @@ export const fetchTickets = createAsyncThunk(
           state.status = "succeeded";
         })
         .addCase(sendMessage.fulfilled, (state: MessageState, action: PayloadAction<ELMAChat>) => {
-          if (Array.isArray(state.messages)) {
-            state.messages = [action.payload, ...state.messages];
-          }
+          // if (Array.isArray(state.messages)) {
+          //   state.messages = [action.payload, ...state.messages];
+          // }
         });
     }
   });

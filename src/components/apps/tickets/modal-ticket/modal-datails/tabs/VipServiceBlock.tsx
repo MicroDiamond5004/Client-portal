@@ -75,7 +75,7 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
 
   return (
     <Box>
-      <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+      <Paper sx={{ p: {sx: 0, md: 3}, my: 0, borderRadius: 2, backgroundColor: '#fff' }}>
         <Box
           sx={{
             display: 'flex',
@@ -96,53 +96,59 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
           />}
         </Box>
 
-        {stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis && (
-          <Typography mb={2}>
-            <strong>Стоимость услуги (№ 1):</strong>{' '}
-            {formatMoney(stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis)}
-          </Typography>
-        )}
+        <Paper
+          sx={{ p: 3, m: 1, borderRadius: 2, backgroundColor: '#fff', border: '1px solid #c5c5c570', boxShadow: '3px 3px 7px 0px #c5c5c5'}}>
 
-        {stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2 && (
-          <Typography mb={2}>
-            <strong>Стоимость услуги (№ 2):</strong>{' '}
-            {formatMoney(stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2
-            )}
-          </Typography>
-        )}
+          {/* 1 */}
+          {nazvanie_uslugi && (
+            <Typography mb={2}><strong>Название услуги:</strong> {nazvanie_uslugi}</Typography>
+          )}
 
-        {opisanie_uslugi_vipservis && (
-          <Typography mb={2}><strong>Описание услуги:</strong> {opisanie_uslugi_vipservis ? opisanie_uslugi_vipservis.split('\n').map((line: string, i: number) => (
-              <Fragment key={i}>
-                {line}
-                <br />
-              </Fragment>
-            ))
-            : null}</Typography>
-        )}
+          {opisanie_uslugi_vipservis && (
+            <Typography mb={2}><strong>Описание услуги:</strong> {opisanie_uslugi_vipservis ? opisanie_uslugi_vipservis.split('\n').map((line: string, i: number) => (
+                <Fragment key={i}>
+                  {line}
+                  <br />
+                </Fragment>
+              ))
+              : null}</Typography>
+          )}
 
-        {nazvanie_uslugi && (
-          <Typography mb={2}><strong>Название услуги:</strong> {nazvanie_uslugi}</Typography>
-        )}
+          {fioList.length > 0 && (
+            <Box mb={2}>
+              <Typography><strong>ФИО пассажира(ов)(№1):</strong></Typography>
+              {fioList.map((fio: string, idx: number) => (
+                <Typography key={idx}>{fio}</Typography>
+              ))}
+            </Box>
+          )}
 
-        {fioList.length > 0 && (
-          <Box mb={2}>
-            <Typography><strong>ФИО пассажира(ов)(№1):</strong></Typography>
-            {fioList.map((fio: string, idx: number) => (
-              <Typography key={idx}>{fio}</Typography>
-            ))}
-          </Box>
-        )}
+          {stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis && (
+            <Typography mb={2}>
+              <strong>Стоимость услуги (№ 1):</strong>{' '}
+              {formatMoney(stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis)}
+            </Typography>
+          )}
 
-        {fioList2.length > 0 && (
-          <Box mb={2}>
-            <Typography><strong>ФИО пассажира(ов)(№2):</strong></Typography>
-            {fioList2.map((fio: string, idx: number) => (
-              <Typography key={idx}>{fio}</Typography>
-            ))}
-          </Box>
-        )}
+          {fioList2.length > 0 && (
+            <Box mb={2}>
+              <Typography><strong>ФИО пассажира(ов)(№2):</strong></Typography>
+              {fioList2.map((fio: string, idx: number) => (
+                <Typography key={idx}>{fio}</Typography>
+              ))}
+            </Box>
+          )}
 
+          {stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2 && (
+            <Typography mb={2}>
+              <strong>Стоимость услуги (№ 2):</strong>{' '}
+              {formatMoney(stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2
+              )}
+            </Typography>
+          )}
+        </Paper>
+
+        <Box m={1}>
         {voucherFiles.length > 0 && (
           <FileListBlock
             title="Ваучер VIP-услуг"
@@ -150,6 +156,7 @@ export const VipServiceBlock: React.FC<VipServiceBlockProps> = ({ ticket }) => {
             originalFiles={originalVoucherFiles}
           />
         )}
+        </Box>
       </Paper>
     </Box>
   );

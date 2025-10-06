@@ -171,15 +171,15 @@ function CategoryTaskList({ id, openTicketModal }: CategoryTAskListProps) {
 
   const backgroundColor = category
     ? category.name === AllStatus.NEW
-      ? 'primary.light'
+      ? '#C9D1ED'
       : category.name === AllStatus.PENDING
-        ? 'secondary.light'
+        ? '#A7B4E2'
         : category.name === AllStatus.BOOKED
-          ? 'warning.light'
+          ? '#8596D6'
           : category.name === AllStatus.FORMED
-            ? 'success.light'
-            : 'primary.light'
-    : 'primary.light';
+            ? '#6279CB'
+            : '#405BBF'
+    : '#344B9D';
 
   return (
     <>
@@ -187,7 +187,7 @@ function CategoryTaskList({ id, openTicketModal }: CategoryTAskListProps) {
         {showContainer && category && (
           <Box px={3} py={2} sx={{ backgroundColor }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6" className="fw-semibold">
+              <Typography variant="h6" className="fw-semibold" color={'#fff'}>
                 {newCategoryName}
               </Typography>
               <Stack direction="row">

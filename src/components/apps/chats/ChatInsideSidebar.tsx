@@ -15,7 +15,7 @@ import {
   Dialog,
   DialogActions,
   Button,
-  DialogContent, Chip,
+  DialogContent, Chip, Paper,
 } from '@mui/material';
 import { ChatsType } from 'src/types/apps/chat';
 import { uniq, flatten, random } from 'lodash';
@@ -35,6 +35,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import { pdfjs } from 'react-pdf';
 import formatToRussianDate from 'src/help-functions/format-to-date';
 import { showFilePreview } from 'src/store/slices/filePreviewSlice.ts';
+import { FileListBlock } from 'src/components/apps/tickets/modal-ticket/modal-datails/fileList/FileListBlock.tsx';
 
 // Указываем pdfjs воркер вручную:
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -194,6 +195,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
       setZaprosFiles([]);
       return;
     }
+
     const fetchFiles = async () => {
       try {
         const response = await api.post('/get-files', {
@@ -234,6 +236,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
       );
 
     } catch (error: any) {
+
       console.error('Ошибка при загрузке файла:', error);
       setError(error); // Сохраняем ошибку для отображения
     } finally {
@@ -277,20 +280,75 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
   }, []);
 
 
+  const [vaucher, setVaucher] = useState<any[]>(null);
+  const [kartaMest, setKartaMest] = useState<any[]>(null);
+  const [transer,  setTranser] = useState<any[]>(null);
+  const [prilozhenieTransfer, setPrilozhenieTransfer] = useState<any[]>(null);
+  const [vaucherTransfer, setVaucherTransfer] = useState<any[]>(null);
+  const [vipServis, setVipServis] = useState<any[]>(null);
+
+
   useEffect(() => {
-    if (!ticket?.marshrutnaya_kvitanciya) {
-      setFiles([]);
-      return;
-    }
     const fetchFiles = async () => {
       try {
+        const fileIds: any[] = [
+          ...(ticket?.marshrutnaya_kvitanciya ?? []),
+          ...(ticket?.vaucher ?? []),
+          ...(ticket?.karta_mest_f ?? []),
+          ...(ticket?.transfer_f ?? []),
+          ...(ticket?.prilozhenie_transfer1 ?? []),
+          ...(ticket?.vaucher_transfer ?? []),
+          ...(ticket?.vaucher_vipservis ?? []),
+        ];
+
         const response = await api.post('/get-files', {
-          fileIds: ticket?.marshrutnaya_kvitanciya,
+          fileIds
         });
 
-
       if (response.data.success) {
-        setFiles(response.data.files);
+        setFiles(
+          response.data.files.filter((f: any) =>
+            ticket?.marshrutnaya_kvitanciya?.includes(f.fileId) ?? false
+          )
+        );
+
+        setKartaMest(
+          response.data.files.filter((f: any) =>
+            ticket?.karta_mest_f?.includes(f.fileId) ?? false
+          )
+        );
+
+        setTranser(
+          response.data.files.filter((f: any) =>
+            ticket?.transfer_f?.includes(f.fileId) ?? false
+          )
+        );
+
+        setPrilozhenieTransfer(
+          response.data.files.filter((f: any) =>
+            ticket?.prilozhenie_transfer1?.includes(f.fileId) ?? false
+          )
+        );
+
+        setVaucherTransfer(
+          response.data.files.filter((f: any) =>
+            ticket?.vaucher_transfer?.includes(f.fileId) ?? false
+          )
+        );
+
+        setVaucher(
+          response.data.files.filter((f: any) =>
+            ticket?.vaucher.includes(f.fileId) ?? false
+          )
+        );
+
+        setVipServis(
+          response.data.files.filter((f: any) =>
+            ticket?.vaucher_vipservis?.includes(f.fileId) ?? false
+          )
+        );
+
+
       } else {
         console.error('Ошибка на сервере:', response.data.error);
       }
@@ -304,11 +362,12 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
   }, [ticket]);
 
 
+
   return (<>
     {isInSidebar ? (
       <Box
         sx={{
-          width: isInSidebar === true ? '450px' : 0,
+          width: isInSidebar === true ? lgUp ? '450px' : '100%' : 0,
           flexShrink: 0,
           overflowY: 'auto',
           border: '0',
@@ -320,6 +379,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
           boxShadow: lgUp ? null : (theme) => theme.shadows[8],
           position: 'relative',
           borderColor: (theme) => theme.palette.divider,
+          borderRadius: '0px'
         }}
         p={3}
       >
@@ -365,6 +425,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
           <Chip
             sx={{
               backgroundColor: 'success.main',
+              color: '#fff'
             }}
             size="small"
             label={`Создан: ${formatToRussianDate(ticket?.__createdAt)}`}
@@ -444,89 +505,64 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
             })}
           <br />
           </>}
-          {(ticket?.fio2?.length ?? 0) > 0 && <><Typography fontWeight={600}>Пассажир(ы):</Typography>
-          {ticket?.fio2?.map((currentId) => <Typography className="break-word" key={currentId}>{passports[currentId]?.[0]} - {passports[currentId]?.[1]}</Typography>)
-          }
-          <br />
-          </>}
-          {(ticket?.otvet_klientu3 || ticket?.otvet_klientu || ticket?.otvet_klientu1) && <><Typography fontWeight={600}>Маршрут и стоимость:</Typography>
-          <Typography className="break-word">
-          {(ticket?.otvet_klientu3 ?? ticket?.otvet_klientu ?? ticket?.otvet_klientu1)
-            ?.split('✈️')
-            .filter(Boolean)
-            .map((part, idx, arr) => {
-              let content = '✈️' + part.trim();
-              
-              // Сплит по \n и вставка <br />
-              const lines = content.split('\n');
-
-              return (
-                <React.Fragment key={idx}>
-                  {idx > 0 && <><br /><br /></>}
-                  {lines.map((line, i) => (
-                    <React.Fragment key={i}>
-                      {line}
-                      {i < lines.length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
-                </React.Fragment>
-              );
-            })}
-        </Typography>
-
-          <br />
-          </>}
           {ticket && (getStatus(ticket) === AllStatus.PENDING || getStatus(ticket) === AllStatus.BOOKED) && ticket.taim_limit_dlya_klienta && <><Typography fontWeight={600}>Тайм-лимит:</Typography>
           <Typography>До {formatToRussianDate(ticket.taim_limit_dlya_klienta)}</Typography>
           <br />
           </>}
-          {ticket && getStatus(ticket) === AllStatus.FORMED && <><Typography fontWeight={600}>Маршрутная квитанция:</Typography>
-          <Stack spacing={2.5} direction="column" mt={1}>
-       {files.map((file) => (
-         <Stack key={file.fileId} direction="row" gap={2} alignItems="center">
-           <Avatar
-             variant="rounded"
-             sx={{
-               width: 48,
-               height: 48,
-               bgcolor: (theme) => theme.palette.grey[100],
-             }}
-           >
-             <Avatar
-               src="data:image/svg+xml,%3csvg%20width='24'%20height='24'%20viewBox='0%200%2024%2024'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20clip-path='url(%23clip0_631_1669)'%3e%3cpath%20d='M23.993%200H0.00703125C0.003148%200%200%200.003148%200%200.00703125V23.993C0%2023.9969%200.003148%2024%200.00703125%2024H23.993C23.9969%2024%2024%2023.9969%2024%2023.993V0.00703125C24%200.003148%2023.9969%200%2023.993%200Z'%20fill='%23ED2224'/%3e%3cpath%20d='M13.875%205.625L19.2188%2018.375V5.625H13.875ZM4.78125%205.625V18.375L10.125%205.625H4.78125ZM9.70312%2015.7969H12.1406L13.2188%2018.375H15.375L11.9531%2010.2656L9.70312%2015.7969Z'%20fill='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_631_1669'%3e%3crect%20width='24'%20height='24'%20rx='3'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e"
-               alt="file icon"
-               variant="rounded"
-               sx={{ width: 24, height: 24 }}
-             />
-           </Avatar>
 
-           <Box flexGrow={1} overflow="hidden">
-             <Typography className="break-word" noWrap>{decodeURIComponent(file.filename)}</Typography>
-           </Box>
+          {(files?.length ?? 0) > 0 && (
+            <FileListBlock
+              title="Маршрутная квитанция"
+              files={files}
+              originalFiles={ticket?.marshrutnaya_kvitanciya ?? []}
+            />
+          )}
 
-           <Box display="flex" gap={1}>
-             <IconButton aria-label="view" onClick={() => handleViewFile(file)}>
-               <IconEye stroke={1.5} size="20" />
-             </IconButton>
-             {/*<IconButton aria-label="download" onClick={() => handleDownloadFile(file)}>*/}
-             {/*  <IconDownload stroke={1.5} size="20" />*/}
-             {/*</IconButton>*/}
-           </Box>
-         </Stack>
-       ))}
-    {/* Модалка просмотра */}
-    <DialogViewer
-        openViewer={openViewer}
-        handleCloseViewer={handleCloseViewer}
-        pdfBlobUrl={pdfBlobUrl}
-        pageNumber={pageNumber}
-        setPageNumber={setPageNumber}
-        numPages={numPages}
-        setNumPages={setNumPages}
-      />
-    </Stack>
+          {(vaucher?.length ?? 0) > 0 && (
+            <FileListBlock
+              title="Ваучер отель"
+              files={vaucher}
+              originalFiles={ticket?.vaucher ?? []}
+            />)}
+
+          {(kartaMest?.length ?? 0) > 0 && (
+            <FileListBlock
+              title="Карта мест"
+              files={kartaMest}
+              originalFiles={ticket?.karta_mest_f ?? []}
+            />)}
+
+          {(vaucherTransfer?.length ?? 0) > 0 && (
+            <FileListBlock
+              title="Ваучер трансфер"
+              files={vaucherTransfer}
+              originalFiles={ticket?.vaucher_transfer ?? []}
+            />)}
+
+          {(vipServis?.length ?? 0) > 0 && (
+            <FileListBlock
+              title="Ваучер Вип сервис"
+              files={vipServis}
+              originalFiles={ticket?.vaucher_vipservis ?? []}
+            />)}
+
+            {/*const [vaucher, setVaucher] = useState<string[]>([]);*/}
+            {/*const [kartaMest, setKartaMest] = useState<string[]>([]);*/}
+            {/*const [transer,  setTranser] = useState<string[]>([]);*/}
+            {/*const [prilozhenieTransfer, setPrilozhenieTransfer] = useState<string[]>([]);*/}
+            {/*const [vaucherTransfer, setVaucherTransfer] = useState<string[]>([]);*/}
+            {/*const [vipServis, setVipServis] = useState<string[]>([]);*/}
+
+
+            {/*...(ticket?.marshrutnaya_kvitanciya ?? []),*/}
+            {/*...(ticket?.vaucher ?? []),*/}
+            {/*...(ticket?.karta_mest_f ?? []),*/}
+            {/*...(ticket?.transfer_f ?? []),*/}
+            {/*...(ticket?.prilozhenie_transfer1 ?? []),*/}
+            {/*...(ticket?.vaucher_transfer ?? []),*/}
+            {/*...(ticket?.vaucher_vipservis ?? []),*/}
+
           <br />
-          </>}
         </Box>
       </Box>
     ) : null}

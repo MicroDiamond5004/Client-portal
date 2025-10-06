@@ -117,7 +117,7 @@ const TaskData = ({ task, index, category, tickets, openModalTicket }: TaskDataP
 
   const taskDate = formatDate(editedTask.__updatedAt ?? editedTask.__createdAt ?? ''); // Get formatted task date
 
-  const backgroundColor ='success.main';
+  const backgroundColor ='#0F52BA';
   //   editedTask?.taskProperty === 'Design'
   //     ? 'success.main'
   //     : editedTask?.taskProperty === 'Development'
@@ -161,14 +161,11 @@ const TaskData = ({ task, index, category, tickets, openModalTicket }: TaskDataP
           ref={provided.innerRef}
         >
           <Box sx={{
-            background: editedTask.isChanged
-              ? 'linear-gradient(-45deg, #ff7e5f, #ff3f8e, #bb17e4, #ff9a44)'
-              : '#fff',
+            background: editedTask.isChanged ? 'undefined' : '#fff',
             backgroundSize: editedTask.isChanged ? '300% 300%' : undefined,
             animation: editedTask.isChanged ? 'gradientAnimation 12s ease infinite' : undefined,
             color: editedTask.isChanged ? '#fff' : 'inherit',
             borderRadius: 1, // = theme.spacing(2) = 16px
-            boxShadow: '0px 0px 2px rgba(145, 158, 171, 0.3), 0px 12px 24px -4px rgba(145, 158, 171, 0.12)',
             overflow: 'hidden',
             width: '100%',
             p: 1,

@@ -58,7 +58,8 @@ const BlogCard = ({ post }: Btype) => {
               <Chip
                 sx={{
                   marginLeft: 'auto', marginTop: '-21px',
-                  backgroundColor: (theme: any) => theme.palette.mode === 'dark' ? '#262e3f' : 'white'
+                  backgroundColor: (theme: any) => theme.palette.mode === 'dark' ? '#262e3f' : 'white',
+                  color: '#fff'
                 }}
                 label="2 min Read"
                 size="small"

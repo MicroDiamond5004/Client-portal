@@ -4,25 +4,24 @@ import React, { Fragment, useEffect, useState } from 'react';
 import formatToRussianDate from 'src/help-functions/format-to-date';
 import api from 'src/store/api';
 import { FileListBlock } from '../fileList/FileListBlock';
+import { formatMoney } from 'src/utils/formatMoney.ts';
 
 type HotelsBlockProps = {
   ticket: any;
+  passports?: Record<string, [string | undefined, string | undefined]>;
 };
-
-const formatMoney = (val?: { cents: number; currency: string }) =>
-  val ? `${(val.cents / 100).toLocaleString('ru-RU')} ${val.currency}` : null;
 
 // ...все импорты остаются прежними
 
-export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
+export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket, passports }) => {
   const [files, setFiles] = useState<any[]>([]);
-  const originalVoucherFiles = ticket.vaucher ? [ticket.vaucher] : [];
+  const originalVoucherFiles = ticket.vaucher ?? [];
 
   useEffect(() => {
     const fetchFiles = async () => {
       if (originalVoucherFiles.length > 0) {
         const response = await api.post('/get-files', {
-          fileIds: originalVoucherFiles.map((file) => file.__id),
+          fileIds: originalVoucherFiles.map((file) => file),
         });
 
         if (response.data.success) {
@@ -43,26 +42,35 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
     const c = index === 1 ? '' : null;
     const isThird = index === 3 ? '_' : null;
     const suffix = index;
+    const fios = ticket[`fio_gostya`]
     const hotel = ticket[`nazvanie_otelya${suffix}`];
     const roomType = ticket[`tip_nomera${suffix}_nazvanie`];
     const foodType = ticket[`tip_pitaniya${suffix}_nazvanie`];
     const checkIn = ticket[`data_zaezda${suffix}`];
     const checkOut = ticket[`data_vyezda${suffix}`];
     const nights = ticket[`kolichestvo_nochei${isThird ?? ''}${suffix}`];
-    const price = ticket[`stoimost${c ?? suffix}`]?.cents > 0 ? formatMoney(ticket[`stoimost${suffix}`]) : null;
-
-    console.log(suffix, hotel, checkIn, checkOut, nights, roomType, foodType, price)
+    const price = ticket[`stoimost${c ?? suffix}`]?.cents > 0 ? formatMoney(ticket[`stoimost${c ?? suffix}`]) : null;
 
     const isEmpty =
       !hotel && !checkIn && !checkOut && !nights && !roomType && !foodType && !price;
 
     if (isEmpty) return null;
 
+    const fullNames =
+      Array.isArray(fios) && passports
+        ? fios
+          .map((id: string) => passports?.[id])
+          .filter(Boolean)
+          .join(', ')
+        : '';
+
+    console.log(files, originalVoucherFiles)
+
     return (
       <Paper
         key={index}
         elevation={3}
-        sx={{ p: 3, my: 2, borderRadius: 2, backgroundColor: '#fff' }}
+        sx={{ p: 3, m: 1, borderRadius: 2, backgroundColor: '#fff', border: '1px solid #c5c5c570',  boxShadow: '3px 3px 7px 0px #c5c5c5' }}
       >
         <Box
           sx={{
@@ -77,6 +85,7 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
         >
         </Box>
         {hotel && <Typography mb={1}><strong>Название отеля:</strong> {hotel}</Typography>}
+        {fios && <Typography mb={1}><strong>ФИО гостя(гостей):</strong> {fullNames}</Typography>}
         {ticket.kolichestvo_nomerov && index === 1 && (
           <Typography mb={1}><strong>Количество номеров:</strong> {ticket.kolichestvo_nomerov}</Typography>
         )}
@@ -86,6 +95,16 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
         {roomType && <Typography mb={1}><strong>Тип номера:</strong> {roomType}</Typography>}
         {foodType && <Typography mb={1}><strong>Тип питания:</strong> {foodType}</Typography>}
         {price && <Typography mb={1}><strong>Стоимость:</strong> {price}</Typography>}
+        {ticket.kommentarii_k_predlozheniyu && <Typography mb={1}><strong>Комментарий:</strong> {ticket.kommentarii_k_predlozheniyu ? ticket.kommentarii_k_predlozheniyu.split('\n').map((line: string, i: number) => (
+            <Fragment key={i}>
+              {line}
+              <br />
+            </Fragment>
+          ))
+          : null}</Typography>}
+        {ticket.otmena_bez_shtrafa && <Typography mb={1}><strong>Отмена без штрафа до:</strong> {formatToRussianDate(ticket.otmena_bez_shtrafa)}</Typography>}
+        {ticket.otmena_so_shtrafom && <Typography mb={1}><strong>Отмена со штрафом с:</strong> {formatToRussianDate(ticket.otmena_so_shtrafom)}</Typography>}
+        {ticket.nevozvratnyi && <Typography mb={1}><strong>Невозвратный с:</strong> {formatToRussianDate(ticket.nevozvratnyi)}</Typography>}
       </Paper>
     );
   });
@@ -102,7 +121,7 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
   }
 
   return (
-    <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+    <Paper sx={{ p: {sx: 0, md: 3}, my: 0, borderRadius: 2, backgroundColor: '#fff' }}>
       <Box
         sx={{
           display: 'flex',
@@ -119,22 +138,12 @@ export const HotelsBlock: React.FC<HotelsBlockProps> = ({ ticket }) => {
         color="success"
         variant="outlined"
         label={formatToRussianDate(ticket?.__updatedAtMap, 'd MMMM yyyy / HH:mm')}
-        sx={{ mt: 0.5, mb: 1 }}
+        sx={{ mt: 0.5, mb: 2 }}
       />}
       </Box>
       {hotelItems}
       {(hasExtraData) && (
-        <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#fff' }}>
-          {ticket.kommentarii_k_predlozheniyu && <Typography mb={1}><strong>Комментарий:</strong> {ticket.kommentarii_k_predlozheniyu ? ticket.kommentarii_k_predlozheniyu.split('\n').map((line: string, i: number) => (
-              <Fragment key={i}>
-                {line}
-                <br />
-              </Fragment>
-            ))
-            : null}</Typography>}
-          {ticket.otmena_bez_shtrafa && <Typography mb={1}><strong>Отмена без штрафа до:</strong> {formatToRussianDate(ticket.otmena_bez_shtrafa)}</Typography>}
-          {ticket.otmena_so_shtrafom && <Typography mb={1}><strong>Отмена со штрафом с:</strong> {formatToRussianDate(ticket.otmena_so_shtrafom)}</Typography>}
-          {ticket.nevozvratnyi && <Typography mb={1}><strong>Невозвратный с:</strong> {formatToRussianDate(ticket.nevozvratnyi)}</Typography>}
+        <Paper sx={{ p: 0, m: 1, borderRadius: 2, backgroundColor: '#fff' }}>
           {files.length > 0 && (
             <FileListBlock
               title="Ваучер"

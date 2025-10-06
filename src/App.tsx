@@ -27,49 +27,46 @@ function App() {
   const token = useAppSelector(selectToken);
   const email = useAppSelector(selecttClientEmail);
 
-  useDynamicVh();
-
   useEffect(() => {
-    if ((token?.length ?? 0) > 1) {
+    if (token) {
       const fetchUserData = async () => {
         const response = await api.get('/getUserData');
 
-        try {
-          const messages: ELMAChat[] = await dispatch(fetchMessages(response.data.userId)).unwrap();
-          // console.log('Загруженные сообщения:', messages);
-        } catch (error) {
-          console.error('Ошибка загрузки сообщений:', error);
-        }
-
         dispatch(setClient(response.data));
-
 
         if (response.data.email && response.data.userId) {
           connectWebSocket(response.data.email, response.data.userId, dispatch); // <== передаём один раз
         }
+
+        await Promise.all([
+          dispatch(getContragent()),
+          dispatch(fetchUserOrders()),
+          dispatch(fetchMessages(response.data.userId))
+        ]);
+
       };
 
       fetchUserData();
-      dispatch(getContragent());
-      dispatch(fetchUserOrders());
-      dispatch(fetchMessages());
-
-
-      const handleVisibilityChange = () => {
-        const socket = getSocket();
-        const userId = getCurrentUserId();
-
-        if (document.visibilityState === 'visible' && socket?.readyState !== WebSocket.OPEN && email) {
-          console.log('🔄 Вкладка снова активна. Переподключаем WebSocket...');
-          connectWebSocket(email, userId, dispatch); // <== теперь без dispatch, он сохранён
-        }
-      };
-
-      document.addEventListener("visibilitychange", handleVisibilityChange);
-      return () => {
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
-      };
     }
+  }, [token]);
+
+  useDynamicVh();
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const socket = getSocket();
+      const userId = getCurrentUserId();
+
+      if (document.visibilityState === 'visible' && socket?.readyState !== WebSocket.OPEN && email) {
+        console.log('🔄 Вкладка снова активна. Переподключаем WebSocket...');
+        connectWebSocket(email, userId, dispatch); // <== теперь без dispatch, он сохранён
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [token]);
 
 

@@ -69,7 +69,7 @@ const SidebarItems = () => {
             );
           }
         })}
-          <NavItem item={addItem} key={addItem.id} pathDirect={'/er'} hideMenu={hideMenu}
+          <NavItem mt={30} isButton={true} item={addItem} key={addItem.id} pathDirect={'/er'} hideMenu={hideMenu}
             onClick={() => setIsMobileSidebar(!isMobileSidebar)} />
       </List>
     </Box>

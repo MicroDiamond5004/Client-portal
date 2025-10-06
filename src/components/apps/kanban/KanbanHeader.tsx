@@ -21,10 +21,10 @@ const BoxStyled = styled(Box)(() => ({
   transition: '0.1s ease-in',
   cursor: 'pointer',
   color: 'inherit',
-  backgroundColor: '#5D87FF',
+  backgroundColor: '#26428B',
   '&:hover': {
     transform: 'scale(1.03)',
-    backgroundColor: '#1245d6',
+    backgroundColor: '#0F52BA',
   },
 }));
 

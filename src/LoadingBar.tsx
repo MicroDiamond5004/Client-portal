@@ -26,7 +26,7 @@ function LoadingBar() {
 
     return (
         <TopLoadingBar
-            color="#5D87FF"
+            color="#26428B"
             height={3}
             progress={progress}
         />

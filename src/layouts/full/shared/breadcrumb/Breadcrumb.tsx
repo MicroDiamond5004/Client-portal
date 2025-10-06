@@ -17,7 +17,8 @@ const Breadcrumb = ({ subtitle, items, title, children }: BreadCrumbType) => (
   <Grid
     container
     sx={{
-      backgroundColor: 'primary.light',
+      background: "linear-gradient(90deg, #26428B 0%, #2E57B5 100%)",
+      color: '#fff',
       borderRadius: (theme: Theme) => theme.shape.borderRadius / 4,
       p: '30px 25px 20px',
       marginBottom: '30px',
@@ -79,9 +80,7 @@ const Breadcrumb = ({ subtitle, items, title, children }: BreadCrumbType) => (
           <Box sx={{ top: '0px', position: 'absolute' }}>{children}</Box>
         ) : (
           <>
-            <Box sx={{ top: '0px', position: 'absolute' }}>
-              <img src={breadcrumbImg} alt={breadcrumbImg} width={'165px'} />
-            </Box>
+
           </>
         )}
       </Box>

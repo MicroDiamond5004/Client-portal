@@ -80,9 +80,9 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'Профиль',
-    icon: IconUserCircle,
-    href: '/pages/account-settings',
+    title: 'Заказы',
+    icon: IconTicket,
+    href: '/apps/orders',
   },
   {
     id: uniqueId(),
@@ -104,9 +104,9 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'Заказы',
-    icon: IconTicket,
-    href: '/apps/orders',
+    title: 'Профиль',
+    icon: IconUserCircle,
+    href: '/pages/account-settings',
   },
   // {
   //   id: uniqueId(),

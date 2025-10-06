@@ -35,7 +35,7 @@ export const Profile = () => {
       display={'flex'}
       alignItems="center"
       gap={2}
-      sx={{ m: 3, p: 2,backgroundColor: 'transparent', borderRadius: '16px', border: '2px solid #5d87ff'}}
+      sx={{ m: 3, p: 2,backgroundColor: 'transparent', borderRadius: '16px', border: '2px solid #fff'}}
     >
       {!hideMenu ? (
         <>
@@ -48,7 +48,7 @@ export const Profile = () => {
           <Box sx={{ ml: 'auto' }}>
             <Tooltip title="Выйти" placement="top">
               <IconButton
-                color="primary"
+                sx={{color: '#fff'}}
                 onClick={handleLogout}
                 aria-label="logout"
                 size="small"

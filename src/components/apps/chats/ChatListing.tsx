@@ -128,7 +128,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
         </Badge> */}
         <Box>
           <Typography variant="body1" fontWeight={600}>
-            {contragent ?? 'Константин Козлов'}
+            {contragent ?? ''}
           </Typography>
           <Typography variant="body2">Контрагент</Typography>
         </Box>

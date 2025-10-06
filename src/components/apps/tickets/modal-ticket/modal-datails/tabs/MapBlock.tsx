@@ -54,7 +54,7 @@ export const MapBlock: React.FC<MapBlockProps> = ({ ticket }) => {
     <Box>
       <Paper
         elevation={3}
-        sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: "#f9f9f9" }}
+        sx={{ p: {sx: 0, md: 3}, my: 0, borderRadius: 2, backgroundColor: "#f9f9f9" }}
       >
         <Box
           sx={{
@@ -68,25 +68,30 @@ export const MapBlock: React.FC<MapBlockProps> = ({ ticket }) => {
           }}
         >
         </Box>
-        {ticket.opisanie_stoimosti_mest && (
-          <Typography mb={1}>
-            <strong>Описание стоимости мест:</strong>{" "}
-            {ticket.opisanie_stoimosti_mest ? ticket.opisanie_stoimosti_mest.split('\n').map((line: string, i: number) => (
-                <Fragment key={i}>
-                  {line}
-                  <br />
-                </Fragment>
-              ))
-              : null}
-          </Typography>
-        )}
+        <Paper
+          sx={{ p: 3, m: 1, borderRadius: 2, backgroundColor: '#fff', border: '1px solid #c5c5c570', boxShadow: '3px 3px 7px 0px #c5c5c5'}}>
+          {ticket.opisanie_stoimosti_mest && (
+            <Typography mb={1}>
+              <strong>Описание стоимости мест:</strong>{" "}
+              {ticket.opisanie_stoimosti_mest ? ticket.opisanie_stoimosti_mest.split('\n').map((line: string, i: number) => (
+                  <Fragment key={i}>
+                    {line}
+                    <br />
+                  </Fragment>
+                ))
+                : null}
+            </Typography>
+          )}
+        </Paper>
+        <Box m={1}>
         {files.length > 0 && (
           <FileListBlock
-            title="Файлы"
+            title="Карта мест"
             files={files}
             originalFiles={allFiles}
           />
         )}
+        </Box>
       </Paper>
     </Box>
   );

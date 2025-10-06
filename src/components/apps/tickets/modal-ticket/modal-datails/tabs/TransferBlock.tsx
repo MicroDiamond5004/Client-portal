@@ -66,7 +66,7 @@ export const TransferBlock: React.FC<TransferBlockProps> = ({ ticket }) => {
 
   return (
     <Box>
-      <Paper sx={{ p: 3, my: 0, borderRadius: 2, backgroundColor: '#f9f9f9' }}>
+      <Paper sx={{ p: {sx: 0, md: 3}, my: 0, borderRadius: 2, backgroundColor: '#fff'}}>
         <Box
           sx={{
             display: 'flex',
@@ -87,50 +87,55 @@ export const TransferBlock: React.FC<TransferBlockProps> = ({ ticket }) => {
           />}
         </Box>
 
-        {opisanie_transfera && (
-          <Typography mb={1}><strong>Описание:</strong> {opisanie_transfera}</Typography>
-        )}
-        {informaciya_o_passazhire && (
-          <Typography mb={1}><strong>Информация о пассажире:</strong> {informaciya_o_passazhire}</Typography>
-        )}
-        {otvet_klientu_po_transferu && (
-          <Typography mb={1}><strong>Информация по трансферу:</strong>{otvet_klientu_po_transferu
-            ? otvet_klientu_po_transferu.split('\n').map((line: string, i: number) => (
-              <Fragment key={i}>
-                {line}
-                <br />
-              </Fragment>
-            ))
-            : null}</Typography>
-        )}
-        {stoimost_dlya_klienta_za_oformlenie_transfera_1 && (
-          <Typography mb={1}>
-            <strong>Стоимость:</strong>{' '}
-            {formatMoney(stoimost_dlya_klienta_za_oformlenie_transfera_1)}
-          </Typography>
-        )}
+        <Paper
+          sx={{ p: 3, m: 1, borderRadius: 2, backgroundColor: '#fff', border: '1px solid #c5c5c570', boxShadow: '3px 3px 7px 0px #c5c5c5'}}>
+          {opisanie_transfera && (
+            <Typography mb={1}><strong>Описание:</strong> {opisanie_transfera}</Typography>
+          )}
+          {informaciya_o_passazhire && (
+            <Typography mb={1}><strong>Информация о пассажире:</strong> {informaciya_o_passazhire}</Typography>
+          )}
+          {otvet_klientu_po_transferu && (
+            <Typography mb={1}><strong>Информация по трансферу:</strong>{otvet_klientu_po_transferu
+              ? otvet_klientu_po_transferu.trim().split('\n').map((line: string, i: number) => (
+                <Fragment key={i}>
+                  {line}
+                  <br />
+                </Fragment>
+              ))
+              : null}</Typography>
+          )}
+          {stoimost_dlya_klienta_za_oformlenie_transfera_1 && (
+            <Typography mb={1}>
+              <strong>Стоимость:</strong>{' '}
+              {formatMoney(stoimost_dlya_klienta_za_oformlenie_transfera_1)}
+            </Typography>
+          )}
+        </Paper>
 
-        {filesTransferF.length > 0 && (
-          <FileListBlock
-            title="Файлы трансфера"
-            files={filesTransferF}
-            originalFiles={originalTransferF}
-          />
-        )}
-        {filesAppTransfer.length > 0 && (
-          <FileListBlock
-            title="Приложение трансфер"
-            files={filesAppTransfer}
-            originalFiles={originalAppTransfer}
-          />
-        )}
-        {filesVoucherTransfer.length > 0 && (
-          <FileListBlock
-            title="Ваучер трансфер"
-            files={filesVoucherTransfer}
-            originalFiles={originalVoucherTransfer}
-          />
-        )}
+        <Box m={1}>
+          {filesTransferF.length > 0 && (
+            <FileListBlock
+              title="Файлы трансфера"
+              files={filesTransferF}
+              originalFiles={originalTransferF}
+            />
+          )}
+          {filesAppTransfer.length > 0 && (
+            <FileListBlock
+              title="Приложение трансфер"
+              files={filesAppTransfer}
+              originalFiles={originalAppTransfer}
+            />
+          )}
+          {filesVoucherTransfer.length > 0 && (
+            <FileListBlock
+              title="Ваучер трансфер"
+              files={filesVoucherTransfer}
+              originalFiles={originalVoucherTransfer}
+            />
+          )}
+        </Box>
       </Paper>
     </Box>
   );

@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './ticket.css';
 
 import { format } from 'date-fns';
@@ -54,6 +54,16 @@ import { BoxProps } from '@mui/material/Box';
 dayjs.extend(isBetween);
 dayjs.locale('ru');
 
+const customRu = {
+  ...ru,
+  localize: {
+    ...ru.localize,
+    day: (n: number) => {
+      const shortDays = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+      return shortDays[n];
+    },
+  },
+};
 
 export const AllStatus = {
   NEW: 'Новый заказ',
@@ -239,7 +249,7 @@ const TicketListing = (props: TicketListingProps) => {
     transition: '0.1s ease-in',
     cursor: disabled ? 'default' : 'pointer',
     color: 'inherit',
-    backgroundColor: disabled ? '#c5c5c5' : '#5D87FF',
+    backgroundColor: disabled ? '#c5c5c5' : '#26428B',
     pointerEvents: disabled ? 'none' : 'auto',
     '&:hover': {
       transform: disabled ? 'none' : 'scale(1.03)',
@@ -505,8 +515,33 @@ const TicketListing = (props: TicketListingProps) => {
               return fioValue?.toLowerCase()?.includes(search);
             })) ||
 
-            [ticket.otvet_klientu, ticket.otvet_klientu1, ticket.otvet_klientu3]
-              .filter(Boolean)
+            [
+              ticket.otvet_klientu,
+              ticket.otvet_klientu1,
+              ticket.otvet_klientu3,
+              ticket.zapros,
+
+              ticket.otvet_klientu,
+              ticket.otvet_klientu_o_bronirovanii_2,
+              ticket.otvet_klientu_o_bronirovanii_4,
+              ticket.otvet_klientu_o_bronirovanii_5,
+              ticket.otvet_klientu_o_bronirovanii_6,
+
+              // добавленные новые
+              ticket.otvet_klientu3, // уже был, но в объекте 1: тоже указан
+              ticket.otvet_klientu_pered_oformleniem_bron_2,
+              ticket.otvet_klientu_pered_oformleniem_bron_3,
+              ticket.otvet_klientu_pered_oformleniem_bron_4,
+              ticket.otvet_klientu_pered_oformleniem_bron_5,
+              ticket.otvet_klientu_pered_oformleniem_bron_6,
+            ]
+              .filter((text) => {
+                if (ticket.nomer_zakaza === '1240') {
+                  console.log(text)
+                }
+
+                return text?.trim();
+              }) // ✅ убираем пустые и пробельные строки
               .some((text) =>
                 text.toLowerCase().replace(/\s+/g, '').includes(search)
               );
@@ -594,27 +629,50 @@ const TicketListing = (props: TicketListingProps) => {
     ticketSearch.toLowerCase()
   );
 
-  const ticketBadge = (ticket: ELMATicket) => {
-    return ticket.__status?.status === 1
-      ? theme.palette.success.light
-      : ticket.__status?.status === 2
-        ? theme.palette.error.light
-        : ticket.__status?.status === 3
-          ? theme.palette.warning.light
-          : ticket.__status?.status === 4
-            ? theme.palette.primary.light
-            : 'primary';
-  };
-
   // Внутри компонента
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [padding, setPadding] = useState(0);
+  const [prevWidth, setPrevWidth] = useState(0);
+  const [scrollbarWidth, setScrollbarWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    const scrollDiv = document.createElement("div");
+    scrollDiv.style.width = "100px";
+    scrollDiv.style.height = "100px";
+    scrollDiv.style.overflow = "scroll";
+    scrollDiv.style.position = "absolute";
+    scrollDiv.style.top = "-9999px";
+    document.body.appendChild(scrollDiv);
+
+    const innerDiv = document.createElement("div");
+    innerDiv.style.width = "100%";
+    scrollDiv.appendChild(innerDiv);
+
+    setScrollbarWidth(scrollDiv.offsetWidth - innerDiv.offsetWidth);
+
+    document.body.removeChild(scrollDiv);
+  }, []);
+
+  useLayoutEffect(() => {
+    const element = boxRef.current;
+    if (!element) return;
+
+    const currentWidth = element.scrollWidth;
+    if (prevWidth && currentWidth !== prevWidth) {
+      setPadding(currentWidth > prevWidth ? scrollbarWidth : 0);
+    }
+    setPrevWidth(currentWidth);
+  }, [filter, scrollbarWidth]); // prevWidth не добавляем, чтобы не зациклить
+
 
   return (
     <>
     <Grid container mt={5}>
   {/* Левая часть: Поиск и кнопка */}
-  <Grid lg={5} sm={5  } xs={12}>
+  <Grid lg={5} sm={5} xs={12}>
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
       spacing={2}
@@ -686,7 +744,7 @@ const TicketListing = (props: TicketListingProps) => {
                 ranges={[selectionRange]}
                 onChange={handleSelect}
                 moveRangeOnFirstSelection={false}
-                locale={ru}
+                locale={customRu}
                 showDateDisplay={false}
                 showPreview={false}
               />
@@ -714,7 +772,7 @@ const TicketListing = (props: TicketListingProps) => {
         spacing={2}
         alignItems="center"
         justifyContent="flex-end"
-        sx={{ mt: { xs: 6, sm: 0 } }}
+        sx={{ mt: { xs: 3.5, sm: 0 }, mb: { xs: 2, sm: 0 } }}
       >
         {!isMobile && <BoxStyled
           disabled={status === 'loading'}
@@ -813,9 +871,10 @@ const TicketListing = (props: TicketListingProps) => {
       </Stack>
     </Box>
   </Grid>
-      <Grid item xs={12}>
-        <TableContainer sx={{
+  <Grid item xs={12}>
+        <TableContainer ref={boxRef} sx={{
           maxHeight: '60vh', // или любая нужная тебе высота
+          paddingRight: `${padding}px`
         }}>
           <Table>
             {visibleTickets.length > 0 && (
@@ -826,17 +885,17 @@ const TicketListing = (props: TicketListingProps) => {
                 zIndex: 1,
               }}>
                 <TableRow>
-                  <TableCell width={'5%'}>
-                    <Typography variant="h6" sx={{width: !isMobile ? '55px' : '50px', textAlign: 'center'}}>{isMobile ? 'Заказ' : 'Номер заказа'}</Typography>
+                  <TableCell width={'5%'}  sx={{ textAlign: 'center'}}>
+                    <Typography variant="h6" sx={{width: !isMobile ? '55px' : '50px', textAlign: 'center', margin: '0 auto'}}>{isMobile ? 'Заказ' : 'Номер заказа'}</Typography>
                   </TableCell>
                   {!isMobile && <TableCell width={'15%'}>
                     <Typography variant="h6" sx={{width: '60px'}}>Дата создания </Typography>
                   </TableCell>}
-                  <TableCell width={'75%'} sx={{ pl: 2 }}>
+                  <TableCell width={'68%'} sx={{ pl: 2 }}>
                     <Typography variant="h6">Информация</Typography>
                   </TableCell>
-                  {!isMobile && <TableCell width={'5%'}>
-                    <Typography sx={{position: 'relative', right: '8px'}} textAlign={'center'} variant="h6">Статус</Typography>
+                  {!isMobile && <TableCell width={'12%'}>
+                    <Typography sx={{position: 'relative', right: '0px'}} textAlign={'center'} variant="h6">Статус</Typography>
                   </TableCell>}
                   {/* <TableCell align="right">
               <Typography variant="h6"></Typography>
@@ -855,24 +914,24 @@ const TicketListing = (props: TicketListingProps) => {
 
                   switch (status) {
                     case AllStatus.NEW:
-                      colorStatus = 'warning.main';
-                      backgroundStatus = 'warning.light';
+                      backgroundStatus = '#A7B4E2';
+                      colorStatus = '#fff';
                       break;
                     case AllStatus.PENDING:
-                      colorStatus = 'success.main';
-                      backgroundStatus = 'success.light';
+                      backgroundStatus = '#8596D6';
+                      colorStatus = '#fff';
                       break;
                     case AllStatus.BOOKED:
-                      colorStatus = 'darkpink';
-                      backgroundStatus = 'pink';
+                      backgroundStatus = '#6279CB';
+                      colorStatus = '#fff';
                       break;
                     case AllStatus.FORMED:
-                      colorStatus = 'brown';
-                      backgroundStatus = '#a52a2a1f';
+                      backgroundStatus = '#405BBF';
+                      colorStatus = '#fff';
                       break;
                     default:
-                      colorStatus = 'error.main';
-                      backgroundStatus = 'error.light';
+                      backgroundStatus = '#344B9D';
+                      colorStatus = '#fff';
                       break;
                   }
 
@@ -895,6 +954,10 @@ const TicketListing = (props: TicketListingProps) => {
                     ? `${ticket.otvet_klientu1}`
                     : ticket.zapros;
 
+                  if (!ticket.nomer_zakaza) {
+                    return <></>;
+                  }
+
                   return (
                     <TableRow
                       className={ticket.isChanged ? 'gradient-background' : ''}
@@ -905,8 +968,8 @@ const TicketListing = (props: TicketListingProps) => {
                       <TableCell
                         sx={{
                           // На xs экранах фиксированная ширина, на sm+ — auto
-                          width: { xs: 40, },
-                          minWidth: { xs: 40, sm: '55px' },
+                          width: { xs: 110 },
+                          minWidth: { xs: 110, sm: '55px' },
 
                           padding: { xs: '1.5rem 0px'},
 
@@ -919,13 +982,14 @@ const TicketListing = (props: TicketListingProps) => {
                           textAlign: 'center',
                           py: 1,
                         }}>{ticket.nomer_zakaza}{isMobile && <><br/>
-                        {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}<br/><Chip
+                        {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}<br/><Box p={1}><Chip
                           sx={{
                             backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus,
+                            color: '#fff'
                           }}
                           size="small"
                           label={status}
-                        /></>}</TableCell>
+                        /></Box></>}</TableCell>
                       {!isMobile && <TableCell>
                         <Typography variant="subtitle1" sx={{width: '70px', textAlign: 'center'}}>
                           {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}
@@ -970,10 +1034,11 @@ const TicketListing = (props: TicketListingProps) => {
                       </TableCell>
                       {!isMobile &&
                         <TableCell>
-                          <Box sx={{position: 'relative', right: '8px'}} textAlign={'center'}>
+                          <Box sx={{position: 'relative', right: '0px', maxWidth: '100px'}} textAlign={'center'}>
                             <Chip
                               sx={{
                                 backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus,
+                                color: ticket.isChanged ? 'inherit' : '#FFF',
                               }}
                               size="small"
                               label={status}

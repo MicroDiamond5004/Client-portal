@@ -684,17 +684,79 @@ app.post("/api/addComment/:messageId", authenticateToken, async (req: any, res: 
 
 app.post("/api/getManagers", authenticateToken, async (req: any, res: any) => {
   const token = req.externalToken;
-  await getSergeiToken()
+
+  const company = req.company;
+
+  await getSergeiToken();
   const auth = readAuth();
   const SergeiToken = auth?.token;
   const cookie = auth?.cookie;
+
+  const fetchOtherAgents = await axios.post(`https://portal.dev.lead.aero/pub/v1/app/_clients/_companies/${company?.[0]}/get`,
+    {},
+    {
+      headers: {
+        'Authorization': TOKEN,
+      }
+      });
 
   const { users } = req.body;
 
   const fetchedUsers = [];
 
+  const updatedManagers: Record<string, string> = {};
+
+  const updatedUsers = users.concat(fetchOtherAgents.data.item._contacts);
+
   try {
-    for (let userId of users) {
+    for (let userId of updatedUsers) {
+
+      let contactName: string | null = null;
+
+
+      try {
+        const contactResponse = await axios.post(`https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list`,
+          {
+            "active": true,
+            "fields": {
+              "*": true
+            },
+            "filter": {
+              "tf": {
+                "__user": userId
+              }
+            }
+          },
+          {
+            headers: {
+              'Authorization': TOKEN,
+            }
+          });
+
+        const contactData = contactResponse.data;
+
+        contactName = contactData.result.result?.[0].__name;
+      } catch (e) {
+
+      }
+
+
+      try {
+        const contactResponse = await axios.post(`https://portal.dev.lead.aero/pub/v1/app/_clients/_contacts/${userId}/get`,
+          {},
+          {
+            headers: {
+              'Authorization': TOKEN,
+            }
+          });
+
+        const contactData = contactResponse.data;
+
+        contactName = contactData.item.__name;
+      } catch (e) {
+
+      }
+
       const response = await axios.post(`https://portal.dev.lead.aero/api/auth/users`, {
           asc: true,
           orderBy: "__name",
@@ -739,18 +801,18 @@ app.post("/api/getManagers", authenticateToken, async (req: any, res: any) => {
 
       const data = response.data;
 
-      // // // // // // console.log(data);
-
       const foundUser = data.result.find((u: any) => u.__id === userId);
 
       if (foundUser) {
         fetchedUsers.push(foundUser.__name);
+        updatedManagers[userId] = foundUser.__name;
       } else {
-        fetchedUsers.push('Система');
+        fetchedUsers.push(contactName ?? 'Система');
+        updatedManagers[userId] = contactName ?? 'Система';
       }
     }
 
-    res.json(fetchedUsers);
+    res.json(updatedManagers);
   } catch (err: any) {
     console.error(err.response);
     res.status(500).json({ error: "Ошибка при получении данных" });
@@ -1292,6 +1354,7 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
 
   const fullname = req.fullname;
   const email = req.email;
+  
   const company = req.company;
 
   const cookie = getCookieByToken(token) ?? '';
@@ -1900,12 +1963,36 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
     });
 
     const AllChannels = await responseAllChannels?.json();
-    const isInChannels = AllChannels?.find((channel: any) => channel?.name?.split('№')[1]?.trim() === orderNumber);
+    const isInChannels = AllChannels?.find((channel: any) => channel?.name?.split('№')[1]?.split(' ')[0]?.trim() === orderNumber);
 
     let channelId = isInChannels?.__id;
 
     // Создать новый канал в общей elma
     if (!isInChannels || (isInChannels == null)) {
+
+      const companyResponse = await fetch(`https://portal.dev.lead.aero/pub/v1/app/_clients/_companies/${req.company}/get`, {
+        method: 'POST',
+        headers: {
+          'Authorization': TOKEN,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
+          'Origin': 'https://portal.dev.lead.aero',
+          'Referer': 'https://portal.dev.lead.aero/messages/channels',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-Timezone': 'Europe/Moscow',
+          'X-EQL-Timezone': 'Europe/Moscow',
+          'X-Language': 'ru-RU'
+        },
+        body: JSON.stringify({
+        })
+      });
+
+      const company = await companyResponse.json();
+
+      console.log('---------------');
+      console.log(company);
+
       const response2 = await fetch(`https://portal.dev.lead.aero/api/feed/channels/`, {
         method: 'PUT',
         headers: {
@@ -1923,7 +2010,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
         },
         body: JSON.stringify({
           "author": clientId,
-          name: `Заказ №${orderNumber}`,
+          name: `Заказ №${orderNumber} - ${company?.item?.__name}`,
           members: ['543e820c-e836-45f0-b177-057a584463b7'],
           accessRights: "author"
         })
@@ -1964,10 +2051,31 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
           accessRights: "author"
         }])
       });
+
+      const addMembers = await fetch(`https://portal.dev.lead.aero/api/feed/channels/${channelId}/members`, {
+        method: 'POST',
+        headers: {
+          'Authorization': SergeiToken,
+          'Cookie': cookie,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
+          'Origin': 'https://portal.dev.lead.aero',
+          'Referer': `https://portal.dev.lead.aero/channels/${channelId}`
+        },
+        body: JSON.stringify(
+          [
+            {"id":clientId,"type":"user","accessRights":"author"},
+            {id: "1b010ab3-0ee1-567a-8e55-68b1914d4207", type: "group", accessRights: "reader"}
+          ])
+      });
     }
 
-    const addMembers = await fetch(`https://portal.dev.lead.aero/api/feed/channels/${channelId}/members`, {
-      method: 'POST',
+    const personId = 'all';
+
+    // Добавляем сообщение в канал заказа
+    const responseChanelMessage = await fetch(`https://portal.dev.lead.aero/api/feed/messages`, {
+      method: 'PUT',
       headers: {
         'Authorization': SergeiToken,
         'Cookie': cookie,
@@ -1978,26 +2086,11 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
         'Referer': `https://portal.dev.lead.aero/channels/${channelId}`
       },
       body: JSON.stringify(
-        [{"id":clientId,"type":"user","accessRights":"author"},{id: "1b010ab3-0ee1-567a-8e55-68b1914d4207", type: "group", accessRights: "reader"}])
-    });
-
-    // Добавляем сообщение в канал заказа
-    const responseChanelMessage = await fetch(`https://portal.dev.lead.aero/api/feed/messages`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': token,
-        'Cookie': clientCookie,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0',
-        'Origin': 'https://portal.dev.lead.aero',
-        'Referer': `https://portal.dev.lead.aero/channels/${channelId}`
-      },
-      body: JSON.stringify(
         {
           ...messagePayload,
-          body: `${href}<br/><br/>${messagePayload.body}`,
-          title: "Сообщение из внешнего портала",
+          body: `<p>${href}<br/><br/>${messagePayload.body}</p>`,
+          title: `Сообщение от ${req.fullname}`,
+          mentionIds: [personId],
           target: {
             id: channelId
           }
@@ -2097,7 +2190,6 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
         "tf": {
           // вернуть после соответствия
           // "fio": `${fullname}`,
-          "_email": `${email}`,
           "_companies": [
             `${company[0]}`
           ]
@@ -2110,9 +2202,10 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
       }
     })
 
-    const contactData = getContact.data?.result?.result[0];
 
-    const kontakt = contactData.__id;
+    const contactData = getContact.data?.result;
+
+    const kontakt = contactData.total > 1 ? contactData.result?.map((el: any) => el.__id) : [contactData.result[0]?.__id];
 
     // Иначе идем в ELMA365
     const elmaResponse = await axios.post(
@@ -2124,9 +2217,7 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
         },
         "filter": {
           "tf": {
-            "kontakt": [
-              `${kontakt}`
-            ],
+            "kontakt": kontakt,
           }
         },
         size: 1000
@@ -2146,10 +2237,10 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
     const mergedOrders = elmaResponse.data?.result?.result || [];
 
 
-
     const AllPassports = new Set<string>();
 
     mergedOrders?.forEach((order: any) => {
+      order.fio_gostya?.forEach((fio: string) => AllPassports.add(fio));
       order.fio2?.forEach((fio: string) => AllPassports.add(fio));
       order.dopolnitelnye_fio?.forEach((fio: string) => AllPassports.add(fio));
       order.fio_passazhira_ov_bron_3?.forEach((fio: string) => AllPassports.add(fio));
@@ -2358,14 +2449,44 @@ async function pollNewMessages() {
 
       // ----- Получаем контктные данные -----
       try {
+        const responseUser = await axios.post(
+          'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
+          {
+            "active": true,
+            "fields": {
+              "*": true
+            },
+            "filter": {
+              "tf": {
+                "__user": `${clientId}`,
+              }
+            }
+          },
+          {
+            headers: {
+              Authorization: `${TOKEN}`
+            }
+          }
+        );
+
+        const data = responseUser.data.result.result[0];
+
+        const company = data.company;
+
         const getContact = await axios.post(
           'https://portal.dev.lead.aero/pub/v1/app/_clients/_contacts/list',
           {
-            active: true,
-            fields: { "*": true },
-            filter: {
-              tf: {
-                _email: `${email}`
+            "active": true,
+            "fields": {
+              "*": true
+            },
+            "filter": {
+              "tf": {
+                // вернуть после соответствия
+                // "fio": `${fullname}`,
+                "_companies": [
+                  `${company[0]}`
+                ]
               }
             }
           },
@@ -2377,8 +2498,8 @@ async function pollNewMessages() {
           }
         );
 
-        const contactData = getContact.data?.result?.result[0];
-        const kontakt = contactData?.__id;
+        const contactData = getContact.data?.result;
+        const kontakt = contactData.total > 1 ? contactData.result?.map((el: any) => el.__id) : [contactData.result[0]?.__id];
 
 
         if (!kontakt) return;
@@ -2392,9 +2513,7 @@ async function pollNewMessages() {
             },
             "filter": {
               "tf": {
-                "kontakt": [
-                  `${kontakt}`
-                ],
+                "kontakt": kontakt,
               }
             },
             size: 10000
@@ -2617,6 +2736,9 @@ async function pollNewMessages() {
             const status = getStatus(ticket);
             let fieldsToCompare: string[] = [];
 
+            console.log('-------------------------------...............-----------------------', status, ticket.nomer_zakaza);
+
+
             if ((getStatus(existingTicket) === AllStatus.NEW) && (status === AllStatus.PENDING)) {
               ordersFlag = true;
               if (webSubscriptions?.length) {
@@ -2652,9 +2774,11 @@ async function pollNewMessages() {
               }
               return { ...ticket, isChanged: true };
             }
+            
 
-            if (status === AllStatus.BOOKED && ticket.otvet_klientu) {
-              fieldsToCompare = [
+            if (status === AllStatus.BOOKED && ticket.otvet_klientu && !existingTicket?.otvet_klientu) {
+              const fieldsToCompare = [
+                // --- Уже существующие ---
                 'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
                 'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
                 'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
@@ -2666,7 +2790,44 @@ async function pollNewMessages() {
                 'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
                 'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
                 'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
+
+                // --- Трансфер ---
+                'informaciya_o_passazhire',
+                'otvet_klientu_po_transferu',
+                'stoimost_dlya_klienta_za_oformlenie_transfera_1',
+                'prilozhenie_transfer1',
+                'vaucher_transfer',
+
+                // --- Вип-сервис ---
+                'nazvanie_vipuslugi',
+                'opisanie_i_stoimost_uslugi_vipservis',
+                'fio_passazhirov_vipservis',
+                'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
+                'fio_passazhirov_vipservis_2',
+                'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2',
+                'voucher_vipservis', // заменил "Ваучер Вип-сервис" на camel-case
+
+                // --- Карта мест ---
+                'opisanie_stoimosti_mest',
+                'karta_mest1',
+
+                // --- Отель ---
+                'otel1', 'otel2', 'oteli3',
+                'data_zaezda1', 'data_vyezda1',
+                'data_zaezda2', 'data_vyezda2',
+                'data_zaezda3', 'data_vyezda3',
+                'kolichestvo_nomerov',
+                'kolichestvo_nochei1', 'kolichestvo_nochei2', 'kolichestvo_nochei3',
+                'tip_nomera1', 'tip_nomera2', 'tip_nomera3',
+                'tip_pitaniya1', 'tip_pitaniya2', 'tip_pitaniya3',
+                'stoimost1', 'stoimost2', 'stoimost3',
+                'kommentarii_k_predlozheniyu',
+                'otmena_bez_shtrafa',
+                'otmena_so_shtrafom',
+                'nevozvratnyi',
+                'vaucher'
               ];
+
 
               const isEqualStatus = isEqual(
                 pickFields(ticket, fieldsToCompare),
@@ -2682,20 +2843,58 @@ async function pollNewMessages() {
               }
             }
 
-            if (status === AllStatus.BOOKED && ticket.otvet_klientu) {
+            if (status === AllStatus.BOOKED) {
               const fieldsToCompareT = [
-                'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
-                'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
-                'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
-                'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
-                'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
-                'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
-                'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
-                'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
-                'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
-                'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
-                'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
-              ];
+              // --- Уже существующие ---
+              'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
+              'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
+              'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
+              'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
+              'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
+              'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
+              'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
+              'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
+              'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
+              'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
+              'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
+
+              // --- Трансфер ---
+              'informaciya_o_passazhire',
+              'otvet_klientu_po_transferu',
+              'stoimost_dlya_klienta_za_oformlenie_transfera_1',
+              'prilozhenie_transfer1',
+              'vaucher_transfer',
+
+              // --- Вип-сервис ---
+              'nazvanie_vipuslugi',
+              'opisanie_i_stoimost_uslugi_vipservis',
+              'fio_passazhirov_vipservis',
+              'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
+              'fio_passazhirov_vipservis_2',
+              'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2',
+              'voucher_vipservis', // заменил "Ваучер Вип-сервис" на camel-case
+
+              // --- Карта мест ---
+              'opisanie_stoimosti_mest',
+              'karta_mest1',
+
+              // --- Отель ---
+              'otel1', 'otel2', 'oteli3',
+              'data_zaezda1', 'data_vyezda1',
+              'data_zaezda2', 'data_vyezda2',
+              'data_zaezda3', 'data_vyezda3',
+              'kolichestvo_nomerov',
+              'kolichestvo_nochei1', 'kolichestvo_nochei2', 'kolichestvo_nochei3',
+              'tip_nomera1', 'tip_nomera2', 'tip_nomera3',
+              'tip_pitaniya1', 'tip_pitaniya2', 'tip_pitaniya3',
+              'stoimost1', 'stoimost2', 'stoimost3',
+              'kommentarii_k_predlozheniyu',
+              'otmena_bez_shtrafa',
+              'otmena_so_shtrafom',
+              'nevozvratnyi',
+              'vaucher'
+            ];
+
               const fieldsToCompareM = ['marshrutnaya_kvitanciya'];
 
               const isEqualStatus1 = isEqual(
@@ -2707,7 +2906,9 @@ async function pollNewMessages() {
                 pickFields(existingTicket || {}, fieldsToCompareM)
               );
 
-              if (!(isEqualStatus1 || isEqualStatus2)) {
+              console.log(' АКТУАЛИЗАЦИИИИЯЯЯЯЯ -------------------------------...............-----------------------', status, ticket.nomer_zakaza, isEqualStatus1, isEqualStatus2);
+
+              if (!isEqualStatus1 || !isEqualStatus2) {
                 ordersFlag = true;
                 if (webSubscriptions?.length) {
                   sendPushNotifications(webSubscriptions, 'Актуализация бронирования', `По заказу №${ticket.nomer_zakaza}`);

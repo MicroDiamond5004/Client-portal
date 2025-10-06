@@ -70,7 +70,12 @@ export type ELMATicket = {
     kontakt: string[] | null;
     pasport: string[] | null;
     skidka1: null | string | number | boolean;
-    vaucher: null | string | number | boolean;
+    vaucher: string[];
+    karta_mest_f: string[];
+    transfer_f: string[];
+    prilozhenie_transfer1: string[];
+    vaucher_transfer:  string[];
+    vaucher_vipservis: string[];
     __status: {
         order: number | null;
         status: number | null;

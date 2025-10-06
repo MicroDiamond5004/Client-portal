@@ -36,10 +36,7 @@ const Header = () => {
     background: theme.palette.background.paper,
     justifyContent: 'center',
     backdropFilter: 'blur(4px)',
-
-    [theme.breakpoints.up('lg')]: {
-      minHeight: TopbarHeight,
-    },
+    minHeight: TopbarHeight,
   }));
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     margin: '0 auto',
