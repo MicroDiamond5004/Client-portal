@@ -3,7 +3,7 @@ import webpush from 'web-push';
 import bodyParser, { json } from 'body-parser';
 import cors from 'cors';
 import { ELMATicket, MessageType, UserData } from './data/types';
-import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId } from './data/storage';
+import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId } from './data/mongodbStorage';
 import path from 'path';
 import { readdirSync, readFileSync } from 'fs';
 import fs from 'fs';
@@ -21,7 +21,9 @@ import htmlRouter from './router/routes/htmlRoute';
 import { initWebSocket, sendToUser } from './websocket';
 import subscriptionRouter from './router/routes/subscriptionRouter';
 import http from 'http';
-import { getCookieByToken, saveCookieAndToken } from './data/cookieStore';
+import { getCookieByToken, saveCookieAndToken } from './data/mongodbStorage';
+import { connectToDatabase } from './database/connection';
+import { Session } from './models';
 
 dotenv.config();
 
@@ -59,18 +61,32 @@ const authURL = 'https://portal.dev.lead.aero/api/auth';
 const logoutURL = 'https://portal.dev.lead.aero/guard/logout';
 const cookieCheckURL = 'https://portal.dev.lead.aero/guard/cookie'
 
-const AUTH_CACHE_FILE = path.resolve(__dirname, 'data/token.json');
 
-export function saveAuth({ token, cookie }: { token: string, cookie: string }) {
-  fs.writeFileSync(AUTH_CACHE_FILE, JSON.stringify({ token, cookie }, null, 2), 'utf-8');
+export async function saveAuth({ token, cookie }: { token: string, cookie: string }) {
+  try {
+    await saveCookieAndToken(token, cookie);
+  } catch (error) {
+    console.error('Error saving auth to MongoDB:', error);
+  }
 }
 
-export function readAuth(): { token: string, cookie: string } | null {
-  if (!fs.existsSync(AUTH_CACHE_FILE)) return null;
+export async function readAuth(): Promise<{ token: string, cookie: string } | null> {
   try {
-    const content = fs.readFileSync(AUTH_CACHE_FILE, 'utf-8');
-    return JSON.parse(content);
-  } catch {
+    // Query MongoDB for the latest valid session
+    const session = await Session.findOne({ 
+      expiresAt: { $gt: new Date() } 
+    }).sort({ createdAt: -1 });
+    
+    if (session) {
+      return {
+        token: session.token,
+        cookie: session.cookie
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error reading auth from MongoDB:', error);
     return null;
   }
 }
@@ -92,8 +108,6 @@ async function isTokenExpiringSoonOrInvalid(token: string): Promise<boolean> {
       }
     });
 
-    console.log(firstLogin.data, 'fffffffffffffffffffffuuuuuuuuuuuuuuuuuuuuuuu');
-
     if (firstLogin?.data === 'need logout') return true;
 
     const newToken = firstLogin.data?.token;
@@ -112,7 +126,7 @@ async function isTokenExpiringSoonOrInvalid(token: string): Promise<boolean> {
 
 
 async function getSergeiToken(): Promise<string> {
-  const cached = readAuth();
+  const cached = await readAuth();
   if (cached?.token && !(await isTokenExpiringSoonOrInvalid(cached.token))) {
     return cached.token;
   }
@@ -158,7 +172,7 @@ async function getSergeiToken(): Promise<string> {
     if (!currentToken) throw new Error('⛔ Токен не получен из /api/auth');
 
     // ✅ Сохраняем токен + cookie
-    saveAuth({ token: currentToken, cookie: cookieValue });
+    await saveAuth({ token: currentToken, cookie: cookieValue });
 
     return currentToken;
 
@@ -189,7 +203,7 @@ const authenticateToken = async (req: any, res: any, next: any) => {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Accept": "application/json, text/plain, */*",
-      "Cookie": cookie,
+      "Cookie": typeof cookie === "string" ? cookie : "",
       "Content-Type": "application/json",
       "Referer": "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
       "Sec-CH-UA": `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`,
@@ -380,7 +394,7 @@ app.post('/api/logoutAll', async (req, res) => {
 app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
   const clientId = req.clientId;
   const email = req.email;
-  const {type, id} = req.body;
+  const { type, id } = req.body;
 
   const localData = await loadUserData(clientId);
 
@@ -398,14 +412,14 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
       currentOrders[changeOrder].isChanged = false;
       console.log('[DEBUG] isChanged после:', currentOrders[changeOrder].isChanged);
       await saveUserData(clientId, newData);
-      sendToUser(email, {type: 'orders', orders: currentOrders});
+      sendToUser(email, { type: 'orders', orders: currentOrders });
     }
   } else if (type === 'message') {
     let orderNumber = currentOrders.find((el) => el.__id === id)?.nomer_zakaza;
 
 
 
-    console.log(clientId,currentOrders?.length, currentOrders?.filter(el => el.nomer_zakaza).length);
+    console.log(clientId, currentOrders?.length, currentOrders?.filter(el => el.nomer_zakaza).length);
     let found = false;
 
     let testNumber: null | string = null;
@@ -440,7 +454,7 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
       if (index !== -1) {
         testOrders = [
           ...currentOrders.slice(0, index),
-          {...currentOrders[index], nomer_zakaza: testNumber},
+          { ...currentOrders[index], nomer_zakaza: testNumber },
           ...currentOrders.slice(index + 1),
         ]
       }
@@ -450,9 +464,9 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
     const newData = { orders: testOrders ?? currentOrders, messages: currentMessages };
     await saveUserData(clientId, newData);
 
-    sendToUser(email, {type: 'messages', messages: currentMessages});
+    sendToUser(email, { type: 'messages', messages: currentMessages });
   } else {
-    res.status(501).json({err: 'Не предоставлен тип'});
+    res.status(501).json({ err: 'Не предоставлен тип' });
   }
 
 
@@ -473,7 +487,7 @@ app.get("/api/getUserData", authenticateToken, async (req: any, res: any) => {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Accept": "application/json, text/plain, */*",
-      "Cookie": cookie,
+      "Cookie": typeof cookie === "string" ? cookie : "",
       "Content-Type": "application/json",
       "Referer": "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
       "Sec-CH-UA": `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`,
@@ -525,14 +539,14 @@ app.get("/api/getUserData", authenticateToken, async (req: any, res: any) => {
       phone: userData.phone?.tel
     });
   } catch (err) {
-    // console.error(err);
+    console.error(err);
     res.status(500).json(err);
   }
 });
 
 
 app.post("/api/:id/finish", async (req: any, res: any) => {
-  const {id} = req.params;
+  const { id } = req.params;
   const body = req.body;
 
   try {
@@ -562,13 +576,13 @@ app.post("/api/:id/finish", async (req: any, res: any) => {
     res.status(201).json({});
   } catch (err) {
     // // // // // // console.log(err);
-    res.status(500).json({error: err})
+    res.status(500).json({ error: err })
   }
 
 })
 
-app.get("/api/getUserEmail/:id", async(req: any, res: any) => {
-  const {id} = req.params;
+app.get("/api/getUserEmail/:id", async (req: any, res: any) => {
+  const { id } = req.params;
   const response = await axios.get(`https://portal.dev.lead.aero/api/portal/profiles/work_orders/${id}`);
 
   const data = response.data;
@@ -577,7 +591,7 @@ app.get("/api/getUserEmail/:id", async(req: any, res: any) => {
 })
 
 app.post("/api/:id/checkCode", async (req: any, res: any) => {
-  const {id} = req.params;
+  const { id } = req.params;
   const body = req.body;
 
   try {
@@ -585,23 +599,23 @@ app.post("/api/:id/checkCode", async (req: any, res: any) => {
       body
     )
 
-    const emailConfirmCode= response.data.emailConfirmCode;
+    const emailConfirmCode = response.data.emailConfirmCode;
 
-    res.status(201).json({emailConfirmCode });
+    res.status(201).json({ emailConfirmCode });
   } catch (err) {
-    res.status(500).json({error: err})
+    res.status(500).json({ error: err })
   }
 });
 
 app.post("/api/:id/sendCode", async (req: any, res: any) => {
-  const {id} = req.params;
+  const { id } = req.params;
 
   const body = req.body;
 
   try {
     const response = await axios.post(`https://portal.dev.lead.aero/api/portal/signup/work_orders/${id}/send-code`, body)
 
-    res.status(201).json({status: 'OK'});
+    res.status(201).json({ status: 'OK' });
   } catch (err) {
     // // // console.error(err);
     // // // // // // console.log(body);
@@ -634,10 +648,10 @@ app.post("/api/addComment/:messageId", authenticateToken, async (req: any, res: 
     uploadedFiles = await uploadFilesAndGetMetadata(fileBuffers, TOKEN);
   }
 
-  const response = await axios.put(`https://portal.dev.lead.aero/api/feed/messages/${messageId}/comments`, JSON.stringify({...body, files: uploadedFiles}), {
+  const response = await axios.put(`https://portal.dev.lead.aero/api/feed/messages/${messageId}/comments`, JSON.stringify({ ...body, files: uploadedFiles }), {
     headers: {
       Authorization: token,
-      'Cookie': cookie
+      'Cookie': typeof cookie === "string" ? cookie : "",
     }
   });
 
@@ -672,7 +686,7 @@ app.post("/api/addComment/:messageId", authenticateToken, async (req: any, res: 
         },
       };
 
-      sendToUser(email, {type: 'message', messages: updatedUserData.messages});
+      sendToUser(email, { type: 'message', messages: updatedUserData.messages });
 
       // // // // console.log('✅ Обновлённый userData:', updatedUserData);
       await saveUserData(clientId, updatedUserData);
@@ -688,7 +702,7 @@ app.post("/api/getManagers", authenticateToken, async (req: any, res: any) => {
   const company = req.company;
 
   await getSergeiToken();
-  const auth = readAuth();
+  const auth = await readAuth();
   const SergeiToken = auth?.token;
   const cookie = auth?.cookie;
 
@@ -698,7 +712,7 @@ app.post("/api/getManagers", authenticateToken, async (req: any, res: any) => {
       headers: {
         'Authorization': TOKEN,
       }
-      });
+    });
 
   const { users } = req.body;
 
@@ -758,44 +772,44 @@ app.post("/api/getManagers", authenticateToken, async (req: any, res: any) => {
       }
 
       const response = await axios.post(`https://portal.dev.lead.aero/api/auth/users`, {
-          asc: true,
-          orderBy: "__name",
-          limit: 1000,
-          offset: 0,
-          filter: JSON.stringify({
-            and: [
-              {
-                in: [
-                  { field: "__status" },
-                  { list: [2, 0, 1, 3, 4] }
-                ]
-              },
-              {
-                and: [
-                  {
-                    and: [
-                      {
-                        tf: {
-                          "__status": [2, 0]
-                        }
+        asc: true,
+        orderBy: "__name",
+        limit: 1000,
+        offset: 0,
+        filter: JSON.stringify({
+          and: [
+            {
+              in: [
+                { field: "__status" },
+                { list: [2, 0, 1, 3, 4] }
+              ]
+            },
+            {
+              and: [
+                {
+                  and: [
+                    {
+                      tf: {
+                        "__status": [2, 0]
                       }
-                    ]
-                  },
-                  {
-                    eq: [
-                      { field: "__deletedAt" },
-                      { null: "" }
-                    ]
-                  }
-                ]
-              }
-            ]
-          })
-        }
-        ,{
+                    }
+                  ]
+                },
+                {
+                  eq: [
+                    { field: "__deletedAt" },
+                    { null: "" }
+                  ]
+                }
+              ]
+            }
+          ]
+        })
+      }
+        , {
           headers: {
             'Authorization': SergeiToken,
-            'Cookie': cookie
+            'Cookie': typeof cookie === "string" ? cookie : "",
           },
         });
 
@@ -857,7 +871,7 @@ app.get("/api/getContragent", authenticateToken, async (req: any, res: any) => {
 
     // // // // // console.log(dataCompany);
 
-    res.json({contragent, contragentId});
+    res.json({ contragent, contragentId });
   } catch (err) {
     // // // // // console.log(err);
     res.status(500).json({ error: "Ошибка при получении данных" });
@@ -919,9 +933,6 @@ app.post("/api/registration", loginLimiter, async (req: any, res: any) => {
   //   "portal": "work_orders"
   // }
 })
-
-
-
 
 app.post("/api/login", async (req, res) => {
   try {
@@ -1354,7 +1365,7 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
 
   const fullname = req.fullname;
   const email = req.email;
-  
+
   const company = req.company;
 
   const cookie = getCookieByToken(token) ?? '';
@@ -1382,7 +1393,7 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
     }, {
       headers: {
         'Authorization': `${TOKEN}`,
-        'Cookie': cookie,
+        'Cookie': typeof cookie === "string" ? cookie : "",
         'Content-Type': 'application/json'
       }
     })
@@ -1406,11 +1417,11 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
 
     const elmaResponse = await axios.post(
       'https://portal.dev.lead.aero/api/apps/work_orders/OrdersNew/items',
-      JSON.stringify({ payload: contextPayload, tempData: {withEventForceCreate: false, assignExistingIndex: false}}),
+      JSON.stringify({ payload: contextPayload, tempData: { withEventForceCreate: false, assignExistingIndex: false } }),
       {
         headers: {
           'Authorization': `${token}`,
-          'Cookie': cookie,
+          'Cookie': typeof cookie === "string" ? cookie : "",
           'Content-Type': 'application/json'
         }
       }
@@ -1592,26 +1603,26 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
   const orderId = req.params.id;
 
   await getSergeiToken()
-  const auth = readAuth();
+  const auth = await readAuth();
   const token = auth?.token;
   const cookie = auth?.cookie;
 
   try {
   const responseUnread = await axios.get(
-    `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages?offset=0&limit=1000000&condition=unread`,
-    {
-      headers: {
-        'Authorization': `${token}`,
-        'Cookie': cookie,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-        'Origin': 'https://portal.dev.lead.aero',
-        'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
-      },
-      withCredentials: true
-    }
-  );
+      `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages?offset=0&limit=1000000&condition=unread`,
+      {
+        headers: {
+          'Authorization': `${token}`,
+          'Cookie': cookie,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Origin': 'https://portal.dev.lead.aero',
+          'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
+        },
+        withCredentials: true
+      }
+    );
 
     const unreadMessages = responseUnread.data?.result || [];
 
@@ -1678,10 +1689,10 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
         const updatedUserData = {
           ...userData,
           messages:
-            {
-              ...userData?.messages,
-              [orderNumber]: [...(userData?.messages?.[orderNumber] ?? []), result]
-            }
+          {
+            ...userData?.messages,
+            [orderNumber]: [...(userData?.messages?.[orderNumber] ?? []), result]
+          }
         };
 
         await saveUserData(clientId, updatedUserData);
@@ -1876,7 +1887,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
   const email = req.email;
 
   await getSergeiToken();
-  const auth = readAuth();
+  const auth = await readAuth();
   const SergeiToken = auth?.token ?? '';
   const cookie = auth?.cookie ?? '';
 
@@ -1885,7 +1896,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
 
   // // // // // // // // // console.log(user);
   const { id } = req.params;
-  const { userId, orderNumber, files = [], href,  ...messagePayload } = req.body;
+  const { userId, orderNumber, files = [], href, ...messagePayload } = req.body;
 
   let uploadedFiles: UploadedFileMetadata[] = [];
 
@@ -1913,7 +1924,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
     {
       headers: {
         'Authorization': token,
-        'Cookie': clientCookie,
+        'Cookie': typeof clientCookie === "string" ? clientCookie : "",
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0',
@@ -1935,12 +1946,13 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
       const updatedUserData = {
         ...userData,
         messages:
-          {...userData?.messages,
-            [orderNumber]: [...(userData?.messages?.[orderNumber] ?? []), result]
-          }
+        {
+          ...userData?.messages,
+          [orderNumber]: [...(userData?.messages?.[orderNumber] ?? []), result]
+        }
       };
 
-      sendToUser(email, {type: 'messages', messages: updatedUserData.messages});
+      sendToUser(email, { type: 'messages', messages: updatedUserData.messages });
 
       await saveUserData(clientId, updatedUserData);
     }
@@ -1949,7 +1961,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
       method: 'GET',
       headers: {
         'Authorization': SergeiToken,
-        'Cookie': cookie,
+        'Cookie': typeof cookie === "string" ? cookie : "",
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0',
@@ -1997,7 +2009,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
         method: 'PUT',
         headers: {
           'Authorization': SergeiToken,
-          'Cookie': cookie,
+          'Cookie': typeof cookie === "string" ? cookie : "",
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'User-Agent': 'Mozilla/5.0',
@@ -2034,7 +2046,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
         method: 'POST',
         headers: {
           'Authorization': SergeiToken,
-          'Cookie': cookie,
+          'Cookie': typeof cookie === "string" ? cookie : "",
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'User-Agent': 'Mozilla/5.0',
@@ -2056,7 +2068,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
         method: 'POST',
         headers: {
           'Authorization': SergeiToken,
-          'Cookie': cookie,
+          'Cookie': typeof cookie === "string" ? cookie : "",
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'User-Agent': 'Mozilla/5.0',
@@ -2065,8 +2077,8 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
         },
         body: JSON.stringify(
           [
-            {"id":clientId,"type":"user","accessRights":"author"},
-            {id: "1b010ab3-0ee1-567a-8e55-68b1914d4207", type: "group", accessRights: "reader"}
+            { "id": clientId, "type": "user", "accessRights": "author" },
+            { id: "1b010ab3-0ee1-567a-8e55-68b1914d4207", type: "group", accessRights: "reader" }
           ])
       });
     }
@@ -2078,7 +2090,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
       method: 'PUT',
       headers: {
         'Authorization': SergeiToken,
-        'Cookie': cookie,
+        'Cookie': typeof cookie === "string" ? cookie : "",
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0',
@@ -2141,14 +2153,14 @@ app.post('/change-subscription', authenticateToken, (req: any, res: any) => {
 });
 
 
-app.post('/api/delete-subscription', authenticateToken, (req: any, res: any) => {
+app.post('/api/delete-subscription', authenticateToken, async (req: any, res: any) => {
   const { endpoint } = req.body;
 
   if (!endpoint) {
     return res.status(400).json({ error: 'Не передан endpoint' });
   }
 
-  const success = deleteUserSubscriptionByEndpoint(endpoint);
+  const success = await deleteUserSubscriptionByEndpoint(endpoint);
 
   if (success) {
     return res.json({ success: true });
@@ -2167,7 +2179,7 @@ app.post('/api/save-subscription/:userId', authenticateToken, (req: any, res: an
     return res.status(400).json({ error: 'Некорректная подписка' });
   }
 
-  saveUserSubscription(userId, {...subscription, email, userId});
+  saveUserSubscription(userId, { ...subscription, email, userId });
   res.status(201).json({ success: true });
 });
 
@@ -2289,7 +2301,7 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
 
     const prevTickets = localData.orders || [];
 
-// Мёржим __updatedAt* и isChanged из prevTickets в mergedOrders
+    // Мёржим __updatedAt* и isChanged из prevTickets в mergedOrders
     const currentOrders: any[] = mergedOrders.map((ticket: ELMATicket) => {
       const prev = prevTickets.find(el => el.__id === ticket.__id);
       if (prev) {
@@ -2309,14 +2321,14 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
     // await saveUserData(clientId, newData as UserData);
 
     if (currentOrders.length > 0) {
-      return res.json({fetchedOrders: {result: {result: currentOrders, total: currentOrders.length}, error: '', success: true}, passports});
+      return res.json({ fetchedOrders: { result: { result: currentOrders, total: currentOrders.length }, error: '', success: true }, passports });
     }
 
-    const fetchedOrders: any = {result: {result: currentOrders, total: currentOrders.length}, error: '', success: true};
+    const fetchedOrders: any = { result: { result: currentOrders, total: currentOrders.length }, error: '', success: true };
 
     // Сохраняем новые заказы
 
-    res.json({fetchedOrders, passports});
+    res.json({ fetchedOrders, passports });
   } catch (err: any) {
     // // console.error('Ошибка при получении заказов из ELMA365:', err.response?.data || err.message);
     res.status(500).json({ error: 'Не удалось получить заказы из ELMA365' });
@@ -2333,14 +2345,14 @@ const AllStatus = {
 
 const getStatus = (ticket: any): string => {
   let status = 'Не определен';
-  switch(ticket?.__status?.status) {
+  switch (ticket?.__status?.status) {
     // Новый заказ
     case 1:
       status = AllStatus.NEW;
       break;
     //  В работе
     case 2:
-      status = ticket.tip_zakaz ?  AllStatus.PENDING : AllStatus.NEW;
+      status = ticket.tip_zakaz ? AllStatus.PENDING : AllStatus.NEW;
       break;
     // Ожидание
     case 3:
@@ -2418,7 +2430,7 @@ function mergeMessagesWithIsChanged(
 async function pollNewMessages() {
   const users = await getAllUsersData();
   await getSergeiToken()
-  const auth = readAuth();
+  const auth = await readAuth();
   const token = auth?.token;
   const cookie = auth?.cookie;
 
@@ -2426,718 +2438,717 @@ async function pollNewMessages() {
     await Promise.all(
       users.map(async ({ userId, data }) => {
         try {
-      const subscriptions = getUserSubscriptions(userId);
-      const webSubscriptions = subscriptions?.map((el) => ({
-        endpoint: el.endpoint,
-        expirationTime: el.expirationTime || null,
-        keys: {
-          p256dh: el.keys?.p256dh,
-          auth: el.keys?.auth
-        }
-      }));
-
-      const email = subscriptions[0]?.email ?? findAuthFileByUserId(userId)?.email;
-
-
-      // // // console.log(' - Юзер ', email);
-
-      const clientId = userId;
-
-      let currentData = data;
-      let messages = data.messages;
-      let tickets = data.orders;
-
-      // ----- Получаем контктные данные -----
-      try {
-        const responseUser = await axios.post(
-          'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
-          {
-            "active": true,
-            "fields": {
-              "*": true
-            },
-            "filter": {
-              "tf": {
-                "__user": `${clientId}`,
-              }
+          const subscriptions = await getUserSubscriptions(userId);
+          const webSubscriptions = subscriptions?.map((el) => ({
+            endpoint: el.endpoint,
+            expirationTime: el.expirationTime || null,
+            keys: {
+              p256dh: el.keys?.p256dh,
+              auth: el.keys?.auth
             }
-          },
-          {
-            headers: {
-              Authorization: `${TOKEN}`
-            }
-          }
-        );
+          }));
 
-        const data = responseUser.data.result.result[0];
+          const email = subscriptions[0]?.email ?? (await findAuthFileByUserId(userId))?.email;
 
-        const company = data.company;
+          // // // console.log(' - Юзер ', email);
 
-        const getContact = await axios.post(
-          'https://portal.dev.lead.aero/pub/v1/app/_clients/_contacts/list',
-          {
-            "active": true,
-            "fields": {
-              "*": true
-            },
-            "filter": {
-              "tf": {
-                // вернуть после соответствия
-                // "fio": `${fullname}`,
-                "_companies": [
-                  `${company[0]}`
-                ]
-              }
-            }
-          },
-          {
-            headers: {
-              'Authorization': `${TOKEN}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
+          const clientId = userId;
 
-        const contactData = getContact.data?.result;
-        const kontakt = contactData.total > 1 ? contactData.result?.map((el: any) => el.__id) : [contactData.result[0]?.__id];
+          let currentData = data;
+          let messages = data.messages;
+          let tickets = data.orders;
 
-
-        if (!kontakt) return;
-
-        // ----- Получаем заказы с ЕЛМЫ -----
-        const elmaResponse = await axios.post('https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list',
-          {
-            "active": true,
-            "fields": {
-              "*": true
-            },
-            "filter": {
-              "tf": {
-                "kontakt": kontakt,
-              }
-            },
-            size: 10000
-          },
-          {
-            params: {
-              limit: 10000,
-              offset: 0,
-            },
-            headers: {
-              'Authorization': TOKEN,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        const mergedOrders = await elmaResponse.data?.result?.result || [];
-
-        // // // console.log(' - Получил заказы ');
-
-        const allData = {
-          success: true,
-          error: "",
-          result: {
-            result: mergedOrders,
-            total: mergedOrders.length
-          }
-        };
-
-        let ordersFlag = false;
-        let messagesFlag = false;
-
-        let currentData = await loadUserData(userId);
-
-        messages = currentData.messages;
-        tickets = currentData.orders;
-
-
-        // ----- Логика заказов ----- //
-        function pickFields(obj: any, fields: string[]) {
-          return fields.reduce((acc, field) => {
-            acc[field] = get(obj, field); // безопасно достаёт вложенные поля
-            return acc;
-          }, {} as Record<string, any>);
-        }
-
-        let allMessagesByOrder: Record<string, any[]> = {};
-        let currentOrders: any[] = [];
-
-
-        const orderPromises = mergedOrders.map(async (ticket: ELMATicket) => {
+          // ----- Получаем контктные данные -----
           try {
-            const existingTicket = tickets?.find(
-              (el: any) => el && (el?.__id === ticket?.__id || el?.nomer_zakaza === ticket?.nomer_zakaza)
+            const responseUser = await axios.post(
+              'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
+              {
+                "active": true,
+                "fields": {
+                  "*": true
+                },
+                "filter": {
+                  "tf": {
+                    "__user": `${clientId}`,
+                  }
+                }
+              },
+              {
+                headers: {
+                  Authorization: `${TOKEN}`
+                }
+              }
             );
 
-            if (!ticket) return;
+            const data = responseUser.data.result.result[0];
 
-            if (existingTicket) {
-              // Скопируем все поля __updatedAt* из existingTicket в ticket
-              Object.entries(existingTicket)
-                .filter(([k]) => k.startsWith('__updatedAt') && k !== '__updatedAt')
-                .forEach(([k, v]) => {
+            const company = data.company;
+
+            const getContact = await axios.post(
+              'https://portal.dev.lead.aero/pub/v1/app/_clients/_contacts/list',
+              {
+                "active": true,
+                "fields": {
+                  "*": true
+                },
+                "filter": {
+                  "tf": {
+                    // вернуть после соответствия
+                    // "fio": `${fullname}`,
+                    "_companies": [
+                      `${company[0]}`
+                    ]
+                  }
+                }
+              },
+              {
+                headers: {
+                  'Authorization': `${TOKEN}`,
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+
+            const contactData = getContact.data?.result;
+            const kontakt = contactData.total > 1 ? contactData.result?.map((el: any) => el.__id) : [contactData.result[0]?.__id];
+
+
+            if (!kontakt) return;
+
+            // ----- Получаем заказы с ЕЛМЫ -----
+            const elmaResponse = await axios.post('https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list',
+              {
+                "active": true,
+                "fields": {
+                  "*": true
+                },
+                "filter": {
+                  "tf": {
+                    "kontakt": kontakt,
+                  }
+                },
+                size: 10000
+              },
+              {
+                params: {
+                  limit: 10000,
+                  offset: 0,
+                },
+                headers: {
+                  'Authorization': TOKEN,
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+
+            const mergedOrders = await elmaResponse.data?.result?.result || [];
+
+            // // // console.log(' - Получил заказы ');
+
+            const allData = {
+              success: true,
+              error: "",
+              result: {
+                result: mergedOrders,
+                total: mergedOrders.length
+              }
+            };
+
+            let ordersFlag = false;
+            let messagesFlag = false;
+
+            let currentData = await loadUserData(userId);
+
+            messages = currentData.messages;
+            tickets = currentData.orders;
+
+
+            // ----- Логика заказов ----- //
+            function pickFields(obj: any, fields: string[]) {
+              return fields.reduce((acc, field) => {
+                acc[field] = get(obj, field); // безопасно достаёт вложенные поля
+                return acc;
+              }, {} as Record<string, any>);
+            }
+
+            let allMessagesByOrder: Record<string, any[]> = {};
+            let currentOrders: any[] = [];
+
+
+            const orderPromises = mergedOrders.map(async (ticket: ELMATicket) => {
+              try {
+                const existingTicket = tickets?.find(
+                  (el: any) => el && (el?.__id === ticket?.__id || el?.nomer_zakaza === ticket?.nomer_zakaza)
+                );
+
+                if (!ticket) return;
+
+                if (existingTicket) {
+                  // Скопируем все поля __updatedAt* из existingTicket в ticket
+                  Object.entries(existingTicket)
+                    .filter(([k]) => k.startsWith('__updatedAt') && k !== '__updatedAt')
+                    .forEach(([k, v]) => {
+                      // @ts-ignore
+                      ticket[k] = v;
+                    });
+                }
+
+                const isCurrentChanged = existingTicket?.isChanged ?? false;
+                const isNew = !existingTicket;
+
+                if (isNew) {
+                  ordersFlag = true;
+                  messagesFlag = true;
+                  if (webSubscriptions?.length && ticket?.nomer_zakaza) {
+                    // sendPushNotifications(webSubscriptions, 'Новый заказ', `Поступил новый заказ №${ticket.nomer_zakaza}`);
+                  }
+                  return { ...ticket, isChanged: true };
+                }
+
+                const updateIfChanged = (
+                  tabName: string,
+                  fields: string[]
+                ): { updatedAtKey: string; changed: boolean } => {
+                  const updatedAtKey = `__updatedAt${tabName}`;
                   // @ts-ignore
-                  ticket[k] = v;
-                });
-            }
+                  const prevRaw = ticket?.[updatedAtKey];           // теперь ticket уже содержит старое значение
+                  const isInitial = !prevRaw;                     // первый заход если его нет
+                  const prevFields = pickFields(existingTicket, fields);
+                  const currFields = pickFields(ticket, fields);
+                  const isSame = isEqual(prevFields, currFields);
+                  const changed = isInitial ? true : !isSame;
 
-            const isCurrentChanged = existingTicket?.isChanged ?? false;
-            const isNew = !existingTicket;
+                  if (changed) {
+                    ordersFlag = true;
+                    // console.log(updatedAtKey, isSame, '-----------------------');
+                    const now = new Date().toISOString();
+                    // проставляем в ticket (он уйдёт в saveUserData)
+                    // @ts-ignore
+                    ticket[updatedAtKey] = now;
+                  }
 
-            if (isNew) {
-              ordersFlag = true;
-              messagesFlag = true;
-              if (webSubscriptions?.length && ticket?.nomer_zakaza) {
-                // sendPushNotifications(webSubscriptions, 'Новый заказ', `Поступил новый заказ №${ticket.nomer_zakaza}`);
-              }
-              return { ...ticket, isChanged: true };
-            }
-
-            const updateIfChanged = (
-              tabName: string,
-              fields: string[]
-            ): { updatedAtKey: string; changed: boolean } => {
-              const updatedAtKey = `__updatedAt${tabName}`;
-              // @ts-ignore
-              const prevRaw = ticket?.[updatedAtKey];           // теперь ticket уже содержит старое значение
-              const isInitial = !prevRaw;                     // первый заход если его нет
-              const prevFields = pickFields(existingTicket, fields);
-              const currFields = pickFields(ticket, fields);
-              const isSame = isEqual(prevFields, currFields);
-              const changed = isInitial ? true : !isSame;
-
-              if (changed) {
-                ordersFlag = true;
-                // console.log(updatedAtKey, isSame, '-----------------------');
-                const now = new Date().toISOString();
-                // проставляем в ticket (он уйдёт в saveUserData)
-                // @ts-ignore
-                ticket[updatedAtKey] = now;
-              }
-
-              return { updatedAtKey, changed };
-            };
+                  return { updatedAtKey, changed };
+                };
 
 
 
-            // Booking
-            const fieldMap2: Record<
-              number,
-              {
-                fio: string;
-                passport: string;
-                answer: string;
-                timeLimit: string;
-              }
-            > = {
-              1: {
-                fio: 'fio2',
-                passport: 'nomer_a_pasporta_ov_dlya_proverki',
-                answer: 'otvet_klientu',
-                timeLimit: 'taim_limit_dlya_klienta',
-              },
-              2: {
-                fio: 'dopolnitelnye_fio',
-                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
-                answer: 'otvet_klientu_o_bronirovanii_2',
-                timeLimit: 'taim_limit_dlya_klienta_bron_2',
-              },
-              3: {
-                fio: 'fio_passazhira_ov_bron_3',
-                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_3',
-                answer: 'otvet_klientu_o_bronirovanii_3',
-                timeLimit: 'taim_limit_dlya_klienta_bron_3',
-              },
-              4: {
-                fio: 'fio_passazhira_ov_bron_4',
-                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
-                answer: 'otvet_klientu_o_bronirovanii_4',
-                timeLimit: 'taim_limit_dlya_klienta_bron_4',
-              },
-              5: {
-                fio: 'fio_passazhira_ov_bron_5',
-                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_5',
-                answer: 'otvet_klientu_o_bronirovanii_5',
-                timeLimit: 'taim_limit_dlya_klienta_bron_5',
-              },
-              6: {
-                fio: 'fio_passazhira_ov_bron_6',
-                passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
-                answer: 'otvet_klientu_o_bronirovanii_6',
-                timeLimit: 'taim_limit_dlya_klienta_bron_6',
-              },
-            };
-
-  // Приоритетные поля для ответа до оформления
-            const preAnswerMap: Record<number, string> = {
-              1: 'otvet_klientu3',
-              2: 'otvet_klientu_pered_oformleniem_bron_2',
-              3: 'otvet_klientu_pered_oformleniem_bron_3',
-              4: 'otvet_klientu_pered_oformleniem_bron_4',
-              5: 'otvet_klientu_pered_oformleniem_bron_5',
-              6: 'otvet_klientu_pered_oformleniem_bron_6',
-            };
-
-            const bookingFields = Object.values(fieldMap2).flatMap(obj => Object.values(obj))
-              .concat(Object.values(preAnswerMap))
-              .concat('marshrutnaya_kvitanciya');
-            updateIfChanged('Booking', bookingFields);
-
-  // Hotels
-            const hotelFields = [1, 2, 3].flatMap(index => {
-              const suffix = index === 1 ? '' : index;
-              return [
-                `otel${suffix}?.name`,
-                `data_zaezda${suffix}`,
-                `data_vyezda${suffix}`,
-                `kolichestvo_nochei${suffix}`,
-                `tip_nomera${suffix}?.name`,
-                `tip_pitaniya${suffix}?.name`,
-                `stoimost${suffix}?.cents`,
-                `nazvanie_otelya${suffix}`,
-                `tip_nomera${suffix}_nazvanie`,
-                `tip_pitaniya${suffix}_nazvanie`,
-              ];
-            }).concat('vaucher');
-            updateIfChanged('Hotels', hotelFields);
-
-  // Map
-            updateIfChanged('Map', ['karta_mest_f', 'opisanie_stoimosti_mest']);
-
-  // Transfer
-            const transferFields = [
-              'transfer_f',
-              'prilozhenie_transfer1',
-              'vaucher_transfer',
-              'opisanie_transfera',
-              'otvet_klientu_po_transferu',
-              'informaciya_o_passazhire',
-              'stoimost_dlya_klienta_za_oformlenie_transfera_1',
-            ];
-            updateIfChanged('Transfer', transferFields);
-
-  // VIP
-            const vipFields = [
-              'vaucher_vipservis',
-              'nazvanie_uslugi_vipservis',
-              'opisanie_uslugi_vipservis',
-              'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
-              'fio_passazhirov_vipservis',
-            ];
-            updateIfChanged('Vip', vipFields);
-
-
-// 2️⃣ Если __updatedAt совпадают, ничего больше не делаем
-            if (ticket?.__updatedAt === existingTicket?.__updatedAt) {
-              return existingTicket;
-            }
-
-            const status = getStatus(ticket);
-            let fieldsToCompare: string[] = [];
-
-            console.log('-------------------------------...............-----------------------', status, ticket.nomer_zakaza);
-
-
-            if ((getStatus(existingTicket) === AllStatus.NEW) && (status === AllStatus.PENDING)) {
-              ordersFlag = true;
-              if (webSubscriptions?.length) {
-                sendPushNotifications(webSubscriptions, 'Принят в работу', `Заказ №${ticket.nomer_zakaza} принят в работу`);
-              }
-              return { ...ticket, isChanged: true };
-            }
-
-            if (status === AllStatus.PENDING) {
-              fieldsToCompare = ['otvet_klientu1'];
-              const isEqualStatus = isEqual(
-                pickFields(ticket, fieldsToCompare),
-                pickFields(existingTicket || {}, fieldsToCompare)
-              );
-
-              if (!isEqualStatus) {
-                ordersFlag = true;
-                if (webSubscriptions?.length) {
-                  sendPushNotifications(webSubscriptions, 'Направление предложений', `По заказу №${ticket.nomer_zakaza}`);
-                }
-                return { ...ticket, isChanged: true };
-              }
-            }
-
-            if (
-              getStatus(existingTicket) === AllStatus.BOOKED &&
-              status === AllStatus.FORMED &&
-              ticket?.marshrutnaya_kvitanciya
-            ) {
-              ordersFlag = true;
-              if (webSubscriptions?.length) {
-                sendPushNotifications(webSubscriptions, 'Подтверждение оформления', `Подтверждение оформления заказа №${ticket.nomer_zakaza}`);
-              }
-              return { ...ticket, isChanged: true };
-            }
-            
-
-            if (status === AllStatus.BOOKED && ticket.otvet_klientu && !existingTicket?.otvet_klientu) {
-              const fieldsToCompare = [
-                // --- Уже существующие ---
-                'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
-                'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
-                'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
-                'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
-                'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
-                'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
-                'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
-                'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
-                'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
-                'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
-                'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
-
-                // --- Трансфер ---
-                'informaciya_o_passazhire',
-                'otvet_klientu_po_transferu',
-                'stoimost_dlya_klienta_za_oformlenie_transfera_1',
-                'prilozhenie_transfer1',
-                'vaucher_transfer',
-
-                // --- Вип-сервис ---
-                'nazvanie_vipuslugi',
-                'opisanie_i_stoimost_uslugi_vipservis',
-                'fio_passazhirov_vipservis',
-                'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
-                'fio_passazhirov_vipservis_2',
-                'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2',
-                'voucher_vipservis', // заменил "Ваучер Вип-сервис" на camel-case
-
-                // --- Карта мест ---
-                'opisanie_stoimosti_mest',
-                'karta_mest1',
-
-                // --- Отель ---
-                'otel1', 'otel2', 'oteli3',
-                'data_zaezda1', 'data_vyezda1',
-                'data_zaezda2', 'data_vyezda2',
-                'data_zaezda3', 'data_vyezda3',
-                'kolichestvo_nomerov',
-                'kolichestvo_nochei1', 'kolichestvo_nochei2', 'kolichestvo_nochei3',
-                'tip_nomera1', 'tip_nomera2', 'tip_nomera3',
-                'tip_pitaniya1', 'tip_pitaniya2', 'tip_pitaniya3',
-                'stoimost1', 'stoimost2', 'stoimost3',
-                'kommentarii_k_predlozheniyu',
-                'otmena_bez_shtrafa',
-                'otmena_so_shtrafom',
-                'nevozvratnyi',
-                'vaucher'
-              ];
-
-
-              const isEqualStatus = isEqual(
-                pickFields(ticket, fieldsToCompare),
-                pickFields(existingTicket || {}, fieldsToCompare)
-              );
-
-              if (!isEqualStatus) {
-                ordersFlag = true;
-                if (webSubscriptions?.length) {
-                  sendPushNotifications(webSubscriptions, 'Бронирование создано', `По заказу №${ticket.nomer_zakaza}`);
-                }
-                return { ...ticket, isChanged: true };
-              }
-            }
-
-            if (status === AllStatus.BOOKED) {
-              const fieldsToCompareT = [
-              // --- Уже существующие ---
-              'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
-              'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
-              'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
-              'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
-              'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
-              'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
-              'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
-              'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
-              'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
-              'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
-              'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
-
-              // --- Трансфер ---
-              'informaciya_o_passazhire',
-              'otvet_klientu_po_transferu',
-              'stoimost_dlya_klienta_za_oformlenie_transfera_1',
-              'prilozhenie_transfer1',
-              'vaucher_transfer',
-
-              // --- Вип-сервис ---
-              'nazvanie_vipuslugi',
-              'opisanie_i_stoimost_uslugi_vipservis',
-              'fio_passazhirov_vipservis',
-              'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
-              'fio_passazhirov_vipservis_2',
-              'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2',
-              'voucher_vipservis', // заменил "Ваучер Вип-сервис" на camel-case
-
-              // --- Карта мест ---
-              'opisanie_stoimosti_mest',
-              'karta_mest1',
-
-              // --- Отель ---
-              'otel1', 'otel2', 'oteli3',
-              'data_zaezda1', 'data_vyezda1',
-              'data_zaezda2', 'data_vyezda2',
-              'data_zaezda3', 'data_vyezda3',
-              'kolichestvo_nomerov',
-              'kolichestvo_nochei1', 'kolichestvo_nochei2', 'kolichestvo_nochei3',
-              'tip_nomera1', 'tip_nomera2', 'tip_nomera3',
-              'tip_pitaniya1', 'tip_pitaniya2', 'tip_pitaniya3',
-              'stoimost1', 'stoimost2', 'stoimost3',
-              'kommentarii_k_predlozheniyu',
-              'otmena_bez_shtrafa',
-              'otmena_so_shtrafom',
-              'nevozvratnyi',
-              'vaucher'
-            ];
-
-              const fieldsToCompareM = ['marshrutnaya_kvitanciya'];
-
-              const isEqualStatus1 = isEqual(
-                pickFields(ticket, fieldsToCompareT),
-                pickFields(existingTicket || {}, fieldsToCompareT)
-              );
-              const isEqualStatus2 = isEqual(
-                pickFields(ticket, fieldsToCompareM),
-                pickFields(existingTicket || {}, fieldsToCompareM)
-              );
-
-              console.log(' АКТУАЛИЗАЦИИИИЯЯЯЯЯ -------------------------------...............-----------------------', status, ticket.nomer_zakaza, isEqualStatus1, isEqualStatus2);
-
-              if (!isEqualStatus1 || !isEqualStatus2) {
-                ordersFlag = true;
-                if (webSubscriptions?.length) {
-                  sendPushNotifications(webSubscriptions, 'Актуализация бронирования', `По заказу №${ticket.nomer_zakaza}`);
-                }
-                return { ...ticket, isChanged: true };
-              }
-            }
-
-            console.log('✅ Returning ticket', ticket.nomer_zakaza, ticket.__id);
-            return ticket; // <-- теперь точно увидите логи
-          } catch (err) {
-            console.error('❌ Ошибка при обработке заказа:', ticket?.nomer_zakaza, err);
-            return null; // или ticket с флагом ошибки
-          }
-        });
-
-        const messagePromises = mergedOrders.map(async (order: any) => {
-          if (!clientId) return;
-
-          const orderId = order.__id;
-
-          try {
-            // 📥 Получаем непрочитанные сообщения
-            const responseUnread = await axios.get(
-              `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages?offset=0&limit=1000000&condition=unread`,
-              {
-                headers: {
-                  'Authorization': token,
-                  'Cookie': cookie,
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json',
-                  'User-Agent': 'Mozilla/5.0',
-                  'Origin': 'https://portal.dev.lead.aero',
-                  'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
-                },
-                withCredentials: true
-              }
-            );
-
-            const unreadMessages = responseUnread.data?.result || [];
-
-            // ✅ Помечаем непрочитанные как прочитанные
-            for (const message of unreadMessages) {
-              const messageId = message.__id;
-              await axios.put(
-                `https://portal.dev.lead.aero/api/feed/messages/${messageId}/markread`,
-                JSON.stringify({
-                  readCount: 1,
-                  count: message.comments.length + 1
-                }),
-                {
-                  headers: {
-                    'Authorization': token,
-                    'Cookie': cookie,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0',
-                    'Origin': 'https://portal.dev.lead.aero',
-                    'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
+                // Booking
+                const fieldMap2: Record<
+                  number,
+                  {
+                    fio: string;
+                    passport: string;
+                    answer: string;
+                    timeLimit: string;
+                  }
+                > = {
+                  1: {
+                    fio: 'fio2',
+                    passport: 'nomer_a_pasporta_ov_dlya_proverki',
+                    answer: 'otvet_klientu',
+                    timeLimit: 'taim_limit_dlya_klienta',
                   },
-                  withCredentials: true
+                  2: {
+                    fio: 'dopolnitelnye_fio',
+                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
+                    answer: 'otvet_klientu_o_bronirovanii_2',
+                    timeLimit: 'taim_limit_dlya_klienta_bron_2',
+                  },
+                  3: {
+                    fio: 'fio_passazhira_ov_bron_3',
+                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_3',
+                    answer: 'otvet_klientu_o_bronirovanii_3',
+                    timeLimit: 'taim_limit_dlya_klienta_bron_3',
+                  },
+                  4: {
+                    fio: 'fio_passazhira_ov_bron_4',
+                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
+                    answer: 'otvet_klientu_o_bronirovanii_4',
+                    timeLimit: 'taim_limit_dlya_klienta_bron_4',
+                  },
+                  5: {
+                    fio: 'fio_passazhira_ov_bron_5',
+                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_5',
+                    answer: 'otvet_klientu_o_bronirovanii_5',
+                    timeLimit: 'taim_limit_dlya_klienta_bron_5',
+                  },
+                  6: {
+                    fio: 'fio_passazhira_ov_bron_6',
+                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
+                    answer: 'otvet_klientu_o_bronirovanii_6',
+                    timeLimit: 'taim_limit_dlya_klienta_bron_6',
+                  },
+                };
+
+                // Приоритетные поля для ответа до оформления
+                const preAnswerMap: Record<number, string> = {
+                  1: 'otvet_klientu3',
+                  2: 'otvet_klientu_pered_oformleniem_bron_2',
+                  3: 'otvet_klientu_pered_oformleniem_bron_3',
+                  4: 'otvet_klientu_pered_oformleniem_bron_4',
+                  5: 'otvet_klientu_pered_oformleniem_bron_5',
+                  6: 'otvet_klientu_pered_oformleniem_bron_6',
+                };
+
+                const bookingFields = Object.values(fieldMap2).flatMap(obj => Object.values(obj))
+                  .concat(Object.values(preAnswerMap))
+                  .concat('marshrutnaya_kvitanciya');
+                updateIfChanged('Booking', bookingFields);
+
+                // Hotels
+                const hotelFields = [1, 2, 3].flatMap(index => {
+                  const suffix = index === 1 ? '' : index;
+                  return [
+                    `otel${suffix}?.name`,
+                    `data_zaezda${suffix}`,
+                    `data_vyezda${suffix}`,
+                    `kolichestvo_nochei${suffix}`,
+                    `tip_nomera${suffix}?.name`,
+                    `tip_pitaniya${suffix}?.name`,
+                    `stoimost${suffix}?.cents`,
+                    `nazvanie_otelya${suffix}`,
+                    `tip_nomera${suffix}_nazvanie`,
+                    `tip_pitaniya${suffix}_nazvanie`,
+                  ];
+                }).concat('vaucher');
+                updateIfChanged('Hotels', hotelFields);
+
+                // Map
+                updateIfChanged('Map', ['karta_mest_f', 'opisanie_stoimosti_mest']);
+
+                // Transfer
+                const transferFields = [
+                  'transfer_f',
+                  'prilozhenie_transfer1',
+                  'vaucher_transfer',
+                  'opisanie_transfera',
+                  'otvet_klientu_po_transferu',
+                  'informaciya_o_passazhire',
+                  'stoimost_dlya_klienta_za_oformlenie_transfera_1',
+                ];
+                updateIfChanged('Transfer', transferFields);
+
+                // VIP
+                const vipFields = [
+                  'vaucher_vipservis',
+                  'nazvanie_uslugi_vipservis',
+                  'opisanie_uslugi_vipservis',
+                  'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
+                  'fio_passazhirov_vipservis',
+                ];
+                updateIfChanged('Vip', vipFields);
+
+
+                // 2️⃣ Если __updatedAt совпадают, ничего больше не делаем
+                if (ticket?.__updatedAt === existingTicket?.__updatedAt) {
+                  return existingTicket;
                 }
-              );
-            }
 
-            // 📥 Получаем все сообщения
-            const responseAll = await axios.get(
-              `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages`,
-              {
-                params: { limit: 100000, offset: 0 },
-                headers: {
-                  'Authorization': token,
-                  'Cookie': cookie,
-                  'Accept': 'application/json',
-                  'User-Agent': 'Mozilla/5.0',
-                  'Origin': 'https://portal.dev.lead.aero',
-                  'Referer': 'https://portal.dev.lead.aero/',
-                },
-                withCredentials: true
-              }
-            );
+                const status = getStatus(ticket);
+                let fieldsToCompare: string[] = [];
 
-            const elmaData = responseAll.data;
-            const elmaMessages = Array.isArray(elmaData) ? elmaData : elmaData?.result || [];
+                console.log('-------------------------------...............-----------------------', status, ticket.nomer_zakaza);
 
-            // 🧠 Работаем с сообщениями
-            allMessagesByOrder[order.nomer_zakaza] = elmaMessages.map((message: any) => {
-              const previousMessages = messages?.[order.nomer_zakaza] || [];
-              const existingMessage = previousMessages.find((el: any) => el.__id === message.__id);
 
-              // Новое сообщение
-              if (!existingMessage) {
-                messagesFlag = true;
-                console.log('ЗАШЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЛ');
+                if ((getStatus(existingTicket) === AllStatus.NEW) && (status === AllStatus.PENDING)) {
+                  ordersFlag = true;
+                  if (webSubscriptions?.length) {
+                    sendPushNotifications(webSubscriptions, 'Принят в работу', `Заказ №${ticket.nomer_zakaza} принят в работу`);
+                  }
+                  return { ...ticket, isChanged: true };
+                }
+
+                if (status === AllStatus.PENDING) {
+                  fieldsToCompare = ['otvet_klientu1'];
+                  const isEqualStatus = isEqual(
+                    pickFields(ticket, fieldsToCompare),
+                    pickFields(existingTicket || {}, fieldsToCompare)
+                  );
+
+                  if (!isEqualStatus) {
+                    ordersFlag = true;
+                    if (webSubscriptions?.length) {
+                      sendPushNotifications(webSubscriptions, 'Направление предложений', `По заказу №${ticket.nomer_zakaza}`);
+                    }
+                    return { ...ticket, isChanged: true };
+                  }
+                }
 
                 if (
-                  message.author !== clientId &&
-                  !message.author.includes('00000000-0000-0000-0000-000000000000')
+                  getStatus(existingTicket) === AllStatus.BOOKED &&
+                  status === AllStatus.FORMED &&
+                  ticket?.marshrutnaya_kvitanciya
                 ) {
-                  console.log('Перед отправкой пуша:', message);
-                  sendPushNotifications(
-                    webSubscriptions,
-                    `Новое сообщение по заказу ${order.nomer_zakaza}`,
-                    `${stripHtml(message?.body)}`
-                  );
-                  console.log('После отправки пуша:')
+                  ordersFlag = true;
+                  if (webSubscriptions?.length) {
+                    sendPushNotifications(webSubscriptions, 'Подтверждение оформления', `Подтверждение оформления заказа №${ticket.nomer_zakaza}`);
+                  }
+                  return { ...ticket, isChanged: true };
                 }
 
 
-                return { ...message, isChanged: message.author !== userId && !message.author.includes('00000000-0000-0000-0000-000000000000') };
-              }
+                if (status === AllStatus.BOOKED && ticket.otvet_klientu && !existingTicket?.otvet_klientu) {
+                  const fieldsToCompare = [
+                    // --- Уже существующие ---
+                    'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
+                    'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
+                    'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
+                    'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
+                    'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
+                    'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
+                    'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
+                    'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
+                    'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
+                    'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
+                    'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
 
-              // Сравнение комментариев
-              const newComments = message.comments || [];
-              const oldComments = existingMessage.comments || [];
+                    // --- Трансфер ---
+                    'informaciya_o_passazhire',
+                    'otvet_klientu_po_transferu',
+                    'stoimost_dlya_klienta_za_oformlenie_transfera_1',
+                    'prilozhenie_transfer1',
+                    'vaucher_transfer',
 
-              const strippedNew = newComments.map((c: any) => ({
-                body: c.body,
-                author: c.author
-              }));
-              const strippedOld = oldComments.map((c: any) => ({
-                body: c.body,
-                author: c.author
-              }));
+                    // --- Вип-сервис ---
+                    'nazvanie_vipuslugi',
+                    'opisanie_i_stoimost_uslugi_vipservis',
+                    'fio_passazhirov_vipservis',
+                    'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
+                    'fio_passazhirov_vipservis_2',
+                    'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2',
+                    'voucher_vipservis', // заменил "Ваучер Вип-сервис" на camel-case
 
-              const commentsChanged = !isEqual(strippedNew, strippedOld);
+                    // --- Карта мест ---
+                    'opisanie_stoimosti_mest',
+                    'karta_mest1',
 
-              if (commentsChanged) {
-                messagesFlag = true;
+                    // --- Отель ---
+                    'otel1', 'otel2', 'oteli3',
+                    'data_zaezda1', 'data_vyezda1',
+                    'data_zaezda2', 'data_vyezda2',
+                    'data_zaezda3', 'data_vyezda3',
+                    'kolichestvo_nomerov',
+                    'kolichestvo_nochei1', 'kolichestvo_nochei2', 'kolichestvo_nochei3',
+                    'tip_nomera1', 'tip_nomera2', 'tip_nomera3',
+                    'tip_pitaniya1', 'tip_pitaniya2', 'tip_pitaniya3',
+                    'stoimost1', 'stoimost2', 'stoimost3',
+                    'kommentarii_k_predlozheniyu',
+                    'otmena_bez_shtrafa',
+                    'otmena_so_shtrafom',
+                    'nevozvratnyi',
+                    'vaucher'
+                  ];
 
-                const last = newComments.at(-1);
-                if (
-                  last?.author !== clientId &&
-                  !last?.author.includes('00000000-0000-0000-0000-000000000000')
-                ) {
-                  sendPushNotifications(
-                    webSubscriptions,
-                    `Новый комментарий по заказу ${order.nomer_zakaza}`,
-                    `${stripHtml(last?.body ?? 'Файл')}`
+
+                  const isEqualStatus = isEqual(
+                    pickFields(ticket, fieldsToCompare),
+                    pickFields(existingTicket || {}, fieldsToCompare)
                   );
+
+                  if (!isEqualStatus) {
+                    ordersFlag = true;
+                    if (webSubscriptions?.length) {
+                      sendPushNotifications(webSubscriptions, 'Бронирование создано', `По заказу №${ticket.nomer_zakaza}`);
+                    }
+                    return { ...ticket, isChanged: true };
+                  }
                 }
 
-                return { ...message, isChanged: true };
-              }
+                if (status === AllStatus.BOOKED) {
+                  const fieldsToCompareT = [
+                    // --- Уже существующие ---
+                    'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
+                    'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
+                    'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
+                    'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
+                    'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
+                    'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
+                    'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
+                    'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
+                    'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
+                    'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
+                    'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
 
-              // Сообщение не изменилось
-              return existingMessage;
+                    // --- Трансфер ---
+                    'informaciya_o_passazhire',
+                    'otvet_klientu_po_transferu',
+                    'stoimost_dlya_klienta_za_oformlenie_transfera_1',
+                    'prilozhenie_transfer1',
+                    'vaucher_transfer',
+
+                    // --- Вип-сервис ---
+                    'nazvanie_vipuslugi',
+                    'opisanie_i_stoimost_uslugi_vipservis',
+                    'fio_passazhirov_vipservis',
+                    'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
+                    'fio_passazhirov_vipservis_2',
+                    'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2',
+                    'voucher_vipservis', // заменил "Ваучер Вип-сервис" на camel-case
+
+                    // --- Карта мест ---
+                    'opisanie_stoimosti_mest',
+                    'karta_mest1',
+
+                    // --- Отель ---
+                    'otel1', 'otel2', 'oteli3',
+                    'data_zaezda1', 'data_vyezda1',
+                    'data_zaezda2', 'data_vyezda2',
+                    'data_zaezda3', 'data_vyezda3',
+                    'kolichestvo_nomerov',
+                    'kolichestvo_nochei1', 'kolichestvo_nochei2', 'kolichestvo_nochei3',
+                    'tip_nomera1', 'tip_nomera2', 'tip_nomera3',
+                    'tip_pitaniya1', 'tip_pitaniya2', 'tip_pitaniya3',
+                    'stoimost1', 'stoimost2', 'stoimost3',
+                    'kommentarii_k_predlozheniyu',
+                    'otmena_bez_shtrafa',
+                    'otmena_so_shtrafom',
+                    'nevozvratnyi',
+                    'vaucher'
+                  ];
+
+                  const fieldsToCompareM = ['marshrutnaya_kvitanciya'];
+
+                  const isEqualStatus1 = isEqual(
+                    pickFields(ticket, fieldsToCompareT),
+                    pickFields(existingTicket || {}, fieldsToCompareT)
+                  );
+                  const isEqualStatus2 = isEqual(
+                    pickFields(ticket, fieldsToCompareM),
+                    pickFields(existingTicket || {}, fieldsToCompareM)
+                  );
+
+                  console.log(' АКТУАЛИЗАЦИИИИЯЯЯЯЯ -------------------------------...............-----------------------', status, ticket.nomer_zakaza, isEqualStatus1, isEqualStatus2);
+
+                  if (!isEqualStatus1 || !isEqualStatus2) {
+                    ordersFlag = true;
+                    if (webSubscriptions?.length) {
+                      sendPushNotifications(webSubscriptions, 'Актуализация бронирования', `По заказу №${ticket.nomer_zakaza}`);
+                    }
+                    return { ...ticket, isChanged: true };
+                  }
+                }
+
+                console.log('✅ Returning ticket', ticket.nomer_zakaza, ticket.__id);
+                return ticket; // <-- теперь точно увидите логи
+              } catch (err) {
+                console.error('❌ Ошибка при обработке заказа:', ticket?.nomer_zakaza, err);
+                return null; // или ticket с флагом ошибки
+              }
             });
 
-            allMessagesByOrder[order.nomer_zakaza] ??= [{isChanged: true}];
+            const messagePromises = mergedOrders.map(async (order: any) => {
+              if (!clientId) return;
 
-          } catch (error) {
-            console.error(`Ошибка при обработке сообщений по заказу ${orderId}:`, error);
-          }
-        });
+              const orderId = order.__id;
 
-        // 1️⃣ Сначала обрабатываем и отдаем заказы
-        // 1️⃣ Сначала обрабатываем и отдаем заказы
+              try {
+                // 📥 Получаем непрочитанные сообщения
+                const responseUnread = await axios.get(
+                  `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages?offset=0&limit=1000000&condition=unread`,
+                  {
+                    headers: {
+                      'Authorization': token,
+                      'Cookie': cookie,
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json',
+                      'User-Agent': 'Mozilla/5.0',
+                      'Origin': 'https://portal.dev.lead.aero',
+                      'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
+                    },
+                    withCredentials: true
+                  }
+                );
 
-        const allSetted: Promise<void>[] = [];
+                const unreadMessages = responseUnread.data?.result || [];
 
-        allSetted.push((async () => {
-          const ordersResult = await Promise.all(orderPromises);
-          currentOrders = sortAllTickets(ordersResult.filter(Boolean));
+                // ✅ Помечаем непрочитанные как прочитанные
+                for (const message of unreadMessages) {
+                  const messageId = message.__id;
+                  await axios.put(
+                    `https://portal.dev.lead.aero/api/feed/messages/${messageId}/markread`,
+                    JSON.stringify({
+                      readCount: 1,
+                      count: message.comments.length + 1
+                    }),
+                    {
+                      headers: {
+                        'Authorization': token,
+                        'Cookie': cookie,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0',
+                        'Origin': 'https://portal.dev.lead.aero',
+                        'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
+                      },
+                      withCredentials: true
+                    }
+                  );
+                }
 
-          const latest = await loadUserData(clientId);
-          // const ordersActuallyChanged = !isEqual(latest.orders || [], currentOrders || []);
+                // 📥 Получаем все сообщения
+                const responseAll = await axios.get(
+                  `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages`,
+                  {
+                    params: { limit: 100000, offset: 0 },
+                    headers: {
+                      'Authorization': token,
+                      'Cookie': cookie,
+                      'Accept': 'application/json',
+                      'User-Agent': 'Mozilla/5.0',
+                      'Origin': 'https://portal.dev.lead.aero',
+                      'Referer': 'https://portal.dev.lead.aero/',
+                    },
+                    withCredentials: true
+                  }
+                );
+
+                const elmaData = responseAll.data;
+                const elmaMessages = Array.isArray(elmaData) ? elmaData : elmaData?.result || [];
+
+                // 🧠 Работаем с сообщениями
+                allMessagesByOrder[order.nomer_zakaza] = elmaMessages.map((message: any) => {
+                  const previousMessages = messages?.[order.nomer_zakaza] || [];
+                  const existingMessage = previousMessages.find((el: any) => el.__id === message.__id);
+
+                  // Новое сообщение
+                  if (!existingMessage) {
+                    messagesFlag = true;
+                    console.log('ЗАШЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЛ');
+
+                    if (
+                      message.author !== clientId &&
+                      !message.author.includes('00000000-0000-0000-0000-000000000000')
+                    ) {
+                      console.log('Перед отправкой пуша:', message);
+                      sendPushNotifications(
+                        webSubscriptions,
+                        `Новое сообщение по заказу ${order.nomer_zakaza}`,
+                        `${stripHtml(message?.body)}`
+                      );
+                      console.log('После отправки пуша:')
+                    }
 
 
-          if (ordersFlag) {
-            const finalOrders = mergeIsChanged(latest.orders, currentOrders);
-            const finalMessages = latest.messages;
+                    return { ...message, isChanged: message.author !== userId && !message.author.includes('00000000-0000-0000-0000-000000000000') };
+                  }
 
-            const sample = finalOrders[0];
-            const updatedAtFields = Object.entries(sample)
-              .filter(([key]) => key.startsWith('__updatedAt'))
-              .reduce<Record<string, any>>((acc, [key, value]) => {
-                acc[key] = value;
-                return acc;
-              }, {});
+                  // Сравнение комментариев
+                  const newComments = message.comments || [];
+                  const oldComments = existingMessage.comments || [];
 
-            console.log('[before save] updatedAt fields for sample order:', updatedAtFields);
+                  const strippedNew = newComments.map((c: any) => ({
+                    body: c.body,
+                    author: c.author
+                  }));
+                  const strippedOld = oldComments.map((c: any) => ({
+                    body: c.body,
+                    author: c.author
+                  }));
 
-            sendToUser(email, { type: 'orders', orders: currentOrders });
+                  const commentsChanged = !isEqual(strippedNew, strippedOld);
 
-            await saveUserData(clientId, {
-              orders: currentOrders,
-              messages: finalMessages,
-            }, true);
-          }
-        })());
+                  if (commentsChanged) {
+                    messagesFlag = true;
 
-        allSetted.push((async () => {
-          try {
-            await Promise.all(messagePromises);
+                    const last = newComments.at(-1);
+                    if (
+                      last?.author !== clientId &&
+                      !last?.author.includes('00000000-0000-0000-0000-000000000000')
+                    ) {
+                      sendPushNotifications(
+                        webSubscriptions,
+                        `Новый комментарий по заказу ${order.nomer_zakaza}`,
+                        `${stripHtml(last?.body ?? 'Файл')}`
+                      );
+                    }
 
-            const hasNewMessages = Object.keys(allMessagesByOrder).some(key => !(key in messages));
-            const hasChangedMessages = messagesFlag;
+                    return { ...message, isChanged: true };
+                  }
 
-            if (hasNewMessages || hasChangedMessages) {
-              sendToUser(email, { type: 'messages', messages: allMessagesByOrder });
+                  // Сообщение не изменилось
+                  return existingMessage;
+                });
+
+                allMessagesByOrder[order.nomer_zakaza] ??= [{ isChanged: true }];
+
+              } catch (error) {
+                console.error(`Ошибка при обработке сообщений по заказу ${orderId}:`, error);
+              }
+            });
+
+            // 1️⃣ Сначала обрабатываем и отдаем заказы
+            // 1️⃣ Сначала обрабатываем и отдаем заказы
+
+            const allSetted: Promise<void>[] = [];
+
+            allSetted.push((async () => {
+              const ordersResult = await Promise.all(orderPromises);
+              currentOrders = sortAllTickets(ordersResult.filter(Boolean));
 
               const latest = await loadUserData(clientId);
-              const finalOrders = latest.orders;
-              const finalMessages = mergeMessagesWithIsChanged(latest.messages, allMessagesByOrder);
+              // const ordersActuallyChanged = !isEqual(latest.orders || [], currentOrders || []);
 
-              await saveUserData(clientId, {
-                orders: finalOrders,
-                messages: finalMessages,
-              });
-            }
-          } catch (err) {
-            console.error('Ошибка фоновой обработки сообщений:', err);
+
+              if (ordersFlag) {
+                const finalOrders = mergeIsChanged(latest.orders, currentOrders);
+                const finalMessages = latest.messages;
+
+                const sample = finalOrders[0];
+                const updatedAtFields = Object.entries(sample)
+                  .filter(([key]) => key.startsWith('__updatedAt'))
+                  .reduce<Record<string, any>>((acc, [key, value]) => {
+                    acc[key] = value;
+                    return acc;
+                  }, {});
+
+                console.log('[before save] updatedAt fields for sample order:', updatedAtFields);
+
+                sendToUser(email, { type: 'orders', orders: currentOrders });
+
+                await saveUserData(clientId, {
+                  orders: currentOrders,
+                  messages: finalMessages,
+                }, true);
+              }
+            })());
+
+            allSetted.push((async () => {
+              try {
+                await Promise.all(messagePromises);
+
+                const hasNewMessages = Object.keys(allMessagesByOrder).some(key => !(key in messages));
+                const hasChangedMessages = messagesFlag;
+
+                if (hasNewMessages || hasChangedMessages) {
+                  sendToUser(email, { type: 'messages', messages: allMessagesByOrder });
+
+                  const latest = await loadUserData(clientId);
+                  const finalOrders = latest.orders;
+                  const finalMessages = mergeMessagesWithIsChanged(latest.messages, allMessagesByOrder);
+
+                  await saveUserData(clientId, {
+                    orders: finalOrders,
+                    messages: finalMessages,
+                  });
+                }
+              } catch (err) {
+                console.error('Ошибка фоновой обработки сообщений:', err);
+              }
+            })());
+
+            await Promise.all(allSetted);
+
+            // 2️⃣ Параллельно обрабатываем сообщения
+          } catch (error) {
+            // // console.error("❌ Ошибка при опросе:", error);
           }
-        })());
-
-        await Promise.all(allSetted);
-
-// 2️⃣ Параллельно обрабатываем сообщения
-      } catch (error) {
-        // // console.error("❌ Ошибка при опросе:", error);
-      }
         } catch (err) {
           console.error(`Ошибка при обработке пользователя ${userId}`, err);
         }
       })
     );
   } catch (error) {
-    // // console.error("❌ Ошибка при опросе:", error);
+    console.error("❌ Ошибка при опросе:", error);
   } finally {
     setTimeout(pollNewMessages, 3000);
   }
@@ -3150,6 +3161,7 @@ const server = http.createServer(app); // вместо app.listen
 
 initWebSocket(server); // подключаем WS поверх HTTP-сервера
 
-server.listen(3001, () => {
-  // // console.log('🚀 Сервер запущен на http://localhost:3001');
+server.listen(3001, async () => {
+  console.log('🚀 Сервер запущен на http://localhost:3001');
+  await connectToDatabase();
 });
