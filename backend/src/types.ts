@@ -6,3 +6,10 @@ export interface ElmaData {
     type: 'message' | 'order';
   };
 }
+
+export interface UploadedFileMetadata {
+  hash: string;
+  size: number;
+  __id: string;
+  __name: string;
+}

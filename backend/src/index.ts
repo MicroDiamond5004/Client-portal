@@ -1,11 +1,9 @@
 import express from 'express';
 import webpush from 'web-push';
-import bodyParser, { json } from 'body-parser';
 import cors from 'cors';
 import { ELMATicket, MessageType, UserData } from './data/types';
 import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId } from './data/mongodbStorage';
 import path from 'path';
-import { readdirSync, readFileSync } from 'fs';
 import fs from 'fs';
 import axios from 'axios';
 import { error } from 'console';
@@ -13,8 +11,6 @@ import multer from 'multer';
 import FormData from 'form-data';
 import { v4 as uuidv4 } from 'uuid';
 import rateLimit from "express-rate-limit";
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import { get, isEqual, result } from 'lodash';
 import previewRouter from './router/routes/previewRoute';
 import htmlRouter from './router/routes/htmlRoute';
@@ -23,249 +19,12 @@ import subscriptionRouter from './router/routes/subscriptionRouter';
 import http from 'http';
 import { getCookieByToken, saveCookieAndToken } from './data/mongodbStorage';
 import { connectToDatabase } from './database/connection';
-import { Session } from './models';
-
-dotenv.config();
-
-interface UploadedFileMetadata {
-  hash: string;
-  size: number;
-  __id: string;
-  __name: string;
-}
-
-const AUTH_DATA_PATH = "./src/data/auth/authData.json";
-
-function readAuthData() {
-  const data = fs.readFileSync(AUTH_DATA_PATH, "utf-8");
-  return JSON.parse(data);
-}
-
-function sortAllTickets(tickets: ELMATicket[]): ELMATicket[] {
-  return [...tickets].sort((a, b) => {
-    // Сначала те, у кого isChanged === true
-    if (a.isChanged !== b.isChanged) {
-      return a.isChanged ? -1 : 1;
-    }
-
-    // Затем сортировка по убыванию nomer_zakaza (по номеру заказа)
-    return Number(b?.nomer_zakaza || '0') - Number(a?.nomer_zakaza || '0');
-  });
-}
-
-const auth_login = process.env.API_USER;
-const password = process.env.API_PASSWORD;
-
-const loginURL = 'https://portal.dev.lead.aero/guard/login';
-const authURL = 'https://portal.dev.lead.aero/api/auth';
-const logoutURL = 'https://portal.dev.lead.aero/guard/logout';
-const cookieCheckURL = 'https://portal.dev.lead.aero/guard/cookie'
-
-
-export async function saveAuth({ token, cookie }: { token: string, cookie: string }) {
-  try {
-    await saveCookieAndToken(token, cookie);
-  } catch (error) {
-    console.error('Error saving auth to MongoDB:', error);
-  }
-}
-
-export async function readAuth(): Promise<{ token: string, cookie: string } | null> {
-  try {
-    // Query MongoDB for the latest valid session
-    const session = await Session.findOne({ 
-      expiresAt: { $gt: new Date() } 
-    }).sort({ createdAt: -1 });
-    
-    if (session) {
-      return {
-        token: session.token,
-        cookie: session.cookie
-      };
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Error reading auth from MongoDB:', error);
-    return null;
-  }
-}
-
-async function isTokenExpiringSoonOrInvalid(token: string): Promise<boolean> {
-  try {
-    const firstLogin = await axios.get("https://portal.dev.lead.aero/api/auth", {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        "Referer": "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
-        "Sec-CH-UA": `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`,
-        "Sec-CH-UA-Mobile": "?0",
-        "Sec-CH-UA-Platform": `"Windows"`,
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-        "X-Language": "ru-RU",
-        "X-Requested-With": "XMLHttpRequest"
-      }
-    });
-
-    if (firstLogin?.data === 'need logout') return true;
-
-    const newToken = firstLogin.data?.token;
-    if (!newToken) return true;
-
-    const [, payloadBase64] = newToken.split('.');
-    const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf-8'));
-    const now = Math.floor(Date.now() / 1000);
-    return !payload.exp || payload.exp - now <= 300;
-
-  } catch (err) {
-    // console.warn('⚠ Ошибка проверки токена:', err);
-    return true;
-  }
-}
-
-
-async function getSergeiToken(): Promise<string> {
-  const cached = await readAuth();
-  if (cached?.token && !(await isTokenExpiringSoonOrInvalid(cached.token))) {
-    return cached.token;
-  }
-
-  try {
-    // 1️⃣ Первый login
-    const firstLogin = await axios.post(loginURL, {
-      auth_login,
-      password,
-      portal: 'work_orders',
-    }, {
-      withCredentials: true,
-    });
-
-    const setCookiePrev = firstLogin.headers['set-cookie'];
-    if (!setCookiePrev) throw new Error('⛔ Не получены cookie от первого логина');
-
-    // 2️⃣ Logout
-    await axios.post(logoutURL, {}, {
-      headers: { Cookie: setCookiePrev },
-    });
-
-    // 3️⃣ Второй login
-    const mainLogin = await axios.post(loginURL, {
-      auth_login,
-      password,
-      portal: 'work_orders',
-    }, {
-      withCredentials: true,
-    });
-
-    const rawSetCookie = mainLogin.headers['set-cookie'];
-    const cookieValue = rawSetCookie?.[0]?.split(';')[0]; // vtoken=...
-
-    if (!cookieValue) throw new Error('⛔ Cookie после второго логина не получена');
-
-    // 4️⃣ Получение токена
-    const auth = await axios.get(authURL, {
-      headers: { Cookie: cookieValue },
-    });
-
-    const currentToken = auth.headers['token'];
-    if (!currentToken) throw new Error('⛔ Токен не получен из /api/auth');
-
-    // ✅ Сохраняем токен + cookie
-    await saveAuth({ token: currentToken, cookie: cookieValue });
-
-    return currentToken;
-
-  } catch (e) {
-    // // console.error('❌ Ошибка в getSergeiToken:', e);
-    throw e;
-  }
-}
+import authenticateToken, { getSergeiToken, readAuth, sortAllTickets, stripHtml } from './utils';
+import { loginURL, logoutURL, VAPID_KEYS, TOKEN } from './const';
+import { UploadedFileMetadata } from './types';
+import { sendPushNotifications } from './push';
 
 let token = '';
-
-const authenticateToken = async (req: any, res: any, next: any) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '')?.trim();
-
-  if (!token) {
-    return res.status(401).json({ error: "Токен не предоставлен" });
-  }
-
-  const cookie = getCookieByToken(token);
-
-  if (!cookie) {
-    return res.status(401).json({ error: "Сессия не найдена для токена" });
-  }
-
-  // console.log(`Bearer ${token}`);
-
-  const response = await axios.get("https://portal.dev.lead.aero/api/auth", {
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Accept": "application/json, text/plain, */*",
-      "Cookie": typeof cookie === "string" ? cookie : "",
-      "Content-Type": "application/json",
-      "Referer": "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
-      "Sec-CH-UA": `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`,
-      "Sec-CH-UA-Mobile": "?0",
-      "Sec-CH-UA-Platform": `"Windows"`,
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-      "X-Language": "ru-RU",
-      "X-Requested-With": "XMLHttpRequest"
-    }
-  });
-
-  // console.log(response.status, response.data);
-
-
-  try {
-    const savedClientId = response.data.userId ?? '';
-
-    const responseUser = await axios.post(
-      'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
-      {
-        "active": true,
-        "fields": {
-          "*": true
-        },
-        "filter": {
-          "tf": {
-            "__user": `${savedClientId}`
-          }
-        }
-      },
-      {
-        headers: {
-          Authorization: `${TOKEN}`
-        }
-      }
-    );
-
-    const data = responseUser.data.result.result[0];
-
-    req.email = data.email;
-    req.fullname = data.__name;
-    req.company = data.company;
-
-    req.fullnameObject = data.fullname;
-
-    req.clientId = savedClientId;
-    req.clientName = response.data.username ?? 'Клиент';
-    req.externalToken = token;
-
-    next();
-  } catch (error: any) {
-    // console.error("Ошибка при проверке токена:", error?.response?.data);
-    return res.status(403).json({
-      error: `Ошибка при валидации токена ${error}`
-    });
-  }
-};
-
-
-export function stripHtml(html: string): string {
-  return html?.replace(/<[^>]*>/g, '');
-}
 
 const upload = multer();
 const app = express();
@@ -286,13 +45,6 @@ app.use('/api', previewRouter); // Для GET /previews/:id.html
 app.use('/', htmlRouter);
 app.use('/api/subscription', authenticateToken, subscriptionRouter);
 
-// 🔑 Конфигурация VAPID-ключей
-const VAPID_KEYS = {
-  publicKey: 'BIyUd7eREfLOnyukFMR9DuezE8uXAnOwp_-Rr7YxIX-RIxm2IRW6uJ90vB1OBn51o0rGAf8k4SQGR-ZfuutHmiE',
-  privateKey: 'WM4lBtcHCBrKFaiZiOLF39NbMjML-H3VaDNXkCQBFmg', // 👈 НЕ выкладывай этот ключ на клиент!
-};
-
-const TOKEN = 'Bearer 4ae6ed17-6612-4458-a30d-5a245732168c';
 
 // Ограничение: не более 10 запросов с одного IP за 2 минуты
 const loginLimiter = rateLimit({
@@ -304,17 +56,6 @@ const loginLimiter = rateLimit({
 });
 
 // Это "единый логин", который реально используется при обращении к внешнему API
-const FIXED_CREDENTIALS = {
-  auth_login: "dev_9@lead.aero",
-  password: "*cJ85gXS7Sfd",
-  remember: false,
-};
-
-webpush.setVapidDetails(
-  'mailto:test@example.com',
-  VAPID_KEYS.publicKey,
-  VAPID_KEYS.privateKey
-);
 
 const subscriptionsPath = path.join(__dirname, 'data/subscriptions/subscriptions.json');
 
@@ -333,34 +74,6 @@ app.post('/subscribe', (req, res) => {
   res.status(201).json({ message: 'Subscribed' });
 });
 
-function sendPushNotifications(subscriptions: any[], title: string, message: string) {
-  const payload = JSON.stringify({
-    title,
-    body: message,
-  });
-
-  subscriptions?.forEach(async (subscription: any) => {
-    try {
-      await webpush.sendNotification(subscription, payload);
-    } catch (error: any) {
-      const endpoint = subscription.endpoint;
-
-      const errMessage = error?.body || error?.message || '';
-
-      const isGone =
-        errMessage.includes('unsubscribed') ||
-        errMessage.includes('expired') ||
-        error?.statusCode === 410; // 410 = Gone
-
-      if (isGone && endpoint) {
-        // console.warn(`⚠ Подписка больше неактивна, удаляем: ${endpoint}`);
-        deleteUserSubscriptionByEndpoint(endpoint);
-      } else {
-        // // console.error('❌ Ошибка отправки уведомления:', error);
-      }
-    }
-  });
-}
 
 app.post('/api/logoutAll', async (req, res) => {
   const login = req.body.login;
@@ -1578,16 +1291,11 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
 app.post('/api/send-notification', async (req, res) => {
   const { subscription, message, title } = req.body;
 
-  const payload = JSON.stringify({
-    title: title || '🚀 Push из backend!',
-    body: message || 'Нет текста в сообщении',
-  });
-
   // // // console.log(subscription);
 
   try {
     // // // // // // // // // console.log(subscription);
-    await webpush.sendNotification(subscription, payload);
+    await sendPushNotifications(subscription, title, message);
     // // // // // // // // // console.log('✅ Уведомление отправлено!');
     res.status(201).json({ success: true });
   } catch (error) {
@@ -1606,6 +1314,7 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
   const auth = await readAuth();
   const token = auth?.token;
   const cookie = auth?.cookie;
+console.log("cookie====>", clientId, "====", orderId, "-----", auth);
 
   try {
   const responseUnread = await axios.get(
@@ -1702,6 +1411,7 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
       }
     }
   } catch (err) {
+    console.log("err====>",err);
     const userData = await loadUserData(clientId);
     const savedMessages = userData?.messages || [];
 
@@ -1710,6 +1420,7 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
     return res.json(savedMessages);
   }
 });
+
 
 
 // app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) => {
@@ -2334,97 +2045,6 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
     res.status(500).json({ error: 'Не удалось получить заказы из ELMA365' });
   }
 });
-
-const AllStatus = {
-  NEW: 'Новый заказ',
-  PENDING: 'В работе',
-  BOOKED: 'Бронь',
-  FORMED: 'Оформлено',
-  CLOSED: 'Завершено',
-}
-
-const getStatus = (ticket: any): string => {
-  let status = 'Не определен';
-  switch (ticket?.__status?.status) {
-    // Новый заказ
-    case 1:
-      status = AllStatus.NEW;
-      break;
-    //  В работе
-    case 2:
-      status = ticket.tip_zakaz ? AllStatus.PENDING : AllStatus.NEW;
-      break;
-    // Ожидание
-    case 3:
-      status = AllStatus.PENDING;
-      break;
-    case 4:
-      status = ticket.otvet_klientu ? AllStatus.BOOKED : AllStatus.PENDING;
-      break;
-    // Выписка
-    case 5:
-      status = AllStatus.BOOKED;
-      break;
-    // Завершено
-    case 6:
-      status = AllStatus.FORMED;
-      break;
-    // Снято
-    case 7:
-      status = AllStatus.CLOSED;
-      break;
-  }
-
-  return status;
-}
-
-function mergeIsChanged<T extends { __id: string; isChanged?: boolean }>(
-  oldItems: T[],
-  newItems: T[]
-): T[] {
-  const map = new Map(oldItems.map(item => [item.__id, item]));
-
-  return newItems.map(newItem => {
-    const oldItem = map.get(newItem.__id);
-
-    if (oldItem) {
-      return {
-        ...oldItem,
-        ...newItem,
-        isChanged: oldItem.isChanged === false && newItem.isChanged === true
-          ? false
-          : newItem.isChanged
-      };
-    }
-
-    return newItem;
-  });
-}
-
-
-function mergeMessagesWithIsChanged(
-  oldMessages: Record<string, any[]>,
-  newMessages: Record<string, any[]>
-): Record<string, any[]> {
-  const result: Record<string, any[]> = {};
-
-  for (const key of Object.keys(newMessages)) {
-    const old = oldMessages[key] || [];
-    const incoming = newMessages[key];
-
-    const map = new Map(old.map(m => [m.__id, m]));
-
-    result[key] = incoming.map(m => {
-      const existing = map.get(m.__id);
-      if (existing && existing.isChanged === false && m.isChanged === true) {
-        return { ...m, isChanged: false };
-      }
-      return m;
-    });
-  }
-
-  return result;
-}
 
 
 async function pollNewMessages() {

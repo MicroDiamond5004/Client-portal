@@ -2,13 +2,10 @@ import webPush from 'web-push';
 import fs from 'fs/promises';
 import path from 'path';
 import { PushSubscription } from 'web-push';
+import { VAPID_KEYS } from './const';
+import { deleteUserSubscriptionByEndpoint } from './data/mongodbStorage';
 
 const SUBSCRIPTIONS_PATH = './server/subscriptions.json';
-
-const VAPID_KEYS = {
-  publicKey: 'BIyUd7eREfLOnyukFMR9DuezE8uXAnOwp_-Rr7YxIX-RIxm2IRW6uJ90vB1OBn51o0rGAf8k4SQGR-ZfuutHmiE',
-  privateKey: 'WM4lBtcHCBrKFaiZiOLF39NbMjML-H3VaDNXkCQBFmg', // 👈 НЕ выкладывай этот ключ на клиент!
-};
 
 webPush.setVapidDetails(
   'mailto:you@example.com',
@@ -55,4 +52,34 @@ async function readSubscriptions(): Promise<PushSubscription[]> {
   }
 }
 
-export const getVapidPublicKey = () => vapidKeys.publicKey;
+export const getVapidPublicKey = () => VAPID_KEYS.publicKey;
+
+export function sendPushNotifications(subscriptions: any[], title: string, message: string) {
+  const payload = JSON.stringify({
+    title,
+    body: message,
+  });
+
+  subscriptions?.forEach(async (subscription: any) => {
+    try {
+      await webPush.sendNotification(subscription, payload);
+    } catch (error: any) {
+      const endpoint = subscription.endpoint;
+
+      const errMessage = error?.body || error?.message || '';
+
+      const isGone =
+        errMessage.includes('unsubscribed') ||
+        errMessage.includes('expired') ||
+        error?.statusCode === 410; // 410 = Gone
+
+      if (isGone && endpoint) {
+        // console.warn(`⚠ Подписка больше неактивна, удаляем: ${endpoint}`);
+        deleteUserSubscriptionByEndpoint(endpoint);
+      } else {
+        // // console.error('❌ Ошибка отправки уведомления:', error);
+      }
+    }
+  });
+}
+
