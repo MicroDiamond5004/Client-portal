@@ -1170,9 +1170,14 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                   p: lgUp ? '0' : '5px 0px',
                   maxHeight: open ? lgUp ? '100%' : `calc((var(--app-height) / 100 * 93) - 100px)` : 'auto',
                   height: open ? lgUp ? 'auto' : `auto` : 'auto',
-                  width:  lgUp? 
-                            !open ? '100%' : '450px'
-                          : window.innerWidth > 1200 ? '500px' : '31vw',
+                  wwidth: lgUp
+                    ? !open
+                      ? '100%'
+                        ? `${(mainBoxRef.current?.clientWidth || 0) -
+                        (inBoxRef.current?.clientWidth || 0)}px`
+                  : '450px'
+                  : window.innerWidth > 1200 ? '500px' : '31vw'
+                  : open ? window.innerWidth - 20 : window.innerWidth - 55,
                   scrollbarWidth: 'none',
                   '&::-webkit-scrollbar': {
                   display: 'none',

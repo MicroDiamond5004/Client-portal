@@ -1,4 +1,4 @@
-import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack, Typography } from '@mui/material';
+import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material';
 
 import config from 'src/context/config'
 import { useContext } from "react";
@@ -11,12 +11,35 @@ import Language from './Language';
 import Navigation from './Navigation';
 import MobileRightSidebar from './MobileRightSidebar';
 import { CustomizerContext } from 'src/context/CustomizerContext';
+import { useAppDispatch, useAppSelector } from 'src/store/hooks';
+import { updateOrdersType } from 'src/store/slices/ticketsSlice';
+import { fetchUserOrders } from 'src/store/middleware/thunks/ordersThunks';
+import { fetchMessages } from 'src/store/middleware/thunks/messageThunks';
+import { selectOrdersType } from 'src/store/selectors/ticketsSelectors';
+import { selectIsMultiuser } from 'src/store/selectors/authSelector';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
 
   const TopbarHeight = config.topbarHeight;
+
+    const dispatch = useAppDispatch();
+    const orderView = useAppSelector(selectOrdersType);
+    const setOrderView = (value: 'my' | 'all') => dispatch(updateOrdersType(value)); 
+
+    const isMultiplyUsers = useAppSelector(selectIsMultiuser);
+  
+    const handleChange = (
+      _: React.MouseEvent<HTMLElement>,
+      newView: "my" | "all" | null
+    ) => {
+      if (newView){
+        setOrderView(newView)
+        dispatch(fetchUserOrders());
+        dispatch(fetchMessages('123'));
+      };
+    };
 
   // drawer
   const { activeMode, setActiveMode, setIsCollapse, isCollapse, isMobileSidebar, setIsMobileSidebar } = useContext(CustomizerContext);
@@ -109,8 +132,66 @@ const Header = () => {
               }}
             >
               {Title}
+
             </Typography>}
           </Box>
+
+          {isMultiplyUsers && (
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      mx: 1,
+    }}
+  >
+    <ToggleButtonGroup
+      value={orderView}
+      exclusive
+      onChange={handleChange}
+      sx={{
+        backgroundColor: (theme) =>
+          theme.palette.mode === 'dark'
+            ? 'rgba(255, 255, 255, 0.1)'
+            : 'rgba(0, 0, 0, 0.08)',
+        borderRadius: '50px',
+        padding: '4px',
+        minHeight: 34,
+        '& .MuiToggleButton-root': {
+          border: 'none',
+          borderRadius: '30px',
+          textTransform: 'none',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          padding: '4px 12px',
+          transition: 'all 0.25s ease',
+          color: (theme) =>
+            theme.palette.mode === 'dark'
+              ? theme.palette.grey[300]
+              : theme.palette.text.secondary,
+          '&.Mui-selected': {
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark'
+                ? theme.palette.primary.dark
+                : theme.palette.primary.main,
+            color: '#fff',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+          },
+          '&:hover': {
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark'
+                ? 'rgba(255,255,255,0.15)'
+                : 'rgba(0,0,0,0.1)',
+          },
+        },
+      }}
+    >
+      <ToggleButton value="my">Мои</ToggleButton>
+      <ToggleButton value="all">Все</ToggleButton>
+    </ToggleButtonGroup>
+  </Box>
+)}
+
 
           {/* --- Правый блок --- */}
           <Stack spacing={1} direction="row" alignItems="center">

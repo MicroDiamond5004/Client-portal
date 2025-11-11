@@ -436,7 +436,7 @@ export async function updateUser(userId: string, updateData: Partial<IUser>): Pr
     return await User.findOneAndUpdate(
       { clientId: userId },
       { ...updateData, updatedAt: new Date() },
-      { new: true }
+      { new: true, upsert: true }
     );
   } catch (error) {
     console.error('Error updating user:', error);

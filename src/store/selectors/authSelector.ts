@@ -10,3 +10,4 @@ export const selecttClientFio = (state: RootState) => state.auth.clientFio;
 export const selecttClientEmail = (state: RootState) => state.auth.email;
 export const selecttClientPhone = (state: RootState) => state.auth.phone;
 export const selectSubscription  = (state: RootState) => state.auth.subscription;
+export const selectIsMultiuser  = (state: RootState) => state.auth.isMultiUser;

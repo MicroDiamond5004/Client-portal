@@ -120,8 +120,8 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
     // // console.log(type, changeOrder);
 
   } else if (type === 'message') {
-    const updatedMessages= await updateIsChangedByType(clientId, id, 'message', false);
-    
+    const updatedMessages = await updateIsChangedByType(clientId, id, 'message', false);
+
 
     // sendToUser(email, { type: 'messages', messages: currentMessages });
   } else {
@@ -170,13 +170,13 @@ app.get("/api/getUserData", authenticateToken, async (req: any, res: any) => {
     const startUserProfile = Date.now();
 
     const [userResponse, anotherUsers] = await Promise.all([
-    axios.post('https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list', {
-      active: true,
-      fields: { "*": true },
-      filter: { tf: { "__user": `${userId}` } }
-    }, { headers: { Authorization: TOKEN } }),
-    getAnotherUsers(userId)
-  ]);
+      axios.post('https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list', {
+        active: true,
+        fields: { "*": true },
+        filter: { tf: { "__user": `${userId}` } }
+      }, { headers: { Authorization: TOKEN } }),
+      getAnotherUsers(userId)
+    ]);
 
     const userProfileTime = Date.now() - startUserProfile;
     console.log(`⏱️ /_user_profiles/list took ${userProfileTime}ms`);
@@ -641,10 +641,17 @@ app.post("/api/login", async (req, res) => {
       }
     );
 
-
     const currentToken = auth.headers["token"];
 
     const authData = auth.data;
+    console.log("authData===>", authData);
+    try {
+      await updateUser(authData.userId, { email: auth_login, password, clientName: authData.userId, clientId: authData.userId, token: currentToken, cookie: cookieValue })
+      console.log('Update User');
+      // await addUser(authData.userId, authData.userId, auth_login, password, company);
+    } catch (err) {
+      console.error(`Can't save login`, err);
+    }
 
     const responseUser = await axios.post(
       'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
@@ -670,14 +677,7 @@ app.post("/api/login", async (req, res) => {
 
     const company = data.company?.[0];
 
-    try {
-      await updateUser(authData.userId, {email: auth_login, password, clientName: authData.userId, clientId: authData.userId, token: currentToken, cookie: cookieValue})
-      
-      // await addUser(authData.userId, authData.userId, auth_login, password, company);
-    } catch(err) {
-      console.error(`Can't save login`, err);
-    }
-    
+
     const fileName = await saveCookieAndToken(currentToken, cookieValue || "");
 
     res.json({
@@ -1294,7 +1294,7 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
   const clientId = req.clientId;
   // const orderId = req.params.id;
 
-    const { type = 'my' } = req.query;
+  const { type = 'my' } = req.query;
 
   try {
     // 👇 загружаем только нужную страницу + общее количество
@@ -1308,7 +1308,7 @@ app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) 
 
     return res.json(chats);
   } catch (err) {
-    console.log("err====>",err);
+    console.log("err====>", err);
     const userData = await loadUserData(clientId);
     const savedMessages = userData?.messages || [];
   }
@@ -1543,7 +1543,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
   try {
     console.log(result);
 
-    await createMessage(userId, {__id: result.__id, targetId: result.target.id, authorId: result.author, body: result.body, files: result.files ?? []})
+    await createMessage(userId, { __id: result.__id, targetId: result.target.id, authorId: result.author, body: result.body, files: result.files ?? [] })
 
     // 💾 Сохраняем сообщение локально
     console.log(clientId, userId, result)
@@ -1802,7 +1802,7 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
     const anotherUsers = type === 'all' ? await getAnotherUsers(clientId) : null;
 
     const passportsRaw = await getPassportsById(clientId) ?? [];
-    
+
     const passports = Object.fromEntries(
       passportsRaw.map(p => [p.passportId, [p.name, p.passportData]])
     );
@@ -1819,51 +1819,51 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
     const fetchedOrders = {
       result: {
         result: orders.map((el) => {
-          
-         const {
-          nomer_zakaza,
-          __id,
-          __name,
-          __status,
-          __createdAt,
-          fio2,
-          zapros,
-          otvet_klientu,
-          otvet_klientu1,
-          otvet_klientu3,
-          otvet_klientu_o_bronirovanii_2,
-          otvet_klientu_o_bronirovanii_4,
-          otvet_klientu_o_bronirovanii_5,
-          otvet_klientu_o_bronirovanii_6,
-          otvet_klientu_pered_oformleniem_bron_2,
-          otvet_klientu_pered_oformleniem_bron_3,
-          otvet_klientu_pered_oformleniem_bron_4,
-          otvet_klientu_pered_oformleniem_bron_5,
-          otvet_klientu_pered_oformleniem_bron_6,
-        } = el.orderData;
 
-        return {
-          nomer_zakaza,
-          __id,
-          __name,
-          __status,
-          __createdAt,
-          fio2,
-          zapros,
-          otvet_klientu,
-          otvet_klientu1,
-          otvet_klientu3,
-          otvet_klientu_o_bronirovanii_2,
-          otvet_klientu_o_bronirovanii_4,
-          otvet_klientu_o_bronirovanii_5,
-          otvet_klientu_o_bronirovanii_6,
-          otvet_klientu_pered_oformleniem_bron_2,
-          otvet_klientu_pered_oformleniem_bron_3,
-          otvet_klientu_pered_oformleniem_bron_4,
-          otvet_klientu_pered_oformleniem_bron_5,
-          otvet_klientu_pered_oformleniem_bron_6,
-          isChanged: el.isChanged,
-        };
+          const {
+            nomer_zakaza,
+            __id,
+            __name,
+            __status,
+            __createdAt,
+            fio2,
+            zapros,
+            otvet_klientu,
+            otvet_klientu1,
+            otvet_klientu3,
+            otvet_klientu_o_bronirovanii_2,
+            otvet_klientu_o_bronirovanii_4,
+            otvet_klientu_o_bronirovanii_5,
+            otvet_klientu_o_bronirovanii_6,
+            otvet_klientu_pered_oformleniem_bron_2,
+            otvet_klientu_pered_oformleniem_bron_3,
+            otvet_klientu_pered_oformleniem_bron_4,
+            otvet_klientu_pered_oformleniem_bron_5,
+            otvet_klientu_pered_oformleniem_bron_6,
+          } = el.orderData;
+
+          return {
+            nomer_zakaza,
+            __id,
+            __name,
+            __status,
+            __createdAt,
+            fio2,
+            zapros,
+            otvet_klientu,
+            otvet_klientu1,
+            otvet_klientu3,
+            otvet_klientu_o_bronirovanii_2,
+            otvet_klientu_o_bronirovanii_4,
+            otvet_klientu_o_bronirovanii_5,
+            otvet_klientu_o_bronirovanii_6,
+            otvet_klientu_pered_oformleniem_bron_2,
+            otvet_klientu_pered_oformleniem_bron_3,
+            otvet_klientu_pered_oformleniem_bron_4,
+            otvet_klientu_pered_oformleniem_bron_5,
+            otvet_klientu_pered_oformleniem_bron_6,
+            isChanged: el.isChanged,
+          };
 
         }),
         total: totalCount,
