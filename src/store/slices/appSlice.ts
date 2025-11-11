@@ -2,12 +2,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 interface InitialStorage {
-  currentPath: Location<any>;
-  previousPath:  Location<any> | null;
+  currentPath: Location;
+  previousPath: Location | null;
 }
 
+
 const initialState: InitialStorage = {
-  currentPath: '/',
+  currentPath: window.location,
   previousPath: null,
 };
 

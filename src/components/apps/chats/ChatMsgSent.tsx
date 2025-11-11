@@ -15,11 +15,12 @@ import {
   sendMessage as sendElmaMessage,
 } from 'src/store/middleware/thunks/messageThunks';
 
-import { selectClientName } from "src/store/selectors/authSelector";
+import { selectClientId, selectClientName } from "src/store/selectors/authSelector";
 import '../chats/chat.css';
 import { stripHtml } from "src/utils/stripHTML";
 import { selectTickets } from "src/store/selectors/ticketsSelectors";
 import { selectSelectedchat } from 'src/store/selectors/messagesSelectors.ts';
+import { useSelector } from 'react-redux';
 
 type ChatMsgSentProps = {
   currentChat: ChatsType | null;
@@ -44,6 +45,8 @@ const ChatMsgSent = ({
   const replyRef = useRef<HTMLElement>(null);
   const filesRef = useRef<HTMLElement>(null);
 
+  const userId = useSelector(selectClientId) ?? '';
+  
 
   const [msg, setMsg] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -75,7 +78,7 @@ const ChatMsgSent = ({
   const handleSendMessage = async (commentMessage: ChatMessage | null = null) => {
     if (!msg.trim() && files.length === 0) return;
 
-    const chatId = selectedChat?.taskId || currentChat?.taskId || tickets.find((t) => t.nomer_zakaza === selectedChat?.name).__id || '';
+    const chatId = selectedChat?.taskId || currentChat?.taskId || tickets?.find((t) => t.nomer_zakaza === selectedChat?.name)?.__id || '';
     const orderNumber = selectedChat?.name || currentChat?.name || "";
 
     if (commentMessage) {
@@ -95,7 +98,7 @@ const ChatMsgSent = ({
     const match = url.match(/\bhttps?:\/\/[^\s\]]+/);
     const cleanUrl = match ? match[0] : null;
 
-    dispatch(sendElmaMessage({ id: chatId, text: msg, orderNumber, files, url: cleanUrl }));
+    dispatch(sendElmaMessage({ id: chatId, text: msg, orderNumber, files, url: cleanUrl ?? '' , userId}));
     setFiles([]);
     // sendPushFromClient(msg, `Заказ - ${orderNumber}`);
     setMsg("");

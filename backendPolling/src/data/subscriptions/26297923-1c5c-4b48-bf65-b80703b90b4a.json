@@ -1,0 +1,22 @@
+[
+  {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/eqjn9yTON_Q:APA91bF7G2jbL3-xT7LlPzrf6Po23e0WDZ7r1a79jOzF1xj-EVjPrMbsSILPt0F26ei7K5LdhseIDg1ZEke8nqQ5H6mYbgqiSEnsD_w-jlLndNtT1h63FfmUc4xcpzDOXftMhmFF5y7n",
+    "expirationTime": null,
+    "keys": {
+      "p256dh": "BIUjM6SrJwmIOCKi3qnlteVvWNPVa7XFzTIFZ5LCOveD1nq_AH2DnBUYrvabEzQCchsYq37gQMAwNbXckH6wXLo",
+      "auth": "q3WaUkcY6FbQ9ynVizigOw"
+    },
+    "email": "u.mikhailova@lead.aero",
+    "userId": "26297923-1c5c-4b48-bf65-b80703b90b4a"
+  },
+  {
+    "endpoint": "https://updates.push.services.mozilla.com/wpush/v2/gAAAAABoSAVIjCVX_9GGrVDoPRYTKGa1nkReJLrCGwdc8PqmpuOv0m9qDiDWwuWIq_LkHMpFEWqVlP2HRpAzaOVffWV0JNR8mmt7l6rj9pDUDDfMfCiT0zwzxzzdSJD1qRVeNuQ7tR7WXkP23CeEmatnOgBwmCMvMmP4si7krUUrMXLm36lWb5E",
+    "expirationTime": null,
+    "keys": {
+      "auth": "QDhFVP7sZInsb4xmhHHgPg",
+      "p256dh": "BAZQXmiwKc_kVClJMtyfDthOmT6MS0NzVt_F2RfdGbF2bM1_RvDgEXB_Ypr_3SQ6aEhxqKASn0oq_Db46yDbV50"
+    },
+    "email": "u.mikhailova@lead.aero",
+    "userId": "26297923-1c5c-4b48-bf65-b80703b90b4a"
+  }
+]

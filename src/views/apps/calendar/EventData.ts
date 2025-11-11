@@ -20,6 +20,7 @@ export interface EventType {
   timeLimit?: string[];
   fios?: string[];
   nomerZakaza?: string;
+  color?: string;
 }
 
 

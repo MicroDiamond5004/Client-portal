@@ -23,7 +23,7 @@ import { IconChevronLeft, IconChevronRight, IconDownload, IconFile, IconX } from
 import { AllStatus, getStatus } from '../tickets/TicketListing';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { useAppDispatch, useAppSelector } from 'src/store/hooks';
-import { fetchMessages, fetchTickets } from 'src/store/middleware/thunks';
+import { fetchTickets } from 'src/store/middleware/thunks';
 import { fetchUserOrders } from 'src/store/middleware/thunks/ordersThunks';
 import { selectPassports, selectTickets } from 'src/store/selectors/ticketsSelectors';
 import axios from 'axios';
@@ -280,12 +280,12 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
   }, []);
 
 
-  const [vaucher, setVaucher] = useState<any[]>(null);
-  const [kartaMest, setKartaMest] = useState<any[]>(null);
-  const [transer,  setTranser] = useState<any[]>(null);
-  const [prilozhenieTransfer, setPrilozhenieTransfer] = useState<any[]>(null);
-  const [vaucherTransfer, setVaucherTransfer] = useState<any[]>(null);
-  const [vipServis, setVipServis] = useState<any[]>(null);
+  const [vaucher, setVaucher] = useState<any[]>();
+  const [kartaMest, setKartaMest] = useState<any[]>();
+  const [transer,  setTranser] = useState<any[]>();
+  const [prilozhenieTransfer, setPrilozhenieTransfer] = useState<any[]>();
+  const [vaucherTransfer, setVaucherTransfer] = useState<any[]>();
+  const [vipServis, setVipServis] = useState<any[]>();
 
 
   useEffect(() => {
@@ -428,7 +428,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
               color: '#fff'
             }}
             size="small"
-            label={`Создан: ${formatToRussianDate(ticket?.__createdAt)}`}
+            label={`Создан: ${formatToRussianDate(ticket?.__createdAt ?? '')}`}
           />
           {/* {chat?.messages.map((c, index) => {
             return (
@@ -469,7 +469,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
             );
           })} */}
           {ticket && <><Typography mt={2} fontWeight={600}>Статус:</Typography>
-          <Typography>{getStatus(ticket)?.trim()}</Typography>
+          <Typography>{ticket && getStatus(ticket as any)?.trim()}</Typography>
           <br />
           <Typography mt={0} fontWeight={600}>Запрос:</Typography>
             {ticket.zapros && (
@@ -497,7 +497,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
                   <Box flexGrow={1} overflow="hidden">
                     <Typography noWrap>{filename}</Typography>
                   </Box>
-                  <IconButton onClick={() => {handleDownloadFile(file)}}>
+                  <IconButton onClick={() => {}}>
                     <IconDownload />
                   </IconButton>
                 </Stack>
@@ -505,7 +505,7 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
             })}
           <br />
           </>}
-          {ticket && (getStatus(ticket) === AllStatus.PENDING || getStatus(ticket) === AllStatus.BOOKED) && ticket.taim_limit_dlya_klienta && <><Typography fontWeight={600}>Тайм-лимит:</Typography>
+          {ticket && (getStatus(ticket as any) === AllStatus.PENDING || getStatus(ticket as any) === AllStatus.BOOKED) && ticket.taim_limit_dlya_klienta && <><Typography fontWeight={600}>Тайм-лимит:</Typography>
           <Typography>До {formatToRussianDate(ticket.taim_limit_dlya_klienta)}</Typography>
           <br />
           </>}
@@ -521,28 +521,28 @@ const ChatInsideSidebar = ({ isInSidebar, chat }: chatType) => {
           {(vaucher?.length ?? 0) > 0 && (
             <FileListBlock
               title="Ваучер отель"
-              files={vaucher}
+              files={vaucher ?? []}
               originalFiles={ticket?.vaucher ?? []}
             />)}
 
           {(kartaMest?.length ?? 0) > 0 && (
             <FileListBlock
               title="Карта мест"
-              files={kartaMest}
+              files={kartaMest ?? []}
               originalFiles={ticket?.karta_mest_f ?? []}
             />)}
 
           {(vaucherTransfer?.length ?? 0) > 0 && (
             <FileListBlock
               title="Ваучер трансфер"
-              files={vaucherTransfer}
+              files={vaucherTransfer ?? []}
               originalFiles={ticket?.vaucher_transfer ?? []}
             />)}
 
           {(vipServis?.length ?? 0) > 0 && (
             <FileListBlock
               title="Ваучер Вип сервис"
-              files={vipServis}
+              files={vipServis ?? []}
               originalFiles={ticket?.vaucher_vipservis ?? []}
             />)}
 

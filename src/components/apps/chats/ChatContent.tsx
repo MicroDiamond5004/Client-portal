@@ -56,13 +56,14 @@ import { selectOrder, selectPassports } from 'src/store/selectors/ticketsSelecto
 import { fetchMessages } from 'src/store/middleware/thunks/messageThunks.ts';
 import ForumIcon from "@mui/icons-material/Forum";
 import {
-  selectChatData,
+  selectChats,
   selectChatSearch,
-  selectMessageStatus,
+  selectMessagesStatus,
   selectSelectedchat,
 } from 'src/store/selectors/messagesSelectors.ts';
 import { updateChatSearch, updateSelectedChat } from 'src/store/slices/messageSlice.ts';
 import { selectPath, selectPrevPath } from 'src/store/selectors/appSelector.ts';
+import { ElmaChat } from 'src/mocks/chats/chat.type';
 
 
 
@@ -85,11 +86,11 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
   const order = useAppSelector(selectOrder);
   const passports = useAppSelector(selectPassports);
 
-  const messageStatus = useAppSelector(selectMessageStatus);
+  const messageStatus = useAppSelector(selectMessagesStatus);
 
   const dispatch = useAppDispatch();
 
-  const chatData = useAppSelector(selectChatData)
+  const chats = useAppSelector(selectChats)
   const selectedChat = useAppSelector(selectSelectedchat);
   const setSelectedChat = (value: any) => dispatch(updateSelectedChat(value));
 
@@ -99,7 +100,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
   const setChatSearch = (value: any) => dispatch(updateChatSearch(value));
 
 
-  const filteredChats = chatData?.filter((chat: any) => {
+  const filteredChats = chats?.filter((chat: any) => {
     const nameMatch = chat.name?.toLowerCase().includes(chatSearch?.toLowerCase());
     const orderMatch = String(chat.name).includes(chatSearch);
     const fioMatch = order.result.result.find((task: ELMATicket) => task.__id === chat.taskId)?.fio2?.some((fio: string) => passports[fio]?.[0]?.toLocaleLowerCase()?.includes(chatSearch.toLocaleLowerCase()));
@@ -133,7 +134,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
   const [currentChat, setCurrentChat] = useState<string>()
 
   const [files, setFiles] = useState<any[]>([]);
-  const [managers, setManagers] = useState<Record<string, string>>({});
+  const managers: Record<string, string> = selectedChat?.authors;
 
   const chatListScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollPositionRef = useRef<number>(0); // хранение позиции
@@ -167,24 +168,18 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
   }, [curPath]);
 
   useEffect(() => {
-    if (curPath.pathname === '/apps/chats' && searchParams.get('item') !== selectedChat.name) {
-      setSearchParams({item: selectedChat.name});
+    if (curPath.pathname === '/apps/chats' && searchParams.get('item') !== selectedChat?.name) {
+      setSearchParams({item: selectedChat?.name});
     }
   }, [searchParams, selectedChat]);
 
   useEffect(() => {
-    const currentChat = chatData?.find((el) => el.id == selectedChat?.id);
-    if (selectedChat && currentChat && !isEqual(selectedChat, currentChat)) {
+    const currentChat = chats?.find((el) => el.id == selectedChat?.id);
+    if ((selectedChat && currentChat && !isEqual(selectedChat, currentChat)) || !selectedChat) {
       // console.log(currentChat);
-      setSelectedChat({
-        name: currentChat.name,
-        id: currentChat.id,
-        messages: currentChat.messages,
-        taskId: currentChat.taskId,
-        files: currentChat.files,
-      });
+      setSelectedChat(currentChat);
     }
-  }, [chatData]);
+  }, [chats]);
 
   useEffect(() => {
     if (!selectedChat || !selectedChat.messages || !selectedChat?.files) return;
@@ -235,50 +230,6 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
     }, currentChat ? 500 : 3000);
   }, [currentChat]);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setUsersLoading(true);
-      try {
-        if (!selectedChat?.messages?.length) return;
-
-        const userIds = new Set<string>();
-
-        for (const currentChat of chatData) {
-          for (const message of currentChat.messages) {
-            if (message.senderId) userIds.add(message.senderId);
-            if (message.comments?.length) {
-              for (const comment of message.comments) {
-                if (comment.author) userIds.add(comment.author);
-              }
-            }
-          }
-        }
-
-        const currentUsers = Array.from(userIds);
-
-        const knownUserIds = Object.keys(managers);
-        const isSame =
-          currentUsers.length === knownUserIds.length &&
-          currentUsers.every((id) => managers.hasOwnProperty(id));
-
-        setUsersLoading(false);
-
-        if (!isSame) {
-          const response = await api.post('/getManagers', { users: currentUsers });
-
-          const data = response.data; // массив имён
-
-          setManagers((prev) => ({ ...prev, ...data}));
-          setUsersLoading(false);
-        }
-      } catch (error) {
-        console.error('Failed to fetch managers:', error);
-      }
-    };
-
-    fetchUsers()
-  }, [selectedChat]);
-
 
   const handleMessageClick = (message: any) => {
     if ((replyToMsg?.id || replyToMsg?.__id) === (message.id || message.__id)) {
@@ -305,7 +256,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
     }
   };
 
-  const handleChatSelect = (chat: ChatsType) => {
+  const handleChatSelect = (chat: ElmaChat) => {
     if (chatListScrollRef.current) {
       scrollPositionRef.current = chatListScrollRef.current.scrollTop;
     }
@@ -342,7 +293,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
     AllMessages.push({...message, comments: [], type: 'text', author: message.senderId,  senderId: message.senderId !== clientId ? selectedChat.id : message.senderId });
     AllMainMessages[message.id] = {...message, comments: []};
     message.comments?.forEach((comment: any, index: number) => {
-      AllMessages.push({...comment, prevComment: index > 0 ? message.comments?.[index - 1] : null, messageId: message.id, senderId: comment.author === clientId ? '0' : selectedChat.name});
+      AllMessages.push({...comment, prevComment: index > 0 ? message.comments?.[index - 1] : null, messageId: message.id, senderId: comment.author === clientId ? '0' : selectedChat?.name});
     })
   })
 
@@ -402,7 +353,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
     // const commentsHTML = chat?.comments.map((comment: any) => DOMPurify.sanitize(comment.body));
 
 
-    if (selectedChat && (chat.senderId === selectedChat.name && !!chat.messageId)) {
+    if (selectedChat && (chat.senderId === selectedChat?.name && !!chat.messageId)) {
       const replyedMessage = chat.prevComment ? {
         attachment: [],
         author: chat.prevComment.author,
@@ -410,7 +361,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
         createdAt: chat.prevComment.__createdAt,
         id: chat.prevComment.__id,
         msg: chat.prevComment?.body,
-        senderId: chat.prevComment?.author === clientId ? '0' : selectedChat.name,
+        senderId: chat.prevComment?.author === clientId ? '0' : selectedChat?.name,
         type: "text",
         messageId: chat.messageId,
       } : AllMainMessages[chat.messageId];
@@ -652,7 +603,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
     </Box>
       </Box>)
     }
-    else if (selectedChat && (chat.senderId !== selectedChat.name && !!chat.messageId)) {
+    else if (selectedChat && (chat.senderId !== selectedChat?.name && !!chat.messageId)) {
       const replyedMessage = chat.prevComment ? {
         attachment: [],
         author: chat.prevComment.author,
@@ -660,7 +611,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
         createdAt: chat.prevComment.__createdAt,
         id: chat.prevComment.__id,
         msg: chat.prevComment.body,
-        senderId: chat.prevComment?.author === clientId ? '0' : selectedChat.name,
+        senderId: chat.prevComment?.author === clientId ? '0' : selectedChat?.name,
         type: "text",
         messageId: chat.messageId,
       } : AllMainMessages[chat.messageId];
@@ -890,9 +841,6 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
     }
     else if (selectedChat && (selectedChat.id === chat.senderId) && !chat.messageId) {
 
-      console.log('managers: ', managers);
-      console.log(managers[chat.author], chat.author);
-
       return(
           <Box display="flex" onClick={() => handleMessageClick?.(chat)}
           sx={{
@@ -1106,7 +1054,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
   }
 
 
-  return selectedChat && (selectedChat.messages.length > 0 ? !usersLoading && Object.keys(managers).length > 0 : true) && messageStatus === 'succeeded' ? (
+  return selectedChat && (selectedChat.messages.length > 0 ? !usersLoading && Object.keys(managers ?? {}).length > 0 : true) && messageStatus === 'succeeded' ? (
     <Box overflow={'hidden'}>
       <Box sx={{ display: 'flex', flexWrap: 'wrap' }} overflow={'hidden'} maxHeight={'100%'}>
         <Box width="100%" overflow={'hidden'}>
@@ -1152,7 +1100,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                   {/*    overlap="circular"*/}
                   {/*  >*/}
                   {/*    <Avatar*/}
-                  {/*      alt={selectedChat.name}*/}
+                  {/*      alt={selectedChat?.name}*/}
                   {/*      src={selectedChat.thumb}*/}
                   {/*      sx={{ width: 40, height: 40 }}*/}
                   {/*    />*/}
@@ -1184,11 +1132,11 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                                   pr={lgUp ? '0' : '15%'}
                                   fontSize={17}
                                   onClick={() =>
-                                    navigate(`/apps/orders?item=${selectedChat.name}`)
+                                    navigate(`/apps/orders?item=${selectedChat?.name}`)
                                   }
                                   fontWeight={500}
                       >
-                        Заказ №{selectedChat.name}
+                        Заказ №{selectedChat?.name}
                       </Typography>
                     }
                     secondary={selectedChat.status}
@@ -1222,14 +1170,9 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                   p: lgUp ? '0' : '5px 0px',
                   maxHeight: open ? lgUp ? '100%' : `calc((var(--app-height) / 100 * 93) - 100px)` : 'auto',
                   height: open ? lgUp ? 'auto' : `auto` : 'auto',
-                  width: lgUp
-                    ? !open
-                      ? '100%'
-                        ? `${(mainBoxRef.current?.clientWidth || 0) -
-                        (inBoxRef.current?.clientWidth || 0)}px`
-                  : '450px'
-                  : window.innerWidth > 1200 ? '500px' : '31vw'
-                  : open ? window.innerWidth - 20 : window.innerWidth - 55,
+                  width:  lgUp? 
+                            !open ? '100%' : '450px'
+                          : window.innerWidth > 1200 ? '500px' : '31vw',
                   scrollbarWidth: 'none',
                   '&::-webkit-scrollbar': {
                   display: 'none',

@@ -15,10 +15,12 @@ interface AuthState {
     lastName: string;
     middleName: string;
   } | null
+  isMultiUser?: boolean;
   contragentId?: string;
   email?: string;
   phone?: string;
   subscription?: any;
+  cookie?: string;
 }
 
 const initialState: AuthState = {
@@ -46,6 +48,7 @@ const authSlice = createSlice({
       state.clientFio = action.payload.fio;
       state.email = action.payload.email;
       state.phone = action.payload.phone;
+      state.isMultiUser = action.payload.isMultiUser;
     },
     setSubscription: (state, action) => {
       console.log(action.payload);
@@ -59,7 +62,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder: any) => {
     builder
-      .addCase(logoutAll.fulfilled, (state) => {
+      .addCase(logoutAll.fulfilled, (state: AuthState) => {
           state.token = null;
           state.error = null;
           state.clientName = '';

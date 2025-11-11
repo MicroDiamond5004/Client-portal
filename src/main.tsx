@@ -16,6 +16,8 @@ import { Provider } from 'react-redux';
 //     onUnhandledRequest: 'bypass',
 //   });
 // }
+console.log('ffff');
+
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

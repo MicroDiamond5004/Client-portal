@@ -9,7 +9,6 @@ function useDynamicVh() {
         ? window.visualViewport.height
         : window.innerHeight;
 
-      console.log(height);
 
       if (height < MIN_HEIGHT) {
         // Игнорируем слишком маленькие значения (например, когда клавиатура открыта)

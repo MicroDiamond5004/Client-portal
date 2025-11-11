@@ -32,17 +32,17 @@ import { selectContragent } from 'src/store/selectors/authSelector';
 import { selectOrder, selectPassports } from 'src/store/selectors/ticketsSelectors';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import api from 'src/store/api';
-import { fetchUserOrders } from 'src/store/middleware/thunks';
 import { fetchMessages } from 'src/store/middleware/thunks/messageThunks';
 
 import { Theme, useMediaQuery } from '@mui/system';
 import {
-  selectChatData,
+  selectChats,
   selectChatSearch,
-  selectMessageStatus,
+  selectMessagesStatus,
   selectSelectedchat,
 } from 'src/store/selectors/messagesSelectors.ts';
 import { updateChatSearch, updateSelectedChat } from 'src/store/slices/messageSlice.ts';
+import { ElmaChat } from 'src/mocks/chats/chat.type';
 
 export const stripHtmlAndDecode = (html: string): string => {
   // Удаляем теги
@@ -62,9 +62,9 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
 
   const dispatch = useAppDispatch();
 
-  const messageStatus = useAppSelector(selectMessageStatus);
+  const messageStatus = useAppSelector(selectMessagesStatus);
 
-  const chatData = useAppSelector(selectChatData)
+  const chats = useAppSelector(selectChats)
   const selectedChat = useAppSelector(selectSelectedchat);
   const setSelectedChat = (value: any) => dispatch(updateSelectedChat(value));
 
@@ -72,7 +72,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
   const chatSearch = useAppSelector(selectChatSearch) ?? '';
   const setChatSearch = (value: any) => dispatch(updateChatSearch(value));
 
-  const filteredChats = chatData?.filter((chat) => {
+  const filteredChats = chats?.filter((chat) => {
     const nameMatch = chat.name?.toLowerCase().includes(chatSearch.toLowerCase());
     const orderMatch = String(chat.name).includes(chatSearch);
     const fioMatch = order.result.result.find((task: ELMATicket) => task.__id === chat.taskId)?.fio2.some((fio: string) => passports[fio]?.[0]?.toLocaleLowerCase()?.includes(chatSearch.toLocaleLowerCase()));
@@ -82,11 +82,12 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
     if (a.isChanged !== b.isChanged) {
       return (b.isChanged ? 1 : 0) - (a.isChanged ? 1 : 0);
     }
-    return (b.name) - Number(a.name)
+
+    return Number(b.name) -  Number(a.name);
   });
 
 
-  const handleChatSelect = (chat: ChatsType) => {
+  const handleChatSelect = (chat: ElmaChat) => {
     setSelectedChat({ ...chat, isChanged: false }); // теперь это наш "manual" setSelectedChat
     localStorage.setItem("lastSelectedChatId", String(chat.id));
 
@@ -97,8 +98,6 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
         type: "message",
         id: chat.taskId,
       });
-
-      dispatch(fetchMessages(chat.taskId));
     };
 
     updateChange();
@@ -163,7 +162,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
       </Box>
       <List sx={{ px: 0 }}>
         <Scrollbar sx={{ height: { md: 'calc(100vh - 200px)', sm: '100vh' }, maxHeight: 'calc(100vh - 390px)' }}>
-          {messageStatus === 'succeeded' && chatData && filteredChats && filteredChats.length ? (
+          {messageStatus === 'succeeded' && chats && filteredChats && filteredChats.length ? (
             filteredChats.map((chat) => (
               <ListItemButton 
                 key={chat.name + chat.id}
@@ -200,7 +199,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
             ))
           ) : (
             <Box m={2}>
-              {(messageStatus !== 'succeeded' || (chatData && chatData.length === 0)) ?
+              {(messageStatus !== 'succeeded' || (chats && chats.length === 0)) ?
               <Alert severity="info" variant="filled" sx={{ color: 'white' }}>
                 Сообщения загружаются...
               </Alert> :<Alert severity="warning" variant="filled" sx={{ color: 'white' }}>

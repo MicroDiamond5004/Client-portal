@@ -18,9 +18,12 @@ import { fetchMessages } from 'src/store/middleware/thunks/messageThunks.ts';
 import { fetchUserOrders } from 'src/store/middleware/thunks/ordersThunks.ts';
 import { setPath } from 'src/store/slices/appSlice.ts';
 import useDynamicVh from 'src/hooks/useDinamivVH.ts';
+import ErrorBoundary from './ErrorBoundary';
 
 
 function App() {
+  console.log('Vite React app started');
+
   const theme = ThemeSettings();
   const { activeDir } = useContext(CustomizerContext);
   const dispatch = useAppDispatch();
@@ -30,19 +33,20 @@ function App() {
   useEffect(() => {
     if (token) {
       const fetchUserData = async () => {
+
         const response = await api.get('/getUserData');
 
-        dispatch(setClient(response.data));
+        await Promise.all([
+          dispatch(setClient(response.data)),
+          dispatch(getContragent()),
+          dispatch(fetchUserOrders()),
+        ]);
+
+        dispatch(fetchMessages(response.data.userId));
 
         if (response.data.email && response.data.userId) {
           connectWebSocket(response.data.email, response.data.userId, dispatch); // <== передаём один раз
         }
-
-        await Promise.all([
-          dispatch(getContragent()),
-          dispatch(fetchUserOrders()),
-          dispatch(fetchMessages(response.data.userId))
-        ]);
 
       };
 
@@ -90,17 +94,19 @@ function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-    <PushManagerFloatingButton/>
-    <RTL direction={activeDir}>
-      <CssBaseline />
-      <BrowserRouter>
-        <RouteTracker />
-        <AppRoutes />
-        <FilePreviewDialog />
-      </BrowserRouter>
-    </RTL>
-  </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+      <PushManagerFloatingButton/>
+      <RTL direction={activeDir}>
+        <CssBaseline />
+        <BrowserRouter>
+          <RouteTracker />
+          <AppRoutes />
+          <FilePreviewDialog />
+        </BrowserRouter>
+      </RTL>
+    </ThemeProvider>
+  </ErrorBoundary>
   );
 }
 

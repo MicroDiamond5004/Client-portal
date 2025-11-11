@@ -64,7 +64,6 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             searchTickets,
             ticketSearch,
             filter,
-            setFilter,
         }}
       >
           <>

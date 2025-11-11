@@ -2,19 +2,23 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IComment {
   authorId: string;
-  body: string;
+  body: string | null;
   createdAt: Date;
 }
 
 export interface IMessage extends Document {
-  userId: mongoose.Types.ObjectId;
+  __id: string;
+  userId: string;
+  clientId: string;
   targetId: string;
   authorId: string;
-  body: string;
+  body: string | null;
   comments: IComment[];
   unreadCommentsCount: number;
   createdAt: Date;
   updatedAt: Date;
+  chatId: string;
+  isChanged: boolean; 
 }
 
 const CommentSchema = new Schema<IComment>({
@@ -24,7 +28,6 @@ const CommentSchema = new Schema<IComment>({
   },
   body: {
     type: String,
-    required: true
   },
   createdAt: {
     type: Date,
@@ -33,14 +36,22 @@ const CommentSchema = new Schema<IComment>({
 });
 
 const MessageSchema = new Schema<IMessage>({
+  __id: {
+    type: String,
+    required: true,
+  },
+  chatId: {
+    type: String,
+  },
   userId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },
   targetId: {
     type: String,
-    required: true
+    required: true,
+    ref: 'Order',
   },
   authorId: {
     type: String,
@@ -48,7 +59,10 @@ const MessageSchema = new Schema<IMessage>({
   },
   body: {
     type: String,
-    required: true
+  },
+  isChanged: {
+    type: Boolean,
+    default: false
   },
   comments: [CommentSchema],
   unreadCommentsCount: {

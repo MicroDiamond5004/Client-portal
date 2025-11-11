@@ -20,6 +20,7 @@ import {
   Button,
   Popover,
   Grid, InputAdornment,
+  Pagination,
 } from '@mui/material';
 import { IconList, IconPlus, IconSearch, IconX } from '@tabler/icons-react';
 import { TicketContext } from 'src/context/TicketContext';
@@ -29,6 +30,9 @@ import { useSearchParams } from 'react-router';
 import sortAllTickets from './sort-tickets/sort-tickets';
 import formatToRussianDate from 'src/help-functions/format-to-date';
 import {
+  selectLimit,
+  selectOrder,
+  selectPageNumber,
   selectPassports,
   selectSearchTerm,
   selectTickets,
@@ -47,7 +51,7 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { isEqual, omitBy, uniqueId } from 'lodash';
 import { ELMATicket } from 'src/data/types.ts';
-import { updateSearchTerms, updateTicketsFilter } from 'src/store/slices/ticketsSlice.ts';
+import { updatePageNumber, updateSearchTerms, updateTicketsFilter } from 'src/store/slices/ticketsSlice.ts';
 import { store } from 'src/store';
 import { BoxProps } from '@mui/material/Box';
 
@@ -88,7 +92,7 @@ export const getStatus = (ticket: ELMATicket): string => {
       break;
     //  В работе
     case 2:
-      status = ticket.tip_zakaz ?  AllStatus.PENDING : AllStatus.NEW;
+      status = ticket?.tip_zakaz ?  AllStatus.PENDING : AllStatus.NEW;
       break;
     // Ожидание
     case 3:
@@ -96,7 +100,7 @@ export const getStatus = (ticket: ELMATicket): string => {
       break;
     // Создание бронирования
     case 4:
-      status = ticket.otvet_klientu ? AllStatus.BOOKED : AllStatus.PENDING;
+      status = ticket?.otvet_klientu ? AllStatus.BOOKED : AllStatus.PENDING;
       break;
     // Выписка
     case 5:
@@ -118,19 +122,20 @@ export const getStatus = (ticket: ELMATicket): string => {
 }
 
 export const getStatus2 = (
+  tickets: ELMATicket[],
   ticket: ELMATicket
 ): string | null => {
 
   const existingTicket = tickets?.find(
-    (el) => el.__id === ticket.__id || el.nomer_zakaza === ticket.nomer_zakaza
+    (el) => el.__id === ticket?.__id || el.nomer_zakaza === ticket?.nomer_zakaza
   );
 
   const isNew = !existingTicket;
 
-  const status = getTicketStatus(ticket);
-  const existingStatus = getTicketStatus(existingTicket);
-
   if (isNew) return AllStatus.NEW;
+
+  const status = getStatus(ticket);
+  const existingStatus = getStatus(existingTicket);
 
   if (existingStatus === AllStatus.NEW && status === AllStatus.PENDING) {
     return AllStatus.PENDING;
@@ -153,7 +158,7 @@ export const getStatus2 = (
     return AllStatus.FORMED;
   }
 
-  if (status === AllStatus.BOOKED && ticket.otvet_klientu) {
+  if (status === AllStatus.BOOKED && ticket?.otvet_klientu) {
     const fieldsToCompareMain = [
       'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
       'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
@@ -211,7 +216,8 @@ const TicketListing = (props: TicketListingProps) => {
   const {changeView} = props;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const newDate = new Date()
+  const newDate = new Date();
+
   const [selectionRange, setSelectionRange] = useState({
     startDate: newDate,
     endDate: newDate,
@@ -221,11 +227,15 @@ const TicketListing = (props: TicketListingProps) => {
   const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(null);
   const [endDate, setEndDate] = useState<dayjs.Dayjs | null>(null);
 
+  // const currentPage = useAppSelector(selectPageNumber);
+  // const limit = useAppSelector(selectLimit);
 
   // const { tickets, searchTickets, ticketSearch, filter, setFilter }: any =
   //   useContext(TicketContext);
 
   const tickets = useAppSelector(selectTickets) ?? [];
+
+  const fullOrder = useAppSelector(selectOrder);
 
   const ticketSearch = useAppSelector(selectSearchTerm) ?? '';
   const filter = useAppSelector(selectTicketsFilter) ?? '';
@@ -237,9 +247,165 @@ const TicketListing = (props: TicketListingProps) => {
   const setFilter = (value: string) => dispatch(updateTicketsFilter(value));
   const searchTickets = (value: string) => dispatch(updateSearchTerms(value));
 
+  // const setCurrentPage = (value: number) => dispatch(updatePageNumber(value));
+
   const [currentTicket, setCurrentTicket] = useState<ELMATicket>();
 
   const passports = useAppSelector(selectPassports) ?? {};
+
+  // const [filterType, setFilterType] = useState<'my' | 'all'>('my');
+
+  // const [ordersRange, setOrdersRange] = useState([1, limit]);
+
+  // const ordersCount: number = fullOrder?.result?.total ?? 0;
+  // const numberOfPages = Math.round(ordersCount / limit); 
+
+  const getVisibleTickets = (tickets: ELMATicket[], filter: string, ticketSearch: string) => {
+    switch (filter) {
+      case 'total_tickets':
+        return tickets.filter((ticket: any) => {
+          if (ticket?.__deletedAt) return false;
+
+          const search = ticketSearch.toLowerCase().replace(/\s+/g, '');
+
+          const matchesSearch =
+            (ticket?.__name?.toLowerCase().includes(search)) ||
+
+            (ticket?.fio2?.some((fio: string) => {
+              const fioValue = passports?.[fio]?.[0];
+              return fioValue?.toLowerCase()?.includes(search);
+            })) ||
+
+            [
+              ticket?.otvet_klientu,
+              ticket?.otvet_klientu1,
+              ticket?.otvet_klientu3,
+              ticket?.zapros,
+
+              ticket?.otvet_klientu,
+              ticket?.otvet_klientu_o_bronirovanii_2,
+              ticket?.otvet_klientu_o_bronirovanii_4,
+              ticket?.otvet_klientu_o_bronirovanii_5,
+              ticket?.otvet_klientu_o_bronirovanii_6,
+
+              // добавленные новые
+              ticket?.otvet_klientu3, // уже был, но в объекте 1: тоже указан
+              ticket?.otvet_klientu_pered_oformleniem_bron_2,
+              ticket?.otvet_klientu_pered_oformleniem_bron_3,
+              ticket?.otvet_klientu_pered_oformleniem_bron_4,
+              ticket?.otvet_klientu_pered_oformleniem_bron_5,
+              ticket?.otvet_klientu_pered_oformleniem_bron_6,
+            ]
+              .filter((text) => {
+                return text?.trim();
+              }) // ✅ убираем пустые и пробельные строки
+              .some((text) =>
+                {
+                  
+                  // if (text.toLowerCase().replace(/\s+/g, '').includes(search)) {
+                  //   console.log(true);
+                  // }
+                  return text.toLowerCase().replace(/\s+/g, '').includes(search)
+                }
+              );
+
+          const ticketDates = [
+            ticket?.__createdAt,
+            // ticket?.__updatedAt,
+            // ticket?.taim_limit_dlya_klienta,
+            // ticket?.data_vyleta,
+            // ticket?.data_ofrmleniya,
+            // ticket?.data_vyezda1,
+            // ticket?.data_vyezda2,
+            // ticket?.data_vyezda3,
+            // ticket?.data_zaezda1,
+            // ticket?.data_zaezda2,
+            // ticket?.data_zaezda3,
+          ].map((el: any) => dayjs(el));
+
+          // console.log(ticketDates.some((el) => el && el.isSame(startDate, 'day')), ticketDates.find((el) => el && el.isBetween(startDate, endDate, 'day', '[]')));
+
+          const matchesDate =
+            (!startDate && !endDate) ||
+            (startDate && !endDate && ticketDates.some((el) => el.isValid() && el.isSame(startDate, 'day'))) ||
+            (startDate && endDate && ticketDates.some((el) => el.isValid() && el.isBetween(startDate, endDate, 'day', '[]')));
+
+          return matchesSearch && matchesDate;
+        });
+
+
+
+      case AllStatus.NEW:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.NEW
+        );
+
+      case AllStatus.PENDING:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.PENDING
+        );
+
+      case AllStatus.BOOKED:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.BOOKED
+        );
+
+      case AllStatus.FORMED:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.FORMED
+        );
+
+      case AllStatus.CLOSED:
+        return tickets.filter(
+          (c) =>
+            !c.__deletedAt && getStatus(c) === AllStatus.CLOSED
+        );
+
+      // case 'Closed':
+      //   return tickets.filter(
+      //     (c) =>
+      //       !c.deleted &&
+      //       c.Status === 'Closed' &&
+      //       c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
+      //   );
+
+      // case 'Open':
+      //   return tickets.filter(
+      //     (c) =>
+      //       !c.deleted &&
+      //       c.Status === 'Open' &&
+      //       c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
+      //   );
+
+      default:
+        throw new Error(`Unknown filter: ${filter}`);
+    }
+  };
+
+  const [visibleTickets, setVisibleTickets] = useState<any[]>(getVisibleTickets(
+    tickets as any[],
+    filter,
+    ticketSearch.toLowerCase()
+  ));
+
+  useEffect(() => {
+    setVisibleTickets(getVisibleTickets(tickets as any[], filter, ticketSearch.toLowerCase()));
+  }, [tickets, ticketSearch, endDate, filter])
+
+  console.log('Merged tickets length', visibleTickets.length);
+
+  const isMultiplyUsers = true;
+
+
+  // const handlePagination = (event: React.ChangeEvent<unknown>, page: number) => {
+  //   setCurrentPage(page);
+  //   setOrdersRange([(page - 1) * 20 + 1, page === numberOfPages ? ordersCount : page * 20]);
+  //   dispatch(fetchUserOrders())
+  // }
 
   interface BoxStyledProps extends BoxProps {
     disabled?: boolean;
@@ -342,6 +508,7 @@ const TicketListing = (props: TicketListingProps) => {
 
 
   const resetDates = () => {
+    setSelectionRange({startDate: new Date(), endDate: new Date(), key: 'selection'})
     setStartDate(null);
     setEndDate(null);
     setIsDateManuallySelected(false);
@@ -362,17 +529,17 @@ const TicketListing = (props: TicketListingProps) => {
   useEffect(() => {
     if (searchParams.get('item') && (currentTicket?.nomer_zakaza !== searchParams.get('item'))) {
       if (searchParams.get('item')) {
-        const ticket = tickets.find((ticket: ELMATicket) => ticket?.nomer_zakaza === searchParams.get('item'));
+        const ticket = tickets.find((ticket: any) => ticket?.nomer_zakaza === searchParams.get('item'));
         if (ticket) {
           if (searchParams.get('type')) {
             setSearchParams({item: searchParams.get('item') || ''})
           }
-          setCurrentTicket(ticket);
+          setCurrentTicket(ticket as any);
           setIsShowModal(true);
           const updateChange = async () => {
             await api.post('/updateChange', {
             type: 'order',
-            id: ticket.__id,
+            id: ticket?.__id,
             })
             dispatch(fetchUserOrders());
           }
@@ -384,7 +551,7 @@ const TicketListing = (props: TicketListingProps) => {
       }
     } else if (status !== 'loading' && searchParams.get('add') && searchParams.get('add') === 'new' && !isShowModal) {
       // // // console.log(tickets, tickets[0]);
-      const allSortedTickets = sortAllTickets(tickets).filter((ticket) => ticket.nomer_zakaza);
+      const allSortedTickets = sortAllTickets(tickets)?.filter((ticket) => ticket?.nomer_zakaza);
       // // console.log('test', tickets[0], Number(allSortedTickets[0]?.nomer_zakaza) + 1);
       // // // console.log(allSortedTickets);
       if (allSortedTickets) {
@@ -498,136 +665,6 @@ const TicketListing = (props: TicketListingProps) => {
     setSearchParams(params);
   };
 
-
-  const getVisibleTickets = (tickets: ELMATicket[], filter: string, ticketSearch: string) => {
-    switch (filter) {
-      case 'total_tickets':
-        return tickets.filter((ticket: any) => {
-          if (ticket.__deletedAt) return false;
-
-          const search = ticketSearch.toLowerCase().replace(/\s+/g, '');
-
-          const matchesSearch =
-            (ticket.__name?.toLowerCase().includes(search)) ||
-
-            (ticket?.fio2?.some((fio: string) => {
-              const fioValue = passports?.[fio]?.[0];
-              return fioValue?.toLowerCase()?.includes(search);
-            })) ||
-
-            [
-              ticket.otvet_klientu,
-              ticket.otvet_klientu1,
-              ticket.otvet_klientu3,
-              ticket.zapros,
-
-              ticket.otvet_klientu,
-              ticket.otvet_klientu_o_bronirovanii_2,
-              ticket.otvet_klientu_o_bronirovanii_4,
-              ticket.otvet_klientu_o_bronirovanii_5,
-              ticket.otvet_klientu_o_bronirovanii_6,
-
-              // добавленные новые
-              ticket.otvet_klientu3, // уже был, но в объекте 1: тоже указан
-              ticket.otvet_klientu_pered_oformleniem_bron_2,
-              ticket.otvet_klientu_pered_oformleniem_bron_3,
-              ticket.otvet_klientu_pered_oformleniem_bron_4,
-              ticket.otvet_klientu_pered_oformleniem_bron_5,
-              ticket.otvet_klientu_pered_oformleniem_bron_6,
-            ]
-              .filter((text) => {
-                if (ticket.nomer_zakaza === '1240') {
-                  console.log(text)
-                }
-
-                return text?.trim();
-              }) // ✅ убираем пустые и пробельные строки
-              .some((text) =>
-                text.toLowerCase().replace(/\s+/g, '').includes(search)
-              );
-
-          const ticketDates = [
-            ticket.__createdAt,
-            // ticket.__updatedAt,
-            // ticket.taim_limit_dlya_klienta,
-            // ticket.data_vyleta,
-            // ticket.data_ofrmleniya,
-            // ticket.data_vyezda1,
-            // ticket.data_vyezda2,
-            // ticket.data_vyezda3,
-            // ticket.data_zaezda1,
-            // ticket.data_zaezda2,
-            // ticket.data_zaezda3,
-          ].map((el: any) => dayjs(el));
-
-          // // console.log(ticketDates.some((el) => el && el.isSame(startDate, 'day')), ticketDates.find((el) => el && el.isBetween(startDate, endDate, 'day', '[]')));
-
-          const matchesDate =
-            (!startDate && !endDate) ||
-            (startDate && !endDate && ticketDates.some((el) => el.isValid() && el.isSame(startDate, 'day'))) ||
-            (startDate && endDate && ticketDates.some((el) => el.isValid() && el.isBetween(startDate, endDate, 'day', '[]')));
-
-          return matchesSearch && matchesDate;
-        });
-
-
-
-      case AllStatus.NEW:
-        return tickets.filter(
-          (c) =>
-            !c.__deletedAt && getStatus(c) === AllStatus.NEW
-        );
-
-      case AllStatus.PENDING:
-        return tickets.filter(
-          (c) =>
-            !c.__deletedAt && getStatus(c) === AllStatus.PENDING
-        );
-
-      case AllStatus.BOOKED:
-        return tickets.filter(
-          (c) =>
-            !c.__deletedAt && getStatus(c) === AllStatus.BOOKED
-        );
-
-      case AllStatus.FORMED:
-        return tickets.filter(
-          (c) =>
-            !c.__deletedAt && getStatus(c) === AllStatus.FORMED
-        );
-
-      case AllStatus.CLOSED:
-        return tickets.filter(
-          (c) =>
-            !c.__deletedAt && getStatus(c) === AllStatus.CLOSED
-        );
-
-      // case 'Closed':
-      //   return tickets.filter(
-      //     (c) =>
-      //       !c.deleted &&
-      //       c.Status === 'Closed' &&
-      //       c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
-      //   );
-
-      // case 'Open':
-      //   return tickets.filter(
-      //     (c) =>
-      //       !c.deleted &&
-      //       c.Status === 'Open' &&
-      //       c.ticketTitle.toLocaleLowerCase().includes(ticketSearch),
-      //   );
-
-      default:
-        throw new Error(`Unknown filter: ${filter}`);
-    }
-  };
-
-  const visibleTickets: any = getVisibleTickets(
-    tickets,
-    filter,
-    ticketSearch.toLowerCase()
-  );
 
   // Внутри компонента
   const theme = useTheme();
@@ -744,7 +781,7 @@ const TicketListing = (props: TicketListingProps) => {
                 ranges={[selectionRange]}
                 onChange={handleSelect}
                 moveRangeOnFirstSelection={false}
-                locale={customRu}
+                locale={customRu as any}
                 showDateDisplay={false}
                 showPreview={false}
               />
@@ -871,42 +908,86 @@ const TicketListing = (props: TicketListingProps) => {
       </Stack>
     </Box>
   </Grid>
-  <Grid item xs={12}>
+
+
+  <Grid item xs={12} mt={2}>
         <TableContainer ref={boxRef} sx={{
           maxHeight: '60vh', // или любая нужная тебе высота
           paddingRight: `${padding}px`
         }}>
           <Table>
             {visibleTickets.length > 0 && (
-              <TableHead sx={{
+              <TableHead
+              sx={{
                 position: 'sticky',
                 top: 0,
-                backgroundColor: 'background.paper',
+                backgroundColor: 'primary.main',
                 zIndex: 1,
-              }}>
-                <TableRow>
-                  <TableCell width={'5%'}  sx={{ textAlign: 'center'}}>
-                    <Typography variant="h6" sx={{width: !isMobile ? '55px' : '50px', textAlign: 'center', margin: '0 auto'}}>{isMobile ? 'Заказ' : 'Номер заказа'}</Typography>
+              }}
+            >
+              <TableRow>
+                <TableCell width="5%" sx={{ textAlign: 'center' }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      width: !isMobile ? '55px' : '50px',
+                      textAlign: 'center',
+                      margin: '0 auto',
+                      color: isMultiplyUsers ? '#fff' : 'inherit',
+                    }}
+                  >
+                    {isMobile ? 'Заказ' : 'Номер заказа'}
+                  </Typography>
+                </TableCell>
+
+                {!isMobile && (
+                  <TableCell width="15%">
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        width: '60px',
+                        color: isMultiplyUsers ? '#fff' : 'inherit',
+                      }}
+                    >
+                      Дата создания
+                    </Typography>
                   </TableCell>
-                  {!isMobile && <TableCell width={'15%'}>
-                    <Typography variant="h6" sx={{width: '60px'}}>Дата создания </Typography>
-                  </TableCell>}
-                  <TableCell width={'68%'} sx={{ pl: 2 }}>
-                    <Typography variant="h6">Информация</Typography>
+                )}
+
+                <TableCell width="68%" sx={{ pl: 2 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: isMultiplyUsers ? '#fff' : 'inherit',
+                    }}
+                  >
+                    Информация
+                  </Typography>
+                </TableCell>
+
+                {!isMobile && (
+                  <TableCell width="12%">
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        position: 'relative',
+                        right: 0,
+                        textAlign: 'center',
+                        color: isMultiplyUsers ? '#fff' : 'inherit',
+                      }}
+                    >
+                      Статус
+                    </Typography>
                   </TableCell>
-                  {!isMobile && <TableCell width={'12%'}>
-                    <Typography sx={{position: 'relative', right: '0px'}} textAlign={'center'} variant="h6">Статус</Typography>
-                  </TableCell>}
-                  {/* <TableCell align="right">
-              <Typography variant="h6"></Typography>
-            </TableCell> */}
-                </TableRow>
-              </TableHead>
+                )}
+              </TableRow>
+            </TableHead>
+
             )}
 
             <TableBody>
               {visibleTickets.length > 0 ? (
-                sortAllTickets(visibleTickets).map((ticket: ELMATicket) => {
+                sortAllTickets(visibleTickets).map((ticket: any) => {
                   const status = getStatus(ticket);
 
                   let colorStatus = 'black';
@@ -936,12 +1017,12 @@ const TicketListing = (props: TicketListingProps) => {
                   }
 
                   const clickTicketHandler = () => {
-                    updateSearchParametrs(tickets, ticket, true, startDate, endDate)
-                    if (ticket.isChanged) {
+                    updateSearchParametrs(tickets as any[], ticket, true, startDate, endDate)
+                    if (ticket?.isChanged) {
                       const updateChange = async () => {
                         await api.post('/updateChange', {
                           type: 'order',
-                          id: ticket.__id,
+                          id: ticket?.__id,
                         });
                         dispatch(fetchUserOrders());
                       };
@@ -950,18 +1031,18 @@ const TicketListing = (props: TicketListingProps) => {
                   };
 
 
-                  const info = ticket.otvet_klientu1
-                    ? `${ticket.otvet_klientu1}`
-                    : ticket.zapros;
+                  const info = ticket?.otvet_klientu1
+                    ? `${ticket?.otvet_klientu1}`
+                    : ticket?.zapros;
 
-                  if (!ticket.nomer_zakaza) {
+                  if (!ticket?.nomer_zakaza) {
                     return <></>;
                   }
 
                   return (
                     <TableRow
-                      className={ticket.isChanged ? 'gradient-background' : ''}
-                      key={ticket.__id ?? uniqueId()}
+                      className={ticket?.isChanged ? 'gradient-background' : ''}
+                      key={ticket?.__id ?? uniqueId()}
                       hover
                       onClick={clickTicketHandler}
                     >
@@ -981,10 +1062,10 @@ const TicketListing = (props: TicketListingProps) => {
                           overflowWrap: 'break-word',
                           textAlign: 'center',
                           py: 1,
-                        }}>{ticket.nomer_zakaza}{isMobile && <><br/>
-                        {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}<br/><Box p={1}><Chip
+                        }}>{ticket?.nomer_zakaza}{isMobile && <><br/>
+                        {formatToRussianDate(ticket?.__createdAt, 'dd MMMM')}<br/><Box p={1}><Chip
                           sx={{
-                            backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus,
+                            backgroundColor: ticket?.isChanged ? '#FFF' : backgroundStatus,
                             color: '#fff'
                           }}
                           size="small"
@@ -992,14 +1073,14 @@ const TicketListing = (props: TicketListingProps) => {
                         /></Box></>}</TableCell>
                       {!isMobile && <TableCell>
                         <Typography variant="subtitle1" sx={{width: '70px', textAlign: 'center'}}>
-                          {formatToRussianDate(ticket.__createdAt, 'dd MMMM')}
+                          {formatToRussianDate(ticket?.__createdAt, 'dd MMMM')}
                         </Typography>
                       </TableCell>}
                       <TableCell>
                         <Box>
-                          {(ticket.__status?.status || 0) > 3 && ticket.otvet_klientu && (
+                          {(ticket?.__status?.status || 0) > 3 && ticket?.otvet_klientu && (
                             <>
-                              {ticket?.fio2?.map((currentId) => (
+                              {ticket?.fio2?.map((currentId: string) => (
                                 <Typography
                                   key={uniqueId()}
                                   variant="h6"
@@ -1037,8 +1118,8 @@ const TicketListing = (props: TicketListingProps) => {
                           <Box sx={{position: 'relative', right: '0px', maxWidth: '100px'}} textAlign={'center'}>
                             <Chip
                               sx={{
-                                backgroundColor: ticket.isChanged ? '#FFF' : backgroundStatus,
-                                color: ticket.isChanged ? 'inherit' : '#FFF',
+                                backgroundColor: ticket?.isChanged ? '#FFF' : backgroundStatus,
+                                color: ticket?.isChanged ? 'inherit' : '#FFF',
                               }}
                               size="small"
                               label={status}
@@ -1048,7 +1129,7 @@ const TicketListing = (props: TicketListingProps) => {
                       {/* <TableCell align="right">
                   <Tooltip title="Открыть">
                     <IconButton
-                      sx={{ color: ticket.isChanged ? '#FFF' : 'inherit' }}
+                      sx={{ color: ticket?.isChanged ? '#FFF' : 'inherit' }}
                       onClick={() => {}}
                     >
                       <IconArrowsDiagonal size="22" />
@@ -1105,10 +1186,9 @@ const TicketListing = (props: TicketListingProps) => {
           </Table>
         </TableContainer>
       </Grid>
-</Grid>
+  </Grid>
 
-
-    <ModalTicket show={isShowModal} ticket={isShowModal ? currentTicket ?? tickets?.[0] ?? null : null} close={handlerCloseModal}/>
+    <ModalTicket show={isShowModal} ticket={isShowModal ? currentTicket as any ?? tickets?.[0] ?? null : null} close={handlerCloseModal}/>
     </>);
 };
 

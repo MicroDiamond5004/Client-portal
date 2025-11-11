@@ -1,6 +1,15 @@
 // types.d.ts
 export type ELMATicket = {
     marshrutnaya_kvitanciya: string[];
+    otvet_klientu_o_bronirovanii_2?:  null | string,
+    otvet_klientu_o_bronirovanii_4?:  null | string,
+    otvet_klientu_o_bronirovanii_5?:  null | string,
+    otvet_klientu_o_bronirovanii_6?:  null | string,
+    otvet_klientu_pered_oformleniem_bron_2?:  null | string,
+    otvet_klientu_pered_oformleniem_bron_3?:  null | string,
+    otvet_klientu_pered_oformleniem_bron_4?:  null | string,
+    otvet_klientu_pered_oformleniem_bron_5?:  null | string,
+    otvet_klientu_pered_oformleniem_bron_6?:  null | string,
     fio: string[] | null;
     __id: string | null;
     fio2: string[] | null;

@@ -1,150 +1,151 @@
-import { WebSocketServer, WebSocket } from 'ws';
-import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs';
-import path from 'path';
+import { WebSocketServer, WebSocket } from "ws";
+import { v4 as uuidv4 } from "uuid";
+import {
+  getWebsocketSession,
+  createWebsocketSession,
+  deleteWebsocketSession,
+} from "./data/mongodbStorage"; // adjust import path
 
-const authDataDir = path.resolve(__dirname, 'data/auth');
-if (!fs.existsSync(authDataDir)) {
-  fs.mkdirSync(authDataDir, { recursive: true });
-}
-
-// === ФАЙЛ: Путь к данным пользователя по email ===
-function getUserFilePath(email: string) {
-  return path.join(authDataDir, `${email}.json`);
-}
-
-// === Загрузка данных пользователя ===
-function loadUserData(email: string): any | null {
-  const file = getUserFilePath(email);
-  if (!fs.existsSync(file)) return null;
-
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf-8'));
-  } catch (e) {
-    console.warn(`⚠ Ошибка чтения auth-файла ${email}:`, e);
-    return null;
-  }
-}
-
-// === Сохранение данных пользователя ===
-function saveUserData(email: string, data: any): void {
-  const file = getUserFilePath(email);
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-// === Удаление файла данных пользователя ===
-function deleteUserData(email: string): void {
-  const file = getUserFilePath(email);
-  if (fs.existsSync(file)) fs.unlinkSync(file);
-}
-
-// === Активные соединения и таймеры удаления ===
-const socketConnections = new Map<string, Set<WebSocket>>();
+// === Active connections ===
+// email -> Set of { socket, id }
+const socketConnections = new Map<
+  string,
+  Set<{ socket: WebSocket; id: string }>
+>();
 const disconnectTimers = new Map<string, NodeJS.Timeout>();
 
 export function initWebSocket(server: any) {
-  const wss = new WebSocketServer({ server, path: '/ws' });
+  const wss = new WebSocketServer({ server, path: "/ws" });
 
-  wss.on('connection', (ws: WebSocket) => {
+  wss.on("connection", (ws: WebSocket) => {
     const socketId = uuidv4();
-    console.log(`🔌 WebSocket подключился: ${socketId}`);
+    console.log(`🔌 WebSocket connected: ${socketId}`);
 
-    ws.on('message', (data) => {
+    ws.on("message", async (data) => {
       try {
         const msg = JSON.parse(data.toString());
 
-        if (msg.type === 'register' && msg.userId && msg.email) {
-          const { userId, email } = msg;
+        // === INITIAL REGISTRATION ===
+        if ((msg.type === "init" || msg.type === "register") && msg.userId && msg.email) {
+          const { userId, email, orderType = "my", search = "" } = msg;
+          console.log(`⚡ Registering session for ${email} (${socketId})`);
 
-          // Снимаем таймер удаления, если был
-          if (disconnectTimers.has(email)) {
-            clearTimeout(disconnectTimers.get(email)!);
-            disconnectTimers.delete(email);
+          // Cancel disconnect timeout if any
+          if (disconnectTimers.has(socketId)) {
+            clearTimeout(disconnectTimers.get(socketId)!);
+            disconnectTimers.delete(socketId);
           }
 
-          // Сохраняем в файл, если ещё не было
-          const currentData = loadUserData(email);
-          if (!currentData) {
-            saveUserData(email, { userId, email, createdAt: Date.now() });
-          }
+          // Create or update session (unique per socketId)
+          await createWebsocketSession({
+            id: socketId,
+            email,
+            userId,
+            orderType,
+            start: Date.now(),
+            end: 0,
+            dateStart: new Date(),
+            dateEnd: new Date(),
+            search,
+            orderIds: [],
+          } as any);
 
-          // Регистрируем соединение
+          // Track connection by email
           if (!socketConnections.has(email)) socketConnections.set(email, new Set());
-          socketConnections.get(email)!.add(ws);
+          socketConnections.get(email)!.add({ socket: ws, id: socketId });
 
-          console.log(`✅ Зарегистрирован email: ${email}`);
-          ws.send(JSON.stringify({ type: 'registered', email }));
-        } else if (msg.type === 'disconnect' && msg.email) {
-          // Обработка явного отключения
-          const email = msg.email;
+          ws.send(JSON.stringify({ type: "registered", email, id: socketId }));
+        }
 
-          // Удаляем данные и таймер
-          deleteUserData(email);
-          if (disconnectTimers.has(email)) {
-            clearTimeout(disconnectTimers.get(email)!);
-            disconnectTimers.delete(email);
-          }
+        // === EXPLICIT DISCONNECT ===
+        else if (msg.type === "disconnect" && msg.email && msg.id) {
+          const { email, id } = msg;
 
-          // Закрываем все соединения этого пользователя (если нужно)
-          if (socketConnections.has(email)) {
-            socketConnections.get(email)!.forEach(socket => {
-              if (socket !== ws && socket.readyState === WebSocket.OPEN) {
-                socket.close();
+          await deleteWebsocketSession(id);
+
+          const emailSet = socketConnections.get(email);
+          if (emailSet) {
+            // Remove this socket from the set
+            for (const entry of emailSet) {
+              if (entry.id === id) {
+                if (entry.socket.readyState === WebSocket.OPEN) entry.socket.close();
+                emailSet.delete(entry);
+                break;
               }
-            });
-            socketConnections.delete(email);
+            }
+
+            if (emailSet.size === 0) socketConnections.delete(email);
           }
 
-          // Закрываем текущее соединение
           ws.close();
-
-          console.log(`🛑 Явное отключение и удаление данных email=${email}`);
+          console.log(`🛑 Explicit disconnect: email=${email}, id=${id}`);
         }
       } catch (e) {
-        console.warn('❌ Ошибка разбора сообщения:', e);
+        console.warn("❌ Error handling message:", e);
       }
     });
 
-    ws.on('close', () => {
-      const email = [...socketConnections.entries()]
-        .find(([_, set]) => set.has(ws))?.[0];
+    // === AUTOMATIC DISCONNECT ===
+    ws.on("close", async () => {
+      const emailEntry = [...socketConnections.entries()].find(([_, set]) =>
+        [...set].some((entry) => entry.socket === ws)
+      );
 
-      if (email) {
-        socketConnections.get(email)?.delete(ws);
-        if (socketConnections.get(email)?.size === 0) {
-          socketConnections.delete(email);
+      if (!emailEntry) return;
 
-          // Удаление через 5 сек
-          const timeout = setTimeout(() => {
-            deleteUserData(email);
-            disconnectTimers.delete(email);
-            console.log(`🗑 Удалены данные email=${email} после 5 сек`);
-          }, 5000);
+      const [email, connections] = emailEntry;
+      const connection = [...connections].find((entry) => entry.socket === ws);
+      if (!connection) return;
 
-          disconnectTimers.set(email, timeout);
-        }
+      const { id } = connection;
+      connections.delete(connection);
 
-        console.log(`❌ WebSocket отключён: ${socketId}, email=${email}`);
+      console.log(`❌ WebSocket closed: ${id}, email=${email}`);
+
+      if (connections.size === 0) {
+        socketConnections.delete(email);
       }
+
+      // Delete from DB after timeout (if not reconnected)
+      const timeout = setTimeout(async () => {
+        await deleteWebsocketSession(id);
+        disconnectTimers.delete(id);
+        console.log(`🗑 Session removed from DB id=${id}, email=${email}`);
+      }, 5000);
+
+      disconnectTimers.set(id, timeout);
     });
   });
 
-  console.log('✅ WebSocket сервер слушает по /ws');
+  console.log("✅ WebSocket server running at /ws");
 }
 
-// === Отправка сообщению пользователю по email ===
-export function sendToUser(email: string, payload: any) {
-  const message = JSON.stringify(payload);
-  const sockets = socketConnections.get(email);
+// === SEND MESSAGE TO ALL SOCKETS OF A USER ===
+export function sendToUser(websocketIds: string[], email: string, payload: any) {
+  const data = JSON.stringify(payload);
+  const connections = socketConnections.get(email);
 
-  if (!sockets) {
-    console.log(`⚠ Нет активных соединений для email=${email}`);
+  if (!connections || connections.size === 0) {
+    console.log(`⚠ No active sockets for email=${email}`);
     return;
   }
 
-  sockets.forEach((ws) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(message);
+  // Convert Set → Array and filter by id
+  const sockets = Array.from(connections).filter(conn =>
+    websocketIds.includes(conn.id)
+  );
+
+  console.log("Sending to sockets:", sockets.map(s => s.id));
+
+  if (sockets.length === 0) {
+    console.log(`⚠ No matching websocket IDs for email=${email}`);
+    return;
+  }
+
+  for (const { socket } of sockets) {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(data);
     }
-  });
+  }
 }
+

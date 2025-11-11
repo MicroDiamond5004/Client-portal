@@ -8,6 +8,7 @@ import { selectSearchTerm } from 'src/store/selectors/ticketsSelectors.ts';
 import { TodoCategory } from 'src/types/apps/kanban.ts';
 import { AllStatus, getStatus } from 'src/components/apps/tickets/TicketListing.tsx';
 import sortAllTickets from 'src/components/apps/tickets/sort-tickets/sort-tickets.ts';
+import { sendOrderIdsToWebSocket } from 'src/websocket';
 
 interface TicketState {
   tickets: ELMATicket[];
@@ -21,6 +22,9 @@ interface TicketState {
   passporta: Record<string, [string | undefined, string | undefined]>;
   loading?: boolean;
   todoCategories?: TodoCategory[];
+  page: number;
+  limit: number;
+  ordersType: 'my' | 'all';
 }
 
 const initialState: TicketState = {
@@ -32,12 +36,21 @@ const initialState: TicketState = {
   ticketsFilter: 'total_tickets',
   startDate: null,
   endDate: null,
+  page: 1,
+  limit: 20,
+  ordersType: 'my',
 };
 
 const ticketsSlice = createSlice({
   name: SLiceNames.TICKETS,
   initialState,
   reducers: {
+    updateOrdersType(state, action: PayloadAction<'my' | 'all'>) {
+      state.ordersType = action.payload;
+    },
+    updatePageNumber(state, action: PayloadAction<number>) {
+      state.page = Number(action.payload);
+    },
     updateTicketsFilter: (state, action: PayloadAction<string>) => {
       if (action.payload !== state.ticketsFilter) {
         state.ticketsFilter = action.payload;
@@ -69,51 +82,52 @@ const ticketsSlice = createSlice({
       state.endDate = action.payload.endDate;
     },
     updateAllTickets(state, action: PayloadAction<any>) {
-      const AllTickets: ELMATicket[] = sortAllTickets(action.payload);
-      if (!isEqual(state.tickets, AllTickets)) {
-        console.log('ОБНОВИЛ');
-        state.prevTickets = [...state.tickets]; // сохранить копию до изменений
+      // const AllTickets: ELMATicket[] = sortAllTickets(action.payload);
+      // if (!isEqual(state.tickets, AllTickets)) {
+      //   console.log('ОБНОВИЛ');
+      //   state.prevTickets = [...state.tickets]; // сохранить копию до изменений
 
-        state.tickets = AllTickets;
-        state.fullOrder = {
-          result: {
-            result: AllTickets,
-            total: AllTickets?.length,
-          },
-          success: true,
-          error: ''
-        };
+      //   state.tickets = AllTickets;
+      //   state.fullOrder = {
+      //     result: {
+      //       result: AllTickets,
+      //       total: AllTickets?.length,
+      //       anotherOrders?: Al
+      //     },
+      //     success: true,
+      //     error: ''
+      //   };
 
-        const todosData = AllTickets;
+      //   const todosData = AllTickets;
 
-        const categoriesTickets: any = {
-          [AllStatus.NEW]: [],
-          [AllStatus.PENDING]: [],
-          [AllStatus.BOOKED]: [],
-          [AllStatus.FORMED]: [],
-          [AllStatus.CLOSED]: [],
-        };
+      //   const categoriesTickets: any = {
+      //     [AllStatus.NEW]: [],
+      //     [AllStatus.PENDING]: [],
+      //     [AllStatus.BOOKED]: [],
+      //     [AllStatus.FORMED]: [],
+      //     [AllStatus.CLOSED]: [],
+      //   };
 
-        todosData.forEach((ticket: ELMATicket) => {
-          if (ticket.__status?.status) {
-            categoriesTickets[getStatus(ticket)].push(ticket);
-          }
-        });
+      //   todosData.forEach((ticket: ELMATicket) => {
+      //     if (ticket.__status?.status) {
+      //       categoriesTickets[getStatus(ticket as any)].push(ticket);
+      //     }
+      //   });
 
-        const categories: any = [];
+      //   const categories: any = [];
 
-        Object.entries(categoriesTickets).forEach(([key, value], index) => {
-          categories.push(
-            {
-              id: index + 1,
-              name: key,
-              child: value
-            }
-          )
-        })
+      //   Object.entries(categoriesTickets).forEach(([key, value], index) => {
+      //     categories.push(
+      //       {
+      //         id: index + 1,
+      //         name: key,
+      //         child: value
+      //       }
+      //     )
+      //   })
 
-        state.todoCategories = categories;
-      }
+      //   state.todoCategories = categories;
+      // }
     }
   },
   extraReducers: (builder) => {
@@ -137,15 +151,20 @@ const ticketsSlice = createSlice({
         if (!isEqual(action.payload.fetchedOrders.result.result, state.tickets)) {
           state.prevTickets = state.tickets;
           const AllTickets = action.payload.fetchedOrders.result.result;
+
+          const anotherOrders = action.payload.fetchedOrders.result.anotherOrders;
+
           state.fullOrder = {
             result: {
               result: AllTickets,
-              total: AllTickets?.length,
+              total: action.payload?.fetchedOrders?.result?.total ?? 0,
             },
             success: true,
             error: ''
           };
           state.tickets = sortAllTickets(AllTickets);
+
+          sendOrderIdsToWebSocket([AllTickets?.map((el: ELMATicket) => el?.__id)]);
 
           const todosData = AllTickets;
 
@@ -184,6 +203,6 @@ const ticketsSlice = createSlice({
   },
 });
 
-export const {addNEwTicket, updateDateFilter, updateTicket, updateTicketsFilter, updateSearchTerms, updateAllTickets} = ticketsSlice.actions;
+export const {updateOrdersType, updatePageNumber, addNEwTicket, updateDateFilter, updateTicket, updateTicketsFilter, updateSearchTerms, updateAllTickets} = ticketsSlice.actions;
 export default ticketsSlice.reducer;
 

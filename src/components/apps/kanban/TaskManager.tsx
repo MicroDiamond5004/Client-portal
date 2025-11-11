@@ -167,7 +167,7 @@ function TaskManager(props: TaskManagerProps) {
               mt: 3
             }}
           >
-            {openTicket && <ModalTicket show={showModal} ticket={openTicket} close={handleCloseModal}/>}
+            {openTicket && <ModalTicket show={showModal} ticket={openTicket as any} close={handleCloseModal}/>}
             {todoCategories.map((category) => (
               <Box key={category.id}>
                 <CategoryTaskList id={category.id} openTicketModal={handleShowModal} />

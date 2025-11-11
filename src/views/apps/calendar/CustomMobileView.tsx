@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Card, CardContent, Typography } from '@mui/material';
-import { EventType } from './CalendarPage';
 import dayjs from 'dayjs';
+import { EventType } from './EventData';
 
 type Props = {
   view: 'week' | 'day';

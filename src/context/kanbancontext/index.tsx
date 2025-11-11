@@ -62,7 +62,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
 
             todosData.result.forEach((ticket: ELMATicket) => {
                 if (ticket.__status?.status) {
-                    categoriesTickets[getStatus(ticket)].push(ticket);
+                    categoriesTickets[getStatus(ticket as any)].push(ticket);
                 }
             });
 

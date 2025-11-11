@@ -1,0 +1,21 @@
+[
+  {
+    "endpoint": "https://web.push.apple.com/QGyY2hllJhCqWfEX_wotFSklGwdpPvOv8pWd8ZbpmF94DbErTWMuhw7J9iplzqICJW-nkH-ALaS-78JuJmFqvPsSuJg5_j64JbrhKLH6aP_2U2zICHGBjArHYOwDkHOfyoBOElqbF1X0qnSEtaDmZJUlbs0oBZugDkiWy5B9j4g",
+    "keys": {
+      "p256dh": "BAJB0rYG8WextVUmKf7dCRNTE2RfUVj82pB2FBcFSOZp98_7w67MoObcGzoCqEeQca4ORBiJNKpIh--NOkso-JA",
+      "auth": "FHtgfndWGIMwi6NgwLxBUg"
+    },
+    "email": "arizhzey@gmail.com",
+    "userId": "a5819768-9817-4e67-924e-5e907e398f83"
+  },
+  {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/dHcDJTM_Ymk:APA91bGHKIG_6f3q8Vma-9nZpaJjyUrT4KL4F5HpeQE1IebyRyy4CvTRkRPbWubpbHg_Nd6PikCIrN14fn0E7ifJCQzGuFIELzK2OyCpmDYe1CsLeELYIOPg7SiUQp2vqMlVw9hmmV7o",
+    "expirationTime": null,
+    "keys": {
+      "p256dh": "BLqBEgFOFGctoMIk30zx6MUxTu97yPjv_iyIIKUppVWebhHPsCH5jNHddo4YrZQhnLlk3Uq8IY1p7ky7hR7gZn4",
+      "auth": "YZXbH2LlVw4WXz3Y-JHtxQ"
+    },
+    "email": "arizhzey@gmail.com",
+    "userId": "a5819768-9817-4e67-924e-5e907e398f83"
+  }
+]

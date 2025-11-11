@@ -13,8 +13,8 @@ import api from 'src/store/api.ts';
 import { fetchMessages } from 'src/store/middleware/thunks/messageThunks.ts';
 import { useAppDispatch, useAppSelector } from 'src/store/hooks.ts';
 import { selectClientId } from 'src/store/selectors/authSelector.ts';
-import { selectChatData } from 'src/store/selectors/messagesSelectors.ts';
 import { updateSelectedChat } from 'src/store/slices/messageSlice.ts';
+import { selectChats } from "src/store/selectors/messagesSelectors";
 
 function MiniChat({selectedChat}: any) {
     const mainBoxRef = useRef<HTMLElement>(null);
@@ -22,7 +22,7 @@ function MiniChat({selectedChat}: any) {
 
     const dispatch = useAppDispatch();
 
-    const chatData = useAppSelector(selectChatData)
+    const chats = useAppSelector(selectChats);
     const setSelectedChat = (value: any) => dispatch(updateSelectedChat(value));
     const [replyToMsg, setReplyToMsg] = useState<ChatMessage | null>(null);
 
@@ -30,26 +30,8 @@ function MiniChat({selectedChat}: any) {
 
     // const {selectedChat: currentChat, setSelectedChat} = useContext(ChatContext);
 
-    // console.log(chatData);
-
-  useEffect(() => {
-
-    let isChanged = false;
-
-    const preparedChat = chatData.find((el) => el.name === selectedChat.name);
-
-
-      setSelectedChat({
-        name: selectedChat.name,
-        id: selectedChat.name,
-        taskId: selectedChat.taskId,
-        isChanged,
-        messages: preparedChat.messages,
-        files: preparedChat.files,
-      } as any);
-
-  }, []);
-
+    console.log('Selected chat', selectedChat);
+    setSelectedChat(chats?.find((el) => el.name === selectedChat.name));
 
     return (
     <Box flexGrow={1} border={'1px solid #e5eaef'}>

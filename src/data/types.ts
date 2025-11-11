@@ -6,6 +6,7 @@ export type ELMATicket = {
     otel1: string[] | null;
     otel2: string[] | null;
     otel3: string[] | null;
+    marshrutnaya_kvitanciya?: string[];
     sbor1: null | string | number | boolean;
     sbor2: null | string | number | boolean;
     sbor3: null | string | number | boolean;

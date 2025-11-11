@@ -1,8 +1,75 @@
-import { User, Order, Message, Subscription, Session, IUser, IOrder, IMessage, ISubscription, ISession } from '../models';
+import constants from 'constants';
+import { User, Order, Message, Subscription, Session, IUser, IOrder, IMessage, ISubscription, ISession, IPassport, Passport, IFilePreview, FilePreview, IAuthor, Author, IChat, Chat, WebsocketSession, IWebsocketSession } from '../models';;
+import { getFiles } from '../polling/pollingFunctions';
 import { UserData, ELMATicket } from './types';
-import mongoose from 'mongoose';
+import mongoose, { Mongoose } from 'mongoose';
+import { updateMessageToUser, updateOrderToUser } from '../polling/observer/observer';
 
 // ==================== USER DATA OPERATIONS ====================
+
+export async function addUser(
+  userId: string,
+  clientName: string,
+  email: string,
+  password: string,
+  company: string
+): Promise<IUser | null> {
+  try {
+    console.log("=> checking existing user");
+
+    const existingUser = await User.findOne({ clientId: userId });
+
+    if (existingUser) {
+      let hasChanges = false;
+
+      if (existingUser.clientName !== clientName) {
+        existingUser.clientName = clientName;
+        hasChanges = true;
+      }
+      if (existingUser.email !== email) {
+        existingUser.email = email;
+        hasChanges = true;
+      }
+      if (existingUser.password !== password) {
+        existingUser.password = password;
+        hasChanges = true;
+      }
+      if (existingUser.company !== company) {
+        existingUser.company = company;
+        hasChanges = true;
+      }
+
+      if (hasChanges) {
+        console.log("=> updating user");
+        await existingUser.save();
+      } else {
+        console.log("=> no changes detected");
+      }
+
+      return existingUser;
+    }
+
+    console.log("=> creating new user");
+    const user = new User({
+      clientId: userId,
+      clientName,
+      email,
+      password,
+      company,
+    });
+
+    await user.save();
+
+    if (user._id && typeof user._id === "object" && typeof user._id.toString === "function") {
+      return user;
+    } else {
+      throw new Error("User _id is missing or invalid after save.");
+    }
+  } catch (error) {
+    console.error("Error saving user:", error);
+    throw error;
+  }
+}
 
 export async function loadUserData(userId: string, isImportant = false): Promise<UserData> {
   try {
@@ -263,31 +330,42 @@ export async function findAuthFileByUserId(userId: string): Promise<{ email: str
 
 export async function saveCookieAndToken(token: string, cookie: string): Promise<string> {
   try {
-    // Create a temporary session - you might want to associate this with a specific user
+    // Удаляем все предыдущие сессии
+    await Session.deleteMany({});
+
+    // Создаём новую сессию
     const session = new Session({
-      userId: new mongoose.Types.ObjectId(), // Temporary - needs proper user mapping
+      userId: new mongoose.Types.ObjectId(), // Можно позже заменить на реального пользователя
       token,
       cookie,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 часа
     });
 
+    console.log("=> Saving new single session");
     await session.save();
-    // Ensure session._id is a valid ObjectId before calling toString
-    if (session._id && typeof session._id === 'object' && typeof session._id.toString === 'function') {
-      return session._id.toString();
-    } else {
-      throw new Error('Session _id is missing or invalid after save.');
-    }
+
+    return session?._id?.toString() ?? '';
   } catch (error) {
-    console.error('Error saving cookie and token:', error);
+    console.error("Error saving cookie and token:", error);
     throw error;
   }
 }
+
 
 export async function getCookieByToken(token: string): Promise<string | null> {
   try {
     const session = await Session.findOne({ token });
     return session ? session.cookie : null;
+  } catch (error) {
+    console.error('Error getting cookie by token:', error);
+    return null;
+  }
+}
+
+export async function getCookieAndToken(): Promise<{token: string | undefined, cookie: string | undefined} | null> {
+  try {
+    const session = await Session.findOne({});
+    return {token: session?.token, cookie: session?.cookie};
   } catch (error) {
     console.error('Error getting cookie by token:', error);
     return null;
@@ -302,6 +380,18 @@ export async function deleteCookieByToken(token: string): Promise<boolean> {
     console.error('Error deleting cookie by token:', error);
     return false;
   }
+}
+
+export async function isSessionExpired(token: string): Promise<boolean> {
+  await Session.deleteMany({ expiresAt: { $lte: new Date() } });
+
+  const session = await Session.find({token});
+  
+  if (!!session.at(-1)) {
+    return false;
+  } 
+
+  return true;
 }
 
 // ==================== USER MANAGEMENT ====================
@@ -357,14 +447,15 @@ export async function updateUser(userId: string, updateData: Partial<IUser>): Pr
 // ==================== ORDER OPERATIONS ====================
 
 export async function createOrder(userId: string, orderData: ELMATicket): Promise<IOrder> {
-  try {
-    const user = await User.findOne({ clientId: userId });
-    if (!user) {
-      throw new Error(`User not found: ${userId}`);
-    }
+  const previousOrder = await Order.findOne({userId, elmaId: orderData.__id});
+  
+  if (previousOrder) {
+    return previousOrder;
+  }
 
+  try {
     const order = new Order({
-      userId: user._id,
+      userId,
       elmaId: orderData.__id || `temp-${Date.now()}-${Math.random()}`,
       orderData,
       status: 'active',
@@ -379,27 +470,66 @@ export async function createOrder(userId: string, orderData: ELMATicket): Promis
   }
 }
 
-export async function updateOrder(orderId: string, updateData: Partial<IOrder>): Promise<IOrder | null> {
+export async function updateOrder(userId: string, identifier: string, updateData: Partial<IOrder>) {
   try {
-    return await Order.findByIdAndUpdate(
-      orderId,
+    // If it's a valid MongoDB ObjectId (24 hex characters)
+    const isObjectId = mongoose.Types.ObjectId.isValid(identifier);
+
+    const filter = isObjectId
+      ? { _id: new mongoose.Types.ObjectId(identifier) }
+      : { elmaId: identifier }; // your custom field for UUID orders
+
+    const updated = await Order.findOneAndUpdate(
+      filter,                                 // ✅ filter object
       { ...updateData, updatedAt: new Date() },
-      { new: true }
+      { new: true }                           // ✅ return updated document
     );
+
+    if (!updated) {
+      console.warn("⚠️ Order not found for filter:", filter);
+    }
+
+    await updateOrderToUser({userId, order: updated as any, type: 'order:update'});
+    return updated;
   } catch (error) {
-    console.error('Error updating order:', error);
+    console.error("Error updating order:", error);
     return null;
   }
 }
 
+
+export async function getOrdersByUserIdWithLimit(
+  clientIds: string | string[],
+  page: number = 1,
+  limit: number = 20
+): Promise<{ orders: IOrder[]; totalCount: number }> {
+  try {
+    const userIds = Array.isArray(clientIds) ? clientIds : [clientIds];
+
+    const skip = (page - 1) * limit;
+
+    // Fetch in parallel for performance
+    const [orders, totalCount] = await Promise.all([
+      Order.find({ userId: { $in: userIds } })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec() as unknown as Promise<IOrder[]>,
+      Order.countDocuments({ userId: { $in: userIds } }),
+    ]);
+
+    return { orders, totalCount };
+  } catch (error) {
+    console.error("Error getting paginated orders for users:", error);
+    return { orders: [], totalCount: 0 };
+  }
+}
+
+
 export async function getOrdersByUserId(userId: string): Promise<IOrder[]> {
   try {
-    const user = await User.findOne({ clientId: userId });
-    if (!user) {
-      return [];
-    }
-
-    return await Order.find({ userId: user._id }).sort({ createdAt: -1 });
+    return await Order.find({ userId }).sort({ createdAt: -1 });
   } catch (error) {
     console.error('Error getting orders by user ID:', error);
     return [];
@@ -407,24 +537,30 @@ export async function getOrdersByUserId(userId: string): Promise<IOrder[]> {
 }
 
 // ==================== MESSAGE OPERATIONS ====================
-
 export async function createMessage(userId: string, messageData: {
+  __id: string;
   targetId: string;
   authorId: string;
-  body: string;
-}): Promise<IMessage> {
+  body: string | null;
+  files?: string[]
+}): Promise<IMessage | undefined> {
   try {
-    const user = await User.findOne({ clientId: userId });
-    if (!user) {
-      throw new Error(`User not found: ${userId}`);
+    const previousMessage = await Message.findOne({__id: messageData.__id, userId});
+
+    if (previousMessage) {
+      // console.log(`Order already existing! ===> ${orderData}`);
+      return previousMessage;
     }
 
     const message = new Message({
-      userId: user._id,
       ...messageData,
+      userId,
       comments: [],
-      unreadCommentsCount: 0
+      unreadCommentsCount: 0,
+      isChanged: true,
     });
+
+    // updateUserData({userId, message});/
 
     await message.save();
     return message;
@@ -434,14 +570,16 @@ export async function createMessage(userId: string, messageData: {
   }
 }
 
-export async function addCommentToMessage(messageId: string, commentData: {
+export async function addCommentToMessage(userId: string, messageId: string, commentData: {
   authorId: string;
-  body: string;
+  body: string | null;
+  files?: string[]
 }): Promise<IMessage | null> {
   try {
-    const message = await Message.findById(messageId);
+    const message = await Message.findOne({__id: messageId});
+
     if (!message) {
-      return null;
+      return message;
     }
 
     message.comments.push({
@@ -451,10 +589,269 @@ export async function addCommentToMessage(messageId: string, commentData: {
     });
 
     message.unreadCommentsCount += 1;
+    message.isChanged = true;
     await message.save();
+
     return message;
   } catch (error) {
     console.error('Error adding comment to message:', error);
     return null;
   }
+}
+
+export async function getMessagesByUserId(userId: string): Promise<IMessage[]> {
+  try {
+    return await Message.find({userId}).sort({ createdAt: -1 });
+    } catch (error) {
+    console.error('Error getting messages by user ID:', error);
+    return [];
+  }
+}
+
+export async function getMessagesByOrderId(userId: string, targetId: string): Promise<IMessage[]> {
+  try {
+    const messages = await Message.aggregate([
+      { $match: { targetId } },
+      { $sort: { createdAt: -1 } },
+      { $group: { _id: "$__id", doc: { $first: "$$ROOT" } } },
+      { $replaceRoot: { newRoot: "$doc" } }
+    ]);
+
+    return messages;
+  } catch (error) {
+    console.error('Error getting messages by target ID:', error);
+    return [];
+  }
+}
+
+
+// ==================== MESSAGE OPERATIONS ====================
+
+export async function createPassport(userId: string, passportData: {
+  passportId: string;
+  name: string;
+  passportData: string;
+}): Promise<IPassport | null> {
+  try {
+    const previousPassport = await Passport.findOne({ passportId: passportData.passportId, userId });
+
+    if (previousPassport) {
+      // console.log(`Order already existing! ===> ${orderData}`);
+      return previousPassport;
+    }
+
+    const passport = new Passport({
+      userId,
+      ...passportData
+    });
+
+    // updateUserData({userId, passport});
+
+    await passport.save();
+    return passport;
+  } catch (error) {
+    console.error('Error creating message:', error);
+    throw error;
+  }
+}
+
+export async function getPassportsById(userId: string): Promise<IPassport[]> {
+  try {
+    return await Passport.find({userId}).lean() as unknown as IPassport[];
+    } catch (error) {
+    console.error('Error getting messages by user ID:', error);
+    return [];
+  }
+}
+
+
+// ==================== FILE OPERATIONS ====================
+export async function createFile(userId: string, fileData: {
+  fileId: string,
+  filename: string,
+  url: string,
+}): Promise<IFilePreview | undefined> {
+  try {
+    const previousFile = await FilePreview.findOne({ userId, fileId: fileData.fileId });
+
+    if (previousFile) {
+      // console.log(`Order already existing! ===> ${orderData}`);
+      return previousFile;
+    }
+
+    const extension = fileData.filename?.split('.').at(-1);
+
+    const file = new FilePreview({
+      userId,
+      fileId: fileData.fileId,
+      fileName: fileData.filename,
+      fileType: extension,
+      fileUrl: fileData.url,
+    });
+
+    // updateUserData({userId, passport});
+
+    await file.save();
+    return file;
+  } catch (error) {
+    console.error('Error creating file:', error);
+    throw error;
+  }
+}
+
+export async function getFileById(fileId: string): Promise<IFilePreview | null> {
+  try {
+    return await FilePreview.findOne({fileId});
+  } catch (error) {
+    console.error('Error getting file:', error);
+    throw error;
+  }
+} 
+
+// ==================== AUTHOR OPERATIONS ====================
+
+export async function createAuthor(authorData: {
+  authorId: string;
+  name: string;
+}): Promise<IAuthor> {
+  const { authorId, name } = authorData;
+
+  const author = await Author.findOneAndUpdate(
+    { authorId },
+    { $setOnInsert: { name } },
+    { new: true, upsert: true }
+  );
+
+  return author;
+}
+
+export async function getAuthor(authorId: string): Promise<IAuthor | null> {
+  try {
+    return await Author.findOne({authorId});
+  } catch (error){
+    console.error('Error getting author:', error);
+    throw error;
+  }
+}
+
+// ==================== CHAT OPERATIONS ====================
+
+export async function getChat(id: string): Promise<IChat | null> {
+  try {
+    const chat = await Chat.findOne({id});
+    return chat;
+  } catch (error) {
+    console.error('Error getting chat:', error);
+    throw error;
+  }
+}
+
+export async function createChat(chatData: {
+  name: string,
+  taskId: string,
+}): Promise<IChat | null> {
+  const previousChat = await Chat.findOne({name: chatData.name});
+  if (previousChat) {
+    return previousChat;
+  }
+
+  const chat = new Chat({
+    id: chatData.name,
+    name: chatData.name,
+    taskId: chatData.taskId,
+    isChanged: true
+  })
+
+  await chat.save();
+  return chat;
+}
+ 
+
+// ==================== WEB SOCKET SEESION OPERATIONS ====================
+
+/**
+ * Get websocket session by ID
+ */
+
+export async function getWebsocketSessionsByUserId(userId: string): Promise<IWebsocketSession[] | null> {
+  try {
+    return await WebsocketSession.find({ userId });
+  } catch (error) {
+    console.error("Error getting websocket session:", error);
+    throw error;
+  }
+}
+
+export async function getWebsocketSession(id: string): Promise<IWebsocketSession | null> {
+  try {
+    return await WebsocketSession.findOne({ id });
+  } catch (error) {
+    console.error("Error getting websocket session:", error);
+    throw error;
+  }
+}
+
+/**
+ * Create or update websocket session by ID
+ */
+export async function createWebsocketSession(
+  websocketSessionData: IWebsocketSession
+): Promise<IWebsocketSession | null> {
+  try {
+    const session = await WebsocketSession.findOneAndUpdate(
+      { id: websocketSessionData.id },
+      { $set: websocketSessionData },
+      { new: true, upsert: true } // new = return updated doc, upsert = create if not exists
+    );
+    return session;
+  } catch (error) {
+    console.error("Error creating/updating websocket session:", error);
+    throw error;
+  }
+}
+
+/**
+ * Delete websocket session by ID
+ */
+export async function deleteWebsocketSession(id: string): Promise<IWebsocketSession | null> {
+  try {
+    return await WebsocketSession.findOneAndDelete({ id });
+  } catch (error) {
+    console.error("Error deleting websocket session:", error);
+    throw error;
+  }
+}
+
+
+// ------------ Update isChange function --------------
+export async function updateIsChangedByType(
+  userId: string,
+  elementId: string,
+  type: 'order' | 'message',
+  isChanged: boolean
+): Promise<IOrder | IMessage[] | null> {
+  if (type === 'order') {
+  const updatedOrder = await Order.findOneAndUpdate(
+    { userId, elmaId: elementId },
+    {
+      $set: {
+        isChanged,               // top-level field
+        'orderData.isChanged': isChanged, // nested field inside orderData
+      },
+    },
+    { new: true, upsert: false } // upsert: false ensures it doesn't create a new doc accidentally
+  );
+
+  return updatedOrder;
+}
+
+  // For messages — update many
+  await Message.updateMany(
+    { targetId: elementId },
+    { $set: { isChanged } }
+  );
+
+  // Return updated messages if needed
+  const updatedMessages = await Message.find({ userId, elementId });
+  return updatedMessages;
 }

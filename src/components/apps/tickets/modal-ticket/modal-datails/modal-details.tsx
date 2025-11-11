@@ -33,7 +33,6 @@ import MiniChat from '../../mini-chat/mini-chat';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { ChatsType } from 'src/types/apps/chat';
 import { useAppDispatch, useAppSelector } from 'src/store/hooks';
-import { selectMessages } from 'src/store/selectors/messagesSelectors';
 import { selectPassports } from 'src/store/selectors/ticketsSelectors';
 import { IconDownload, IconEye, IconFile } from '@tabler/icons-react';
 import { DialogViewer } from 'src/components/apps/chats/ChatInsideSidebar';
@@ -48,10 +47,12 @@ import { MapBlock } from './tabs/MapBlock';
 import { BookingInfoBlock } from './tabs/BookingInfoBlock';
 import { fetchMessages } from 'src/store/middleware/thunks/messageThunks';
 import { FileListBlock } from 'src/components/apps/tickets/modal-ticket/modal-datails/fileList/FileListBlock.tsx';
+import { selectChats } from 'src/store/selectors/messagesSelectors';
+import { ElmaChat } from 'src/mocks/chats/chat.type';
 
 
 type ModalTicketProps = {
-    ticket: ELMATicket;
+    ticket: any;
     onClose: () => void;
 }
 
@@ -78,7 +79,7 @@ const ModalDetails = (props: ModalTicketProps) => {
 
   const dispatch = useAppDispatch();
 
-  const currentChats: any = useAppSelector(selectMessages);
+  const currentChats: any = useAppSelector(selectChats);
   const passports = useAppSelector(selectPassports)
 
   const [isLoading, setIsLoading] = useState(true); // если нужно знать статус
@@ -150,7 +151,7 @@ const ModalDetails = (props: ModalTicketProps) => {
 
   // console.log(currentChats);
 
-  const selectedChat: ChatsType = {
+  const selectedChat: ElmaChat = currentChats?.find((el: ElmaChat) => el.name === ticket.nomer_zakaza) ?? {
     id: ticket?.__id ?? '',
     taskId: ticket?.__id || '',
     name: ticket?.nomer_zakaza || '',
@@ -158,8 +159,10 @@ const ModalDetails = (props: ModalTicketProps) => {
     recent: true,
     excerpt: '',
     chatHistory: [],
-    messages: ticket?.nomer_zakaza ? currentChats?.[ticket.nomer_zakaza] : [],
+    messages: [],
   };
+
+  console.log(selectedChat);
 
   const status = getStatus(ticket);
 
@@ -459,7 +462,7 @@ const ModalDetails = (props: ModalTicketProps) => {
     }
 
     // tabIndex > 0 → динамические вкладки
-    const dynamicTab = visibleTabs[tabIndex - 1]?.props?.label;
+    const dynamicTab = (visibleTabs[tabIndex - 1] as any)?.props?.label;
 
     switch (dynamicTab) {
       case 'Отели':
@@ -597,7 +600,7 @@ const ModalDetails = (props: ModalTicketProps) => {
         </AppBar>
 
         {!isMobile ? (
-          <Container maxWidth="100%" sx={{ maxHeight: '80vh', overflow: 'auto' }}>
+          <Container sx={{ maxHeight: '80vh', overflow: 'auto' }}>
             <Grid container spacing={2} sx={{ maxHeight: '100%' }}>
               {/* Left Column */}
               <Grid item xs={12} sm={3} sx={{ maxHeight: '80vh' }}>
@@ -751,7 +754,7 @@ const ModalDetails = (props: ModalTicketProps) => {
             </Grid>
           </Container>
         ) : (
-          <Container maxWidth="100%" sx={{ height: '100%' }}>
+          <Container  sx={{ height: '100%' }}>
           <Grid container spacing={0} sx={{ height: '100%' }}>
             {/* Left Column */}
             <Grid item xs={12} sm={8} sx={{ height: '100%' }}>

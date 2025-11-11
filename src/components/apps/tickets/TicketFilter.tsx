@@ -34,11 +34,11 @@ const TicketFilter = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const openC = tickets.filter((t: ELMATicket) => t && getStatus(t) === AllStatus.NEW)?.length;
-  const pendingC = tickets.filter((t: ELMATicket) => t && getStatus(t) === AllStatus.PENDING)?.length;
-  const bookedC = tickets.filter((t: ELMATicket) => t && getStatus(t) === AllStatus.BOOKED)?.length;
-  const formedC = tickets.filter((t: ELMATicket) => t && getStatus(t) === AllStatus.FORMED)?.length;
-  const closeC = tickets.filter((t: ELMATicket) => t && getStatus(t) === AllStatus.CLOSED)?.length;
+  const openC = tickets.filter((t: any) => t && getStatus(t) === AllStatus.NEW)?.length;
+  const pendingC = tickets.filter((t: any) => t && getStatus(t) === AllStatus.PENDING)?.length;
+  const bookedC = tickets.filter((t: any) => t && getStatus(t) === AllStatus.BOOKED)?.length;
+  const formedC = tickets.filter((t: any) => t && getStatus(t) === AllStatus.FORMED)?.length;
+  const closeC = tickets.filter((t: any) => t && getStatus(t) === AllStatus.CLOSED)?.length;
 
   const isMobile = useMediaQuery('(max-width:600px)');
 
@@ -80,6 +80,8 @@ const TicketFilter = () => {
       sx: { backgroundColor: '#344B9D', color: '#fff' },
     },
   ];
+
+  const smth = '';
 
   return (
     <MuiGrid container spacing={isMobile ? 2 : 3} justifyContent="center" textAlign="center">

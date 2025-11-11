@@ -60,7 +60,7 @@ const locales = {
 
 const localizer = dateFnsLocalizer({
   format,
-  parse: (str, formatString, backupDate) => {
+  parse: (str: string, formatString: string, backupDate: any) => {
     return dayjs(str, formatString).toDate();
   },
   startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
@@ -203,7 +203,7 @@ const BigCalendar = () => {
           {daysOfWeek.map(day => {
             const isActive = selectedDay ? isSameDay(day, selectedDay) : false;
             const isEventDay = Events.some(ev =>
-              isSameDay(ev.start, day)
+              isSameDay(ev.start as any, day)
             );
             const isToday = isSameDay(day, today);
             return (

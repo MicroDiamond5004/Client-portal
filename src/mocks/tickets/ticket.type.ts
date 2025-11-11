@@ -232,6 +232,7 @@ export type TicketsData = {
     "success": boolean;
     "error": string;
     "result": {
+        "anotherOrders"?: ELMATicket[];
         "result": ELMATicket[];
         "total": number;
     }

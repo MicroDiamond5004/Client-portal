@@ -1,9 +1,15 @@
 import axios from "axios";
 import { ELMATicket } from "./data/types";
-import { Session } from "./models";
-import { getCookieByToken, saveCookieAndToken } from "./data/mongodbStorage";
-import { AllStatus, AUTH_DATA_PATH, auth_login, authURL, loginURL, logoutURL, password, TOKEN } from "./const";
+import { IMessage, Session } from "./models";
+import { createFile, findUserByClientId, findUserByEmail, getAuthor, getCookieByToken, getFileById, getMessagesByOrderId, isSessionExpired, saveCookieAndToken } from "./data/mongodbStorage";
+import { AllStatus, AUTH_DATA_PATH, auth_login, authURL, cookieCheckURL, loginURL, logoutURL, password, TOKEN } from "./const";
 import fs from "fs";
+import { getAuthors, getFiles } from "./polling/pollingFunctions";
+import { wrapper } from "axios-cookiejar-support";
+import { CookieJar } from "tough-cookie";
+
+const jar = new CookieJar();
+const client = wrapper(axios.create({ jar, withCredentials: true }));
 
 export function sortAllTickets(tickets: ELMATicket[]): ELMATicket[] {
   return [...tickets].sort((a, b) => {
@@ -17,7 +23,7 @@ export function sortAllTickets(tickets: ELMATicket[]): ELMATicket[] {
   });
 }
 
-export async function saveAuth({ token, cookie }: { token: string, cookie: string }) {
+export async function saveAuth({token, cookie }: { token: string, cookie: string }) {
   try {
     await saveCookieAndToken(token, cookie);
   } catch (error) {
@@ -46,12 +52,17 @@ export async function readAuth(): Promise<{ token: string, cookie: string } | nu
   }
 }
 
+interface AuthToken {
+  token: string;
+  cookie: string;
+}
 
-export async function isTokenExpiringSoonOrInvalid(token: string): Promise<boolean> {
+export async function isTokenExpiringSoonOrInvalid({token, cookie}: AuthToken): Promise<boolean> {
   try {
     const firstLogin = await axios.get("https://portal.dev.lead.aero/api/auth", {
       headers: {
         "Authorization": `Bearer ${token}`,
+        "Cookie": `${cookie}`, 
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json",
         "Referer": "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
@@ -64,15 +75,14 @@ export async function isTokenExpiringSoonOrInvalid(token: string): Promise<boole
       }
     });
 
-    if (firstLogin?.data === 'need logout') return true;
+    if (firstLogin?.data?.userId) return false;
 
-    const newToken = firstLogin.data?.token;
-    if (!newToken) return true;
+    return true;
 
-    const [, payloadBase64] = newToken.split('.');
-    const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf-8'));
-    const now = Math.floor(Date.now() / 1000);
-    return !payload.exp || payload.exp - now <= 300;
+    // const [, payloadBase64] = newToken.split('.');
+    // const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf-8'));
+    // const now = Math.floor(Date.now() / 1000);
+    // return !payload.exp || payload.exp - now <= 300;
 
   } catch (err) {
     // console.warn('⚠ Ошибка проверки токена:', err);
@@ -83,7 +93,8 @@ export async function isTokenExpiringSoonOrInvalid(token: string): Promise<boole
 
 export async function getSergeiToken(): Promise<string> {
   const cached = await readAuth();
-  if (cached?.token && !(await isTokenExpiringSoonOrInvalid(cached.token))) {
+
+  if (cached?.token && !(await isTokenExpiringSoonOrInvalid(cached)) && !(await isSessionExpired(cached.token))) {
     return cached.token;
   }
 
@@ -127,8 +138,7 @@ export async function getSergeiToken(): Promise<string> {
     const currentToken = auth.headers['token'];
     if (!currentToken) throw new Error('⛔ Токен не получен из /api/auth');
 
-    // ✅ Сохраняем токен + cookie
-    await saveAuth({ token: currentToken, cookie: cookieValue });
+    saveAuth({token: currentToken, cookie: cookieValue})
 
     return currentToken;
 
@@ -138,79 +148,71 @@ export async function getSergeiToken(): Promise<string> {
   }
 }
 
-const authenticateToken = async (req: any, res: any, next: any) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '')?.trim();
+export const authenticateToken = async (req: any, res: any, next: any) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "")?.trim();
 
   if (!token) {
     return res.status(401).json({ error: "Токен не предоставлен" });
   }
 
-  const cookie = getCookieByToken(token);
-
-  if (!cookie) {
-    return res.status(401).json({ error: "Сессия не найдена для токена" });
-  }
-
-  // console.log(`Bearer ${token}`);
-
-const response = await axios.get("https://portal.dev.lead.aero/api/auth", {
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Accept": "application/json, text/plain, */*",
-      "Cookie": typeof cookie === "string" ? cookie : "",
-      "Content-Type": "application/json",
-      "Referer": "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
-      "Sec-CH-UA": `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`,
-      "Sec-CH-UA-Mobile": "?0",
-      "Sec-CH-UA-Platform": `"Windows"`,
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-      "X-Language": "ru-RU",
-      "X-Requested-With": "XMLHttpRequest"
-    }
-  });
-
-
-
   try {
-    const savedClientId = response.data.userId ?? '';
+    // 1️⃣ Проверяем токен и получаем пользователя
+    const response = await client.get("https://portal.dev.lead.aero/api/auth", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        Referer:
+          "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
+        "Sec-CH-UA":
+          `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`,
+        "Sec-CH-UA-Mobile": "?0",
+        "Sec-CH-UA-Platform": `"Windows"`,
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "X-Language": "ru-RU",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    });
 
-    const responseUser = await axios.post(
-      'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
+    const savedClientId = response.data.userId ?? "";
+
+    // 3️⃣ Получаем профиль пользователя
+    const responseUser = await client.post(
+      "https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list",
       {
-        "active": true,
-        "fields": {
-          "*": true
-        },
-        "filter": {
-          "tf": {
-            "__user": `${savedClientId}`
-          }
-        }
+        active: true,
+        fields: { "*": true },
+        filter: { tf: { __user: `${savedClientId}` } },
       },
       {
         headers: {
-          Authorization: `${TOKEN}`
-        }
+          Authorization: `${TOKEN}`,
+        },
       }
     );
 
     const data = responseUser.data.result.result[0];
 
+    // 4️⃣ Добавляем данные в req
     req.email = data.email;
     req.fullname = data.__name;
     req.company = data.company;
-
     req.fullnameObject = data.fullname;
-
     req.clientId = savedClientId;
-    req.clientName = response.data.username ?? 'Клиент';
+    req.clientName = response.data.username ?? "Клиент";
+
+    const user = await findUserByEmail(data.email);
+
     req.externalToken = token;
+    req.clientCookie = user?.cookie ?? '';
 
     next();
   } catch (error: any) {
-    // console.error("Ошибка при проверке токена:", error?.response?.data);
+    console.error("Ошибка при проверке токена:", error?.response?.data || error.message);
     return res.status(403).json({
-      error: `Ошибка при валидации токена ${error}`
+      error: "Ошибка при валидации токена",
+      details: error?.response?.data || error.message,
     });
   }
 };
@@ -309,3 +311,64 @@ export const getStatus = (ticket: any): string => {
 
   return status;
 }
+
+export async function createChatFromMessages(userId: string, order: ELMATicket) {
+  const allFileIds: string[] = [];
+
+  let isChanged = false;
+
+  const messages = await getMessagesByOrderId(userId, order.__id ?? '');
+
+  const authorIds = new Set<string>();
+
+  const preparedMessages = messages?.map((m: any) => {
+    m.files?.forEach((f: any) => allFileIds.push(f));
+    m.comments?.forEach((c: any) => c.files?.forEach((f: any) => allFileIds.push(f)));
+
+    if (m.authorId) {
+      authorIds.add(m.authorId);
+    }
+
+    m.comments?.forEach((comment: any) => {
+      if (comment.author) {
+        authorIds.add(comment.author);
+      }
+    })
+
+    if (m.isChanged) {
+      isChanged = true;
+    }
+
+    return {
+      id: m.__id,
+      msg: m.body ?? '',
+      createdAt: m.createdAt,
+      senderId: m.authorId,
+      comments: m.comments,
+    };
+  }).filter((el: any) => !(el.authorId?.includes('00000000-0000-0000-0000-000000000000'))) ?? [];
+
+  preparedMessages?.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+  const filesFromChat = await Promise.all(allFileIds.map(async (id) => await getFileById(id)));
+
+  const authors: Record<string, string> = Object.fromEntries(
+    await Promise.all(
+      Array.from(authorIds).map(async (id) => {
+        const author = await getAuthor(id);
+        return [id, author?.name]
+      })
+    )
+  );
+
+  return {
+    name: order.nomer_zakaza,
+    id: order.nomer_zakaza,
+    taskId: order.__id,
+    isChanged,
+
+    files: filesFromChat,
+    messages: preparedMessages,
+    authors, 
+  };
+};

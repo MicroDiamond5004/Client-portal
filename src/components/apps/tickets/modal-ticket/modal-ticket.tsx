@@ -25,10 +25,10 @@ import { sendPushFromClient } from "src/utils/pushManager"
 import { useAppDispatch, useAppSelector } from "src/store/hooks"
 import { fetchAddNewOrder} from "src/store/middleware/thunks"
 import { fetchMessages } from 'src/store/middleware/thunks/messageThunks';
-import { selectMessages } from "src/store/selectors/messagesSelectors"
 import { selectContragentId } from "src/store/selectors/authSelector"
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import { ELMATicket } from 'src/data/types.ts';
+import { selectChats } from 'src/store/selectors/messagesSelectors';
 
 type ModalTicketProps = {
     show: boolean,
@@ -69,7 +69,7 @@ const ModalTicket = (props: ModalTicketProps) => {
 
     const textRef = useRef<HTMLTextAreaElement>(null);
 
-    const currentChats: any  = useAppSelector(selectMessages);
+    const currentChats: any  = useAppSelector(selectChats);
     const [isLoading, setIsLoading] = useState(true);
     const [isDisabled, setIsDisabled] = useState(true);
 
@@ -307,7 +307,7 @@ const ModalTicket = (props: ModalTicketProps) => {
                   cursor: 'pointer',
                 }}
               >
-                <IconFile sx={{ fontSize: 18 }} />
+                <IconFile size={18} />
                 <Typography variant="button" sx={{ color: 'white' }}>
                   Загрузить файлы
                 </Typography>

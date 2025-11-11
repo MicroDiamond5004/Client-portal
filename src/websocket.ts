@@ -1,16 +1,22 @@
 import { updateAllTickets } from "./store/slices/ticketsSlice";
-import { updateAllMessages } from "./store/slices/messageSlice";
+import { addNewMessage, updateAllMessages } from "./store/slices/messageSlice";
 
 let socket: WebSocket | null = null;
 let reconnectTimeout: NodeJS.Timeout | null = null;
-let currentUserId: string = '';
+let currentUserId = "";
+let currentEmail = "";
 let currentDispatch: Function | null = null;
 
-const RECONNECT_INTERVAL = 2000; // ms
+const RECONNECT_INTERVAL = 2000;
+let manualDisconnect = false;
+const websocketUrl = 'localhost:3002';
 
-// Добавляем функцию отключения
+let currentSocketId: string | null = null;
+
+
 export const disconnectWebSocket = (email: string) => {
   console.log("🛑 Отключаем WebSocket");
+  manualDisconnect = true;
 
   if (reconnectTimeout) {
     clearTimeout(reconnectTimeout);
@@ -18,19 +24,28 @@ export const disconnectWebSocket = (email: string) => {
   }
 
   if (socket) {
-    socket.send(JSON.stringify({ type: 'disconnect', email }));
+    socket.send(JSON.stringify({ type: "disconnect", email }));
     socket.close();
-    socket.onclose = null; // чтобы не запускать reconnect при закрытии вручную
+    socket.onclose = null;
     socket = null;
   }
 
   currentDispatch = null;
-  currentUserId = '';
+  currentUserId = "";
+  currentEmail = "";
 };
 
 
-export const connectWebSocket = (email: string, userId: string, dispatchFn?: Function) => {
+export const connectWebSocket = (
+  email: string,
+  userId: string,
+  dispatchFn?: Function,
+  orderType: "my" | "all" = "my",
+  search: string = ""
+) => {
   currentUserId = userId;
+  currentEmail = email;
+  manualDisconnect = false;
 
   if (dispatchFn) {
     currentDispatch = dispatchFn;
@@ -41,37 +56,68 @@ export const connectWebSocket = (email: string, userId: string, dispatchFn?: Fun
     return;
   }
 
-  socket = new WebSocket("wss://lk.lead.aero/ws");
+  console.log("🔌 Подключаем WebSocket...");
+  socket = new WebSocket(`ws://${websocketUrl}/ws`);
 
   socket.onopen = () => {
     console.log("✅ WebSocket подключён");
-    socket?.send(JSON.stringify({ type: "register", email, userId }));
+
+    // === 🔥 Immediately notify backend about active session ===
+    socket?.send(
+      JSON.stringify({
+        type: "init",
+        email,
+        userId,
+        orderType,
+        search,
+        timestamp: Date.now(),
+      })
+    );
   };
 
   socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
+    try {
+      const data = JSON.parse(event.data);
+      if (!currentDispatch) return;
 
-    if (!currentDispatch) return;
-
-    if (data.type === 'registered') {
       console.log(data);
-    }
 
-    if (data.type === 'messages') {
-      console.log(`Новые сообщения по WS:\n${data.messages['967']?.length}`);
-      currentDispatch(updateAllMessages(data.messages));
-    }
+      switch (data.type) {
+        case "registered":
+          currentSocketId = data.id;
+          console.log(`🟢 Зарегистрирован ${data.email} (id=${currentSocketId})`);
+          break;
 
-    if (data.type === 'orders') {
-      // console.log(`Новые заказы по WS:\n${JSON.stringify(data.orders)}`);
-      currentDispatch(updateAllTickets(data.orders));
+        case "message:add":
+          currentDispatch(addNewMessage(data.data));
+          break;
+
+        case "messages":
+          currentDispatch(updateAllMessages(data.messages));
+          break;
+
+        case "orders":
+          currentDispatch(updateAllTickets(data.orders));
+          break;
+
+        default:
+          console.log("⚠ Неизвестный тип сообщения:", data);
+      }
+    } catch (err) {
+      console.error("Ошибка обработки WS-сообщения:", err);
     }
   };
 
   socket.onclose = () => {
-    console.warn("❌ WebSocket отключён. Переподключение через 2с...");
-    if (reconnectTimeout) clearTimeout(reconnectTimeout);
-    reconnectTimeout = setTimeout(() => connectWebSocket(email, userId, dispatchFn), RECONNECT_INTERVAL);
+    console.warn("❌ WebSocket отключён.");
+    if (!manualDisconnect) {
+      console.log(`🔁 Переподключение через ${RECONNECT_INTERVAL / 1000}с...`);
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      reconnectTimeout = setTimeout(
+        () => connectWebSocket(email, userId, dispatchFn, orderType, search),
+        RECONNECT_INTERVAL
+      );
+    }
   };
 
   socket.onerror = (err) => {
@@ -80,6 +126,58 @@ export const connectWebSocket = (email: string, userId: string, dispatchFn?: Fun
   };
 };
 
-// ✅ Экспортируем доступ к текущему WebSocket и userId
 export const getSocket = () => socket;
 export const getCurrentUserId = () => currentUserId;
+export const getCurrentEmail = () => currentEmail;
+
+export const sendOrderIdsToWebSocket = async (orderIds: string[]) => {
+  if (!socket) {
+    console.warn("⚠️ WebSocket is not initialized");
+    return;
+  }
+
+  // ждём пока сокет не откроется
+  if (socket.readyState === WebSocket.CONNECTING) {
+    console.log("⏳ Waiting for WebSocket to connect...");
+    await new Promise<void>((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (socket?.readyState === WebSocket.OPEN) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  // ждём пока произойдёт регистрация (currentSocketId заполнится)
+  if (!currentSocketId) {
+    console.log("⏳ Waiting for WebSocket registration...");
+    await new Promise<void>((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (currentSocketId) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  // дополнительная проверка после ожидания
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    console.warn("⚠️ WebSocket is not connected after waiting");
+    return;
+  }
+
+  const message = {
+    type: "updateOrders",
+    email: currentEmail,
+    userId: currentUserId,
+    id: currentSocketId, // ✅ теперь точно есть
+    orderIds,
+    timestamp: Date.now(),
+  };
+
+  console.log("📤 Sending orderIds via WebSocket:", message);
+  socket.send(JSON.stringify(message));
+};
+

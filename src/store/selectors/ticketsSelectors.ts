@@ -1,3 +1,4 @@
+import { StatementSync } from "node:sqlite";
 import { RootState } from "..";
 
 export const selectTickets = (state: RootState) => state.tickets.tickets;
@@ -14,3 +15,6 @@ export const selectDateFilter = (state: RootState) => ({
   endDate: state.tickets.endDate,
 });
 export const selectTicketStatus = (state: RootState) => state.tickets.status;
+export const selectPageNumber = (state: RootState) => state.tickets.page;
+export const selectLimit = (state: RootState) => state.tickets.limit;
+export const selectOrdersType = (state: RootState) => state.tickets.ordersType;

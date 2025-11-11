@@ -2,7 +2,7 @@ import express from 'express';
 import webpush from 'web-push';
 import cors from 'cors';
 import { ELMATicket, MessageType, UserData } from './data/types';
-import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId } from './data/mongodbStorage';
+import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId, addUser, getOrdersByUserId, getMessagesByUserId, getPassportsById, getOrdersByUserIdWithLimit, updateIsChangedByType, updateUser, createMessage } from './data/mongodbStorage';
 import path from 'path';
 import fs from 'fs';
 import axios from 'axios';
@@ -19,10 +19,13 @@ import subscriptionRouter from './router/routes/subscriptionRouter';
 import http from 'http';
 import { getCookieByToken, saveCookieAndToken } from './data/mongodbStorage';
 import { connectToDatabase } from './database/connection';
-import authenticateToken, { getSergeiToken, readAuth, sortAllTickets, stripHtml } from './utils';
-import { loginURL, logoutURL, VAPID_KEYS, TOKEN } from './const';
+import authenticateToken, { createChatFromMessages, getSergeiToken, getStatus, mergeIsChanged, mergeMessagesWithIsChanged, readAuth, sortAllTickets, stripHtml } from './utils';
+import { loginURL, logoutURL, VAPID_KEYS, TOKEN, AllStatus } from './const';
 import { UploadedFileMetadata } from './types';
 import { sendPushNotifications } from './push';
+import pollNewMessages from './polling';
+import { getAnotherUsers } from './polling/pollingFunctions';
+import { IOrder, IPassport } from './models';
 
 let token = '';
 
@@ -111,73 +114,16 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
 
   const localData = await loadUserData(clientId);
 
-  let currentOrders = localData.orders;
-  let currentMessages = localData.messages;
-
-
   if (type === 'order') {
-    const changeOrder = currentOrders.findIndex((el) => el.__id === id);
+    const updatedOrder = await updateIsChangedByType(clientId, id, 'order', false);
+    // const changeOrder = currentOrders.findIndex((el) => el.__id === id);
     // // console.log(type, changeOrder);
-    if (changeOrder !== -1) {
-      const newData = { orders: currentOrders, messages: currentMessages };
-      console.log('[DEBUG] Order найден:', currentOrders[changeOrder]);
-      console.log('[DEBUG] isChanged до:', currentOrders[changeOrder].isChanged);
-      currentOrders[changeOrder].isChanged = false;
-      console.log('[DEBUG] isChanged после:', currentOrders[changeOrder].isChanged);
-      await saveUserData(clientId, newData);
-      sendToUser(email, { type: 'orders', orders: currentOrders });
-    }
+
   } else if (type === 'message') {
-    let orderNumber = currentOrders.find((el) => el.__id === id)?.nomer_zakaza;
+    const updatedMessages= await updateIsChangedByType(clientId, id, 'message', false);
+    
 
-
-
-    console.log(clientId, currentOrders?.length, currentOrders?.filter(el => el.nomer_zakaza).length);
-    let found = false;
-
-    let testNumber: null | string = null;
-
-    // if (id === '01987a28-4ac9-7c7f-b97c-2edf912d5302') {
-    //   testNumber = '1128';
-    //   orderNumber = '1128';
-    // }
-
-    if (!orderNumber) {
-      return res.status(404).json({ error: 'Сообщение не найдено' });
-    }
-
-    currentMessages[orderNumber]?.map((el) => {
-      if (el.isChanged) {
-        found = true;
-      }
-    })
-
-    if (found) {
-      currentMessages[orderNumber] = currentMessages[orderNumber].map((msg) => ({
-        ...msg,
-        isChanged: false
-      }));
-    }
-
-    let testOrders: ELMATicket[] | null;
-
-    if (testNumber) {
-      const index = currentOrders.findIndex((el) => el.__id === '01987a28-4ac9-7c7f-b97c-2edf912d5302');
-
-      if (index !== -1) {
-        testOrders = [
-          ...currentOrders.slice(0, index),
-          { ...currentOrders[index], nomer_zakaza: testNumber },
-          ...currentOrders.slice(index + 1),
-        ]
-      }
-    }
-
-    // @ts-ignore
-    const newData = { orders: testOrders ?? currentOrders, messages: currentMessages };
-    await saveUserData(clientId, newData);
-
-    sendToUser(email, { type: 'messages', messages: currentMessages });
+    // sendToUser(email, { type: 'messages', messages: currentMessages });
   } else {
     res.status(501).json({ err: 'Не предоставлен тип' });
   }
@@ -187,75 +133,80 @@ app.post('/api/updateChange', authenticateToken, async (req: any, res: any) => {
 })
 
 app.get("/api/getUserData", authenticateToken, async (req: any, res: any) => {
-  const token = req.externalToken;
+  const startTotal = Date.now();
 
+  const token = req.externalToken;
   const cookie = getCookieByToken(token);
 
   if (!cookie) {
     return res.status(401).json({ error: "Сессия не найдена для токена" });
   }
 
-  const response = await axios.get("https://portal.dev.lead.aero/api/auth", {
-
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Accept": "application/json, text/plain, */*",
-      "Cookie": typeof cookie === "string" ? cookie : "",
-      "Content-Type": "application/json",
-      "Referer": "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
-      "Sec-CH-UA": `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`,
-      "Sec-CH-UA-Mobile": "?0",
-      "Sec-CH-UA-Platform": `"Windows"`,
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-      "X-Language": "ru-RU",
-      "X-Requested-With": "XMLHttpRequest"
-    }
-  });
-
   try {
-    const data = response.data;
+    // 🔹 Measure time for /api/auth
+    const startAuth = Date.now();
+    const response = await axios.get("https://portal.dev.lead.aero/api/auth", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json, text/plain, */*",
+        Cookie: typeof cookie === "string" ? cookie : "",
+        "Content-Type": "application/json",
+        Referer: "https://portal.dev.lead.aero/_login?returnUrl=%2Fwork_orders%2F__portal",
+        "Sec-CH-UA": `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`,
+        "Sec-CH-UA-Mobile": "?0",
+        "Sec-CH-UA-Platform": `"Windows"`,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "X-Language": "ru-RU",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    });
+    const authTime = Date.now() - startAuth;
+    console.log(`⏱️ /api/auth took ${authTime}ms`);
 
+    const data = response.data;
     const userId = data.userId;
 
-    const userResponse = await axios.post(
-      'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
-      {
-        "active": true,
-        "fields": {
-          "*": true
-        },
-        "filter": {
-          "tf": {
-            "__user": `${userId}`
-          }
-        }
-      },
-      {
-        headers: {
-          Authorization: TOKEN
-        }
-      }
-    );
+    // 🔹 Measure time for /user_profiles/list
+    const startUserProfile = Date.now();
 
-    const userData = userResponse.data?.result?.result[0];
+    const [userResponse, anotherUsers] = await Promise.all([
+    axios.post('https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list', {
+      active: true,
+      fields: { "*": true },
+      filter: { tf: { "__user": `${userId}` } }
+    }, { headers: { Authorization: TOKEN } }),
+    getAnotherUsers(userId)
+  ]);
 
+    const userProfileTime = Date.now() - startUserProfile;
+    console.log(`⏱️ /_user_profiles/list took ${userProfileTime}ms`);
+
+    const userData = userResponse.data?.result?.result?.[0];
+
+    // 🔹 Combine all results
     const fio = {
-      firstName: userData?.fullname.firstname,
-      lastName: userData?.fullname.lastname,
-      middleName: userData?.fullname.middlename,
+      firstName: userData?.fullname?.firstname,
+      lastName: userData?.fullname?.lastname,
+      middleName: userData?.fullname?.middlename
     };
+
+    const totalTime = Date.now() - startTotal;
+    console.log(`✅ /api/getUserData total time: ${totalTime}ms`);
 
     res.json({
       ...data,
+      isMultiUser: anotherUsers?.length > 1,
       fio,
-      email: userData.email,
-      phone: userData.phone?.tel
+      email: userData?.email,
+      phone: userData?.phone?.tel,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json(err);
+
+  } catch (err: any) {
+    console.error("❌ Error in /api/getUserData:", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
+
 
 
 app.post("/api/:id/finish", async (req: any, res: any) => {
@@ -399,7 +350,7 @@ app.post("/api/addComment/:messageId", authenticateToken, async (req: any, res: 
         },
       };
 
-      sendToUser(email, { type: 'message', messages: updatedUserData.messages });
+      // sendToUser(email, { type: 'message', messages: updatedUserData.messages });
 
       // // // // console.log('✅ Обновлённый userData:', updatedUserData);
       await saveUserData(clientId, updatedUserData);
@@ -439,7 +390,6 @@ app.post("/api/getManagers", authenticateToken, async (req: any, res: any) => {
     for (let userId of updatedUsers) {
 
       let contactName: string | null = null;
-
 
       try {
         const contactResponse = await axios.post(`https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list`,
@@ -691,9 +641,44 @@ app.post("/api/login", async (req, res) => {
       }
     );
 
+
     const currentToken = auth.headers["token"];
 
-    const fileName = saveCookieAndToken(currentToken, cookieValue || "");
+    const authData = auth.data;
+
+    const responseUser = await axios.post(
+      'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
+      {
+        "active": true,
+        "fields": {
+          "*": true
+        },
+        "filter": {
+          "tf": {
+            "__user": `${authData.userId}`
+          }
+        }
+      },
+      {
+        headers: {
+          Authorization: `${TOKEN}`
+        }
+      }
+    );
+
+    const data = responseUser.data.result.result[0];
+
+    const company = data.company?.[0];
+
+    try {
+      await updateUser(authData.userId, {email: auth_login, password, clientName: authData.userId, clientId: authData.userId, token: currentToken, cookie: cookieValue})
+      
+      // await addUser(authData.userId, authData.userId, auth_login, password, company);
+    } catch(err) {
+      console.error(`Can't save login`, err);
+    }
+    
+    const fileName = await saveCookieAndToken(currentToken, cookieValue || "");
 
     res.json({
       token: currentToken,
@@ -1259,15 +1244,15 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
       [newOrder.nomer_zakaza]: [], // если nomer_zakaza ещё не присвоен, подстраховка
     };
 
-    sendToUser(email, {
-      type: 'orders',
-      orders: sortAllTickets(finalOrders),
-    });
+    // sendToUser(email, {
+    //   type: 'orders',
+    //   orders: sortAllTickets(finalOrders),
+    // });
 
-    sendToUser(email, {
-      type: 'messages',
-      messages: finalMessages,
-    });
+    // sendToUser(email, {
+    //   type: 'messages',
+    //   messages: finalMessages,
+    // });
 
     await saveUserData(clientId, {
       orders: finalOrders,
@@ -1305,119 +1290,27 @@ app.post('/api/send-notification', async (req, res) => {
 });
 
 app.get('/api/proxy/:userId/:id', authenticateToken, async (req: any, res: any) => {
-  const user = req.user;
+  // const user = req.user;
   const clientId = req.clientId;
+  // const orderId = req.params.id;
 
-  const orderId = req.params.id;
-
-  await getSergeiToken()
-  const auth = await readAuth();
-  const token = auth?.token;
-  const cookie = auth?.cookie;
-console.log("cookie====>", clientId, "====", orderId, "-----", auth);
+    const { type = 'my' } = req.query;
 
   try {
-  const responseUnread = await axios.get(
-      `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages?offset=0&limit=1000000&condition=unread`,
-      {
-        headers: {
-          'Authorization': `${token}`,
-          'Cookie': cookie,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-          'Origin': 'https://portal.dev.lead.aero',
-          'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
-        },
-        withCredentials: true
-      }
+    // 👇 загружаем только нужную страницу + общее количество
+    const anotherUsers = type === 'all' ? await getAnotherUsers(clientId) : null;
+
+    const { orders, totalCount } = await getOrdersByUserIdWithLimit(anotherUsers ?? clientId, 1, 10000);
+
+    const chats = await Promise.all(
+      orders.map(async (order) => await createChatFromMessages(clientId, order.orderData))
     );
 
-    const unreadMessages = responseUnread.data?.result || [];
-
-    // Если есть непрочитанные сообщения, помечаем их прочитанными
-    for (const message of unreadMessages) {
-      const messageId = message.__id;
-
-      try {
-        await axios.put(
-          `https://portal.dev.lead.aero/api/feed/messages/${messageId}/markread`,
-          JSON.stringify({
-            "readCount": 1,
-            "count": unreadMessages[0].comments.length + 1
-          }),
-          {
-            headers: {
-              'Authorization': `${token}`,
-              'Cookie': cookie,
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-              'Origin': 'https://portal.dev.lead.aero',
-              'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
-            },
-            withCredentials: true
-          }
-        );
-      } catch (error: any) {
-        // // console.error(`Ошибка при markread для сообщения ${messageId}:`, error?.response?.status);
-      }
-    }
-
-    const responseAll = await axios.get(
-      `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages`,
-      {
-        params: { limit: 100000, offset: 0 },
-        headers: {
-          'Authorization': `${token}`,
-          'Cookie': cookie,
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-          'Origin': 'https://portal.dev.lead.aero',
-          'Referer': 'https://portal.dev.lead.aero/',
-        },
-        withCredentials: true
-      }
-    );
-
-    const text = await responseAll.data.text();
-    let result = null;
-
-    if (text) {
-      try {
-        result = JSON.parse(text);
-      } catch (e) {
-        // console.warn('Ответ не JSON, но есть текст:', text);
-      }
-    }
-
-    if (clientId && orderId && result) {
-      const userData = await loadUserData(clientId);
-      const orderNumber = userData.orders.find((el) => el.__id === orderId)?.nomer_zakaza;
-      if (orderNumber) {
-        const updatedUserData = {
-          ...userData,
-          messages:
-          {
-            ...userData?.messages,
-            [orderNumber]: [...(userData?.messages?.[orderNumber] ?? []), result]
-          }
-        };
-
-        await saveUserData(clientId, updatedUserData);
-
-        return res.json(updatedUserData.messages);
-
-      }
-    }
+    return res.json(chats);
   } catch (err) {
     console.log("err====>",err);
     const userData = await loadUserData(clientId);
     const savedMessages = userData?.messages || [];
-
-    // console.log(clientId);
-
-    return res.json(savedMessages);
   }
 });
 
@@ -1602,8 +1495,9 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
   const SergeiToken = auth?.token ?? '';
   const cookie = auth?.cookie ?? '';
 
-  const clientCookie = getCookieByToken(token) ?? '';
+  const clientCookie = req.clientCookie;
 
+  console.log('=====', clientCookie, token);
 
   // // // // // // // // // console.log(user);
   const { id } = req.params;
@@ -1635,7 +1529,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
     {
       headers: {
         'Authorization': token,
-        'Cookie': typeof clientCookie === "string" ? clientCookie : "",
+        'Cookie': clientCookie,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0',
@@ -1648,6 +1542,8 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
 
   try {
     console.log(result);
+
+    await createMessage(userId, {__id: result.__id, targetId: result.target.id, authorId: result.author, body: result.body, files: result.files ?? []})
 
     // 💾 Сохраняем сообщение локально
     console.log(clientId, userId, result)
@@ -1663,7 +1559,7 @@ app.post('/api/proxy/send/:id', authenticateToken, async (req: any, res: any) =>
         }
       };
 
-      sendToUser(email, { type: 'messages', messages: updatedUserData.messages });
+      // sendToUser(email, { type: 'messages', messages: updatedUserData.messages });
 
       await saveUserData(clientId, updatedUserData);
     }
@@ -1894,892 +1790,99 @@ app.post('/api/save-subscription/:userId', authenticateToken, (req: any, res: an
   res.status(201).json({ success: true });
 });
 
-
+// Main function for fetch orders (only initial)
 app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
   const clientId = req.clientId;
-  const email = req.email;
-  const company = req.company;
+  const { type = 'my' } = req.query;
 
   try {
-    // Если уже есть сохранённые заказы — сразу возвращаем
-    const localData = await loadUserData(clientId);
+    // 👇 загружаем только нужную страницу + общее количество
+    console.log('prev orders');
 
-    const getContact = await axios.post('https://portal.dev.lead.aero/pub/v1/app/_clients/_contacts/list', {
-      "active": true,
-      "fields": {
-        "*": true
-      },
-      "filter": {
-        "tf": {
-          // вернуть после соответствия
-          // "fio": `${fullname}`,
-          "_companies": [
-            `${company[0]}`
-          ]
-        }
-      }
-    }, {
-      headers: {
-        'Authorization': `${TOKEN}`,
-        'Content-Type': 'application/json'
-      }
-    })
+    const anotherUsers = type === 'all' ? await getAnotherUsers(clientId) : null;
 
-
-    const contactData = getContact.data?.result;
-
-    const kontakt = contactData.total > 1 ? contactData.result?.map((el: any) => el.__id) : [contactData.result[0]?.__id];
-
-    // Иначе идем в ELMA365
-    const elmaResponse = await axios.post(
-      'https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list',
-      {
-        "active": true,
-        "fields": {
-          "*": true
-        },
-        "filter": {
-          "tf": {
-            "kontakt": kontakt,
-          }
-        },
-        size: 1000
-      },
-      {
-        params: {
-          limit: 10000,
-          offset: 0,
-        },
-        headers: {
-          'Authorization': 'Bearer a515732b-4549-4634-b626-ce4362fb10bc',
-          'Content-Type': 'application/json'
-        }
-      }
+    const passportsRaw = await getPassportsById(clientId) ?? [];
+    
+    const passports = Object.fromEntries(
+      passportsRaw.map(p => [p.passportId, [p.name, p.passportData]])
     );
 
-    const mergedOrders = elmaResponse.data?.result?.result || [];
+    const { orders, totalCount } = await getOrdersByUserIdWithLimit(anotherUsers ?? clientId, 1, 10000);
 
+    console.log('-----orders', totalCount);
+    // const savedPassports = await getPassportsById(clientId);
 
-    const AllPassports = new Set<string>();
+    // const passports = Object.fromEntries(
+    //   savedPassports.map((p: any) => [p.passportId ?? "", p])
+    // );
 
-    mergedOrders?.forEach((order: any) => {
-      order.fio_gostya?.forEach((fio: string) => AllPassports.add(fio));
-      order.fio2?.forEach((fio: string) => AllPassports.add(fio));
-      order.dopolnitelnye_fio?.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhira_ov_bron_3?.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhira_ov_bron_4?.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhira_ov_bron_5?.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhira_ov_bron_6?.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhirov_vipservis?.forEach((fio: string) => AllPassports.add(fio));
-      order.fio_passazhirov_vipservis_2?.forEach((fio: string) => AllPassports.add(fio));
-    });
-
-    const passports: Record<string, [string | undefined, string | undefined]> = {};
-
-    await Promise.all(
-      Array.from(AllPassports).map(async (passport) => {
-        try {
-          const response = await axios.post(
-            `https://portal.dev.lead.aero/pub/v1/app/n3333/pasporta/${passport}/get`,
-            {},
-            {
-              headers: {
-                Authorization: TOKEN
-              }
-            }
-          );
-
-          const data = response.data;
-
-          passports[passport] = [
-            data.item.familiya_imya_po_pasportu,
-            data.item.dannye_pasporta
-          ];
-        } catch (error) {
-          // // console.error(`Ошибка при получении паспорта ${passport}:`, error);
-        }
-      })
-    );
-
-    const allData = {
-      success: true,
-      error: "",
+    const fetchedOrders = {
       result: {
-        result: mergedOrders,
-        total: mergedOrders.length
-      }
-    };
+        result: orders.map((el) => {
+          
+         const {
+          nomer_zakaza,
+          __id,
+          __name,
+          __status,
+          __createdAt,
+          fio2,
+          zapros,
+          otvet_klientu,
+          otvet_klientu1,
+          otvet_klientu3,
+          otvet_klientu_o_bronirovanii_2,
+          otvet_klientu_o_bronirovanii_4,
+          otvet_klientu_o_bronirovanii_5,
+          otvet_klientu_o_bronirovanii_6,
+          otvet_klientu_pered_oformleniem_bron_2,
+          otvet_klientu_pered_oformleniem_bron_3,
+          otvet_klientu_pered_oformleniem_bron_4,
+          otvet_klientu_pered_oformleniem_bron_5,
+          otvet_klientu_pered_oformleniem_bron_6,
+        } = el.orderData;
 
-    const prevTickets = localData.orders || [];
-
-    // Мёржим __updatedAt* и isChanged из prevTickets в mergedOrders
-    const currentOrders: any[] = mergedOrders.map((ticket: ELMATicket) => {
-      const prev = prevTickets.find(el => el.__id === ticket.__id);
-      if (prev) {
         return {
-          // все ваши флаги isChanged и все timestamp-поля
-          ...prev,
-          ...ticket,
-          isChanged: prev.isChanged,
+          nomer_zakaza,
+          __id,
+          __name,
+          __status,
+          __createdAt,
+          fio2,
+          zapros,
+          otvet_klientu,
+          otvet_klientu1,
+          otvet_klientu3,
+          otvet_klientu_o_bronirovanii_2,
+          otvet_klientu_o_bronirovanii_4,
+          otvet_klientu_o_bronirovanii_5,
+          otvet_klientu_o_bronirovanii_6,
+          otvet_klientu_pered_oformleniem_bron_2,
+          otvet_klientu_pered_oformleniem_bron_3,
+          otvet_klientu_pered_oformleniem_bron_4,
+          otvet_klientu_pered_oformleniem_bron_5,
+          otvet_klientu_pered_oformleniem_bron_6,
+          isChanged: el.isChanged,
         };
-      }
-      // новый заказ – ставим isChanged = true, остальные флаги пустые
-      return { ...ticket, isChanged: true };
-    });
 
-
-    const newData = { orders: currentOrders.length > 0 ? currentOrders : allData.result.result, messages: localData.messages };
-    // await saveUserData(clientId, newData as UserData);
-
-    if (currentOrders.length > 0) {
-      return res.json({ fetchedOrders: { result: { result: currentOrders, total: currentOrders.length }, error: '', success: true }, passports });
-    }
-
-    const fetchedOrders: any = { result: { result: currentOrders, total: currentOrders.length }, error: '', success: true };
-
-    // Сохраняем новые заказы
+        }),
+        total: totalCount,
+      },
+      error: "",
+      success: true,
+    };
 
     res.json({ fetchedOrders, passports });
   } catch (err: any) {
-    // // console.error('Ошибка при получении заказов из ELMA365:', err.response?.data || err.message);
-    res.status(500).json({ error: 'Не удалось получить заказы из ELMA365' });
+    console.error('Ошибка при получении заказов:', err);
+    res.status(500).json({ error: 'Не удалось получить заказы' });
   }
 });
 
 
-async function pollNewMessages() {
-  const users = await getAllUsersData();
-  await getSergeiToken()
-  const auth = await readAuth();
-  const token = auth?.token;
-  const cookie = auth?.cookie;
-
-  try {
-    await Promise.all(
-      users.map(async ({ userId, data }) => {
-        try {
-          const subscriptions = await getUserSubscriptions(userId);
-          const webSubscriptions = subscriptions?.map((el) => ({
-            endpoint: el.endpoint,
-            expirationTime: el.expirationTime || null,
-            keys: {
-              p256dh: el.keys?.p256dh,
-              auth: el.keys?.auth
-            }
-          }));
-
-          const email = subscriptions[0]?.email ?? (await findAuthFileByUserId(userId))?.email;
-
-          // // // console.log(' - Юзер ', email);
-
-          const clientId = userId;
-
-          let currentData = data;
-          let messages = data.messages;
-          let tickets = data.orders;
-
-          // ----- Получаем контктные данные -----
-          try {
-            const responseUser = await axios.post(
-              'https://portal.dev.lead.aero/pub/v1/app/_system_catalogs/_user_profiles/list',
-              {
-                "active": true,
-                "fields": {
-                  "*": true
-                },
-                "filter": {
-                  "tf": {
-                    "__user": `${clientId}`,
-                  }
-                }
-              },
-              {
-                headers: {
-                  Authorization: `${TOKEN}`
-                }
-              }
-            );
-
-            const data = responseUser.data.result.result[0];
-
-            const company = data.company;
-
-            const getContact = await axios.post(
-              'https://portal.dev.lead.aero/pub/v1/app/_clients/_contacts/list',
-              {
-                "active": true,
-                "fields": {
-                  "*": true
-                },
-                "filter": {
-                  "tf": {
-                    // вернуть после соответствия
-                    // "fio": `${fullname}`,
-                    "_companies": [
-                      `${company[0]}`
-                    ]
-                  }
-                }
-              },
-              {
-                headers: {
-                  'Authorization': `${TOKEN}`,
-                  'Content-Type': 'application/json'
-                }
-              }
-            );
-
-            const contactData = getContact.data?.result;
-            const kontakt = contactData.total > 1 ? contactData.result?.map((el: any) => el.__id) : [contactData.result[0]?.__id];
-
-
-            if (!kontakt) return;
-
-            // ----- Получаем заказы с ЕЛМЫ -----
-            const elmaResponse = await axios.post('https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list',
-              {
-                "active": true,
-                "fields": {
-                  "*": true
-                },
-                "filter": {
-                  "tf": {
-                    "kontakt": kontakt,
-                  }
-                },
-                size: 10000
-              },
-              {
-                params: {
-                  limit: 10000,
-                  offset: 0,
-                },
-                headers: {
-                  'Authorization': TOKEN,
-                  'Content-Type': 'application/json'
-                }
-              }
-            );
-
-            const mergedOrders = await elmaResponse.data?.result?.result || [];
-
-            // // // console.log(' - Получил заказы ');
-
-            const allData = {
-              success: true,
-              error: "",
-              result: {
-                result: mergedOrders,
-                total: mergedOrders.length
-              }
-            };
-
-            let ordersFlag = false;
-            let messagesFlag = false;
-
-            let currentData = await loadUserData(userId);
-
-            messages = currentData.messages;
-            tickets = currentData.orders;
-
-
-            // ----- Логика заказов ----- //
-            function pickFields(obj: any, fields: string[]) {
-              return fields.reduce((acc, field) => {
-                acc[field] = get(obj, field); // безопасно достаёт вложенные поля
-                return acc;
-              }, {} as Record<string, any>);
-            }
-
-            let allMessagesByOrder: Record<string, any[]> = {};
-            let currentOrders: any[] = [];
-
-
-            const orderPromises = mergedOrders.map(async (ticket: ELMATicket) => {
-              try {
-                const existingTicket = tickets?.find(
-                  (el: any) => el && (el?.__id === ticket?.__id || el?.nomer_zakaza === ticket?.nomer_zakaza)
-                );
-
-                if (!ticket) return;
-
-                if (existingTicket) {
-                  // Скопируем все поля __updatedAt* из existingTicket в ticket
-                  Object.entries(existingTicket)
-                    .filter(([k]) => k.startsWith('__updatedAt') && k !== '__updatedAt')
-                    .forEach(([k, v]) => {
-                      // @ts-ignore
-                      ticket[k] = v;
-                    });
-                }
-
-                const isCurrentChanged = existingTicket?.isChanged ?? false;
-                const isNew = !existingTicket;
-
-                if (isNew) {
-                  ordersFlag = true;
-                  messagesFlag = true;
-                  if (webSubscriptions?.length && ticket?.nomer_zakaza) {
-                    // sendPushNotifications(webSubscriptions, 'Новый заказ', `Поступил новый заказ №${ticket.nomer_zakaza}`);
-                  }
-                  return { ...ticket, isChanged: true };
-                }
-
-                const updateIfChanged = (
-                  tabName: string,
-                  fields: string[]
-                ): { updatedAtKey: string; changed: boolean } => {
-                  const updatedAtKey = `__updatedAt${tabName}`;
-                  // @ts-ignore
-                  const prevRaw = ticket?.[updatedAtKey];           // теперь ticket уже содержит старое значение
-                  const isInitial = !prevRaw;                     // первый заход если его нет
-                  const prevFields = pickFields(existingTicket, fields);
-                  const currFields = pickFields(ticket, fields);
-                  const isSame = isEqual(prevFields, currFields);
-                  const changed = isInitial ? true : !isSame;
-
-                  if (changed) {
-                    ordersFlag = true;
-                    // console.log(updatedAtKey, isSame, '-----------------------');
-                    const now = new Date().toISOString();
-                    // проставляем в ticket (он уйдёт в saveUserData)
-                    // @ts-ignore
-                    ticket[updatedAtKey] = now;
-                  }
-
-                  return { updatedAtKey, changed };
-                };
-
-
-
-                // Booking
-                const fieldMap2: Record<
-                  number,
-                  {
-                    fio: string;
-                    passport: string;
-                    answer: string;
-                    timeLimit: string;
-                  }
-                > = {
-                  1: {
-                    fio: 'fio2',
-                    passport: 'nomer_a_pasporta_ov_dlya_proverki',
-                    answer: 'otvet_klientu',
-                    timeLimit: 'taim_limit_dlya_klienta',
-                  },
-                  2: {
-                    fio: 'dopolnitelnye_fio',
-                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
-                    answer: 'otvet_klientu_o_bronirovanii_2',
-                    timeLimit: 'taim_limit_dlya_klienta_bron_2',
-                  },
-                  3: {
-                    fio: 'fio_passazhira_ov_bron_3',
-                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_3',
-                    answer: 'otvet_klientu_o_bronirovanii_3',
-                    timeLimit: 'taim_limit_dlya_klienta_bron_3',
-                  },
-                  4: {
-                    fio: 'fio_passazhira_ov_bron_4',
-                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
-                    answer: 'otvet_klientu_o_bronirovanii_4',
-                    timeLimit: 'taim_limit_dlya_klienta_bron_4',
-                  },
-                  5: {
-                    fio: 'fio_passazhira_ov_bron_5',
-                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_5',
-                    answer: 'otvet_klientu_o_bronirovanii_5',
-                    timeLimit: 'taim_limit_dlya_klienta_bron_5',
-                  },
-                  6: {
-                    fio: 'fio_passazhira_ov_bron_6',
-                    passport: 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
-                    answer: 'otvet_klientu_o_bronirovanii_6',
-                    timeLimit: 'taim_limit_dlya_klienta_bron_6',
-                  },
-                };
-
-                // Приоритетные поля для ответа до оформления
-                const preAnswerMap: Record<number, string> = {
-                  1: 'otvet_klientu3',
-                  2: 'otvet_klientu_pered_oformleniem_bron_2',
-                  3: 'otvet_klientu_pered_oformleniem_bron_3',
-                  4: 'otvet_klientu_pered_oformleniem_bron_4',
-                  5: 'otvet_klientu_pered_oformleniem_bron_5',
-                  6: 'otvet_klientu_pered_oformleniem_bron_6',
-                };
-
-                const bookingFields = Object.values(fieldMap2).flatMap(obj => Object.values(obj))
-                  .concat(Object.values(preAnswerMap))
-                  .concat('marshrutnaya_kvitanciya');
-                updateIfChanged('Booking', bookingFields);
-
-                // Hotels
-                const hotelFields = [1, 2, 3].flatMap(index => {
-                  const suffix = index === 1 ? '' : index;
-                  return [
-                    `otel${suffix}?.name`,
-                    `data_zaezda${suffix}`,
-                    `data_vyezda${suffix}`,
-                    `kolichestvo_nochei${suffix}`,
-                    `tip_nomera${suffix}?.name`,
-                    `tip_pitaniya${suffix}?.name`,
-                    `stoimost${suffix}?.cents`,
-                    `nazvanie_otelya${suffix}`,
-                    `tip_nomera${suffix}_nazvanie`,
-                    `tip_pitaniya${suffix}_nazvanie`,
-                  ];
-                }).concat('vaucher');
-                updateIfChanged('Hotels', hotelFields);
-
-                // Map
-                updateIfChanged('Map', ['karta_mest_f', 'opisanie_stoimosti_mest']);
-
-                // Transfer
-                const transferFields = [
-                  'transfer_f',
-                  'prilozhenie_transfer1',
-                  'vaucher_transfer',
-                  'opisanie_transfera',
-                  'otvet_klientu_po_transferu',
-                  'informaciya_o_passazhire',
-                  'stoimost_dlya_klienta_za_oformlenie_transfera_1',
-                ];
-                updateIfChanged('Transfer', transferFields);
-
-                // VIP
-                const vipFields = [
-                  'vaucher_vipservis',
-                  'nazvanie_uslugi_vipservis',
-                  'opisanie_uslugi_vipservis',
-                  'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
-                  'fio_passazhirov_vipservis',
-                ];
-                updateIfChanged('Vip', vipFields);
-
-
-                // 2️⃣ Если __updatedAt совпадают, ничего больше не делаем
-                if (ticket?.__updatedAt === existingTicket?.__updatedAt) {
-                  return existingTicket;
-                }
-
-                const status = getStatus(ticket);
-                let fieldsToCompare: string[] = [];
-
-                console.log('-------------------------------...............-----------------------', status, ticket.nomer_zakaza);
-
-
-                if ((getStatus(existingTicket) === AllStatus.NEW) && (status === AllStatus.PENDING)) {
-                  ordersFlag = true;
-                  if (webSubscriptions?.length) {
-                    sendPushNotifications(webSubscriptions, 'Принят в работу', `Заказ №${ticket.nomer_zakaza} принят в работу`);
-                  }
-                  return { ...ticket, isChanged: true };
-                }
-
-                if (status === AllStatus.PENDING) {
-                  fieldsToCompare = ['otvet_klientu1'];
-                  const isEqualStatus = isEqual(
-                    pickFields(ticket, fieldsToCompare),
-                    pickFields(existingTicket || {}, fieldsToCompare)
-                  );
-
-                  if (!isEqualStatus) {
-                    ordersFlag = true;
-                    if (webSubscriptions?.length) {
-                      sendPushNotifications(webSubscriptions, 'Направление предложений', `По заказу №${ticket.nomer_zakaza}`);
-                    }
-                    return { ...ticket, isChanged: true };
-                  }
-                }
-
-                if (
-                  getStatus(existingTicket) === AllStatus.BOOKED &&
-                  status === AllStatus.FORMED &&
-                  ticket?.marshrutnaya_kvitanciya
-                ) {
-                  ordersFlag = true;
-                  if (webSubscriptions?.length) {
-                    sendPushNotifications(webSubscriptions, 'Подтверждение оформления', `Подтверждение оформления заказа №${ticket.nomer_zakaza}`);
-                  }
-                  return { ...ticket, isChanged: true };
-                }
-
-
-                if (status === AllStatus.BOOKED && ticket.otvet_klientu && !existingTicket?.otvet_klientu) {
-                  const fieldsToCompare = [
-                    // --- Уже существующие ---
-                    'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
-                    'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
-                    'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
-                    'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
-                    'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
-                    'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
-                    'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
-                    'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
-                    'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
-                    'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
-                    'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
-
-                    // --- Трансфер ---
-                    'informaciya_o_passazhire',
-                    'otvet_klientu_po_transferu',
-                    'stoimost_dlya_klienta_za_oformlenie_transfera_1',
-                    'prilozhenie_transfer1',
-                    'vaucher_transfer',
-
-                    // --- Вип-сервис ---
-                    'nazvanie_vipuslugi',
-                    'opisanie_i_stoimost_uslugi_vipservis',
-                    'fio_passazhirov_vipservis',
-                    'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
-                    'fio_passazhirov_vipservis_2',
-                    'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2',
-                    'voucher_vipservis', // заменил "Ваучер Вип-сервис" на camel-case
-
-                    // --- Карта мест ---
-                    'opisanie_stoimosti_mest',
-                    'karta_mest1',
-
-                    // --- Отель ---
-                    'otel1', 'otel2', 'oteli3',
-                    'data_zaezda1', 'data_vyezda1',
-                    'data_zaezda2', 'data_vyezda2',
-                    'data_zaezda3', 'data_vyezda3',
-                    'kolichestvo_nomerov',
-                    'kolichestvo_nochei1', 'kolichestvo_nochei2', 'kolichestvo_nochei3',
-                    'tip_nomera1', 'tip_nomera2', 'tip_nomera3',
-                    'tip_pitaniya1', 'tip_pitaniya2', 'tip_pitaniya3',
-                    'stoimost1', 'stoimost2', 'stoimost3',
-                    'kommentarii_k_predlozheniyu',
-                    'otmena_bez_shtrafa',
-                    'otmena_so_shtrafom',
-                    'nevozvratnyi',
-                    'vaucher'
-                  ];
-
-
-                  const isEqualStatus = isEqual(
-                    pickFields(ticket, fieldsToCompare),
-                    pickFields(existingTicket || {}, fieldsToCompare)
-                  );
-
-                  if (!isEqualStatus) {
-                    ordersFlag = true;
-                    if (webSubscriptions?.length) {
-                      sendPushNotifications(webSubscriptions, 'Бронирование создано', `По заказу №${ticket.nomer_zakaza}`);
-                    }
-                    return { ...ticket, isChanged: true };
-                  }
-                }
-
-                if (status === AllStatus.BOOKED) {
-                  const fieldsToCompareT = [
-                    // --- Уже существующие ---
-                    'fio2', 'dopolnitelnye_fio', 'fio_passazhira_ov_bron_3', 'fio_passazhira_ov_bron_4',
-                    'fio_passazhira_ov_bron_5', 'fio_passazhira_ov_bron_6',
-                    'nomer_a_pasporta_ov_dlya_proverki', 'nomer_a_pasporta_ov_dlya_proverki_bron_2',
-                    'nomer_a_pasporta_ov_dlya_proverki_bron_3', 'nomer_a_pasporta_ov_dlya_proverki_bron_4',
-                    'nomer_a_pasporta_ov_dlya_proverki_bron_5', 'nomer_a_pasporta_ov_dlya_proverki_bron_6',
-                    'otvet_klientu', 'otvet_klientu_o_bronirovanii_2', 'otvet_klientu_o_bronirovanii_3',
-                    'otvet_klientu_o_bronirovanii_4', 'otvet_klientu_o_bronirovanii_5', 'otvet_klientu_o_bronirovanii_6',
-                    'taim_limit_dlya_klienta', 'taim_limit_dlya_klienta_bron_2', 'taim_limit_dlya_klienta_bron_3',
-                    'taim_limit_dlya_klienta_bron_4', 'taim_limit_dlya_klienta_bron_5', 'taim_limit_dlya_klienta_bron_6',
-                    'otvet_klientu3', 'otvet_klientu_pered_oformleniem_bron_2', 'otvet_klientu_pered_oformleniem_3',
-                    'otvet_klientu_pered_oformleniem_4', 'otvet_klientu_pered_oformleniem_5', 'otvet_klientu_pered_oformleniem_6',
-
-                    // --- Трансфер ---
-                    'informaciya_o_passazhire',
-                    'otvet_klientu_po_transferu',
-                    'stoimost_dlya_klienta_za_oformlenie_transfera_1',
-                    'prilozhenie_transfer1',
-                    'vaucher_transfer',
-
-                    // --- Вип-сервис ---
-                    'nazvanie_vipuslugi',
-                    'opisanie_i_stoimost_uslugi_vipservis',
-                    'fio_passazhirov_vipservis',
-                    'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis',
-                    'fio_passazhirov_vipservis_2',
-                    'stoimost_dlya_klienta_za_oformlenie_uslugi_vipservis_2',
-                    'voucher_vipservis', // заменил "Ваучер Вип-сервис" на camel-case
-
-                    // --- Карта мест ---
-                    'opisanie_stoimosti_mest',
-                    'karta_mest1',
-
-                    // --- Отель ---
-                    'otel1', 'otel2', 'oteli3',
-                    'data_zaezda1', 'data_vyezda1',
-                    'data_zaezda2', 'data_vyezda2',
-                    'data_zaezda3', 'data_vyezda3',
-                    'kolichestvo_nomerov',
-                    'kolichestvo_nochei1', 'kolichestvo_nochei2', 'kolichestvo_nochei3',
-                    'tip_nomera1', 'tip_nomera2', 'tip_nomera3',
-                    'tip_pitaniya1', 'tip_pitaniya2', 'tip_pitaniya3',
-                    'stoimost1', 'stoimost2', 'stoimost3',
-                    'kommentarii_k_predlozheniyu',
-                    'otmena_bez_shtrafa',
-                    'otmena_so_shtrafom',
-                    'nevozvratnyi',
-                    'vaucher'
-                  ];
-
-                  const fieldsToCompareM = ['marshrutnaya_kvitanciya'];
-
-                  const isEqualStatus1 = isEqual(
-                    pickFields(ticket, fieldsToCompareT),
-                    pickFields(existingTicket || {}, fieldsToCompareT)
-                  );
-                  const isEqualStatus2 = isEqual(
-                    pickFields(ticket, fieldsToCompareM),
-                    pickFields(existingTicket || {}, fieldsToCompareM)
-                  );
-
-                  console.log(' АКТУАЛИЗАЦИИИИЯЯЯЯЯ -------------------------------...............-----------------------', status, ticket.nomer_zakaza, isEqualStatus1, isEqualStatus2);
-
-                  if (!isEqualStatus1 || !isEqualStatus2) {
-                    ordersFlag = true;
-                    if (webSubscriptions?.length) {
-                      sendPushNotifications(webSubscriptions, 'Актуализация бронирования', `По заказу №${ticket.nomer_zakaza}`);
-                    }
-                    return { ...ticket, isChanged: true };
-                  }
-                }
-
-                console.log('✅ Returning ticket', ticket.nomer_zakaza, ticket.__id);
-                return ticket; // <-- теперь точно увидите логи
-              } catch (err) {
-                console.error('❌ Ошибка при обработке заказа:', ticket?.nomer_zakaza, err);
-                return null; // или ticket с флагом ошибки
-              }
-            });
-
-            const messagePromises = mergedOrders.map(async (order: any) => {
-              if (!clientId) return;
-
-              const orderId = order.__id;
-
-              try {
-                // 📥 Получаем непрочитанные сообщения
-                const responseUnread = await axios.get(
-                  `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages?offset=0&limit=1000000&condition=unread`,
-                  {
-                    headers: {
-                      'Authorization': token,
-                      'Cookie': cookie,
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json',
-                      'User-Agent': 'Mozilla/5.0',
-                      'Origin': 'https://portal.dev.lead.aero',
-                      'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
-                    },
-                    withCredentials: true
-                  }
-                );
-
-                const unreadMessages = responseUnread.data?.result || [];
-
-                // ✅ Помечаем непрочитанные как прочитанные
-                for (const message of unreadMessages) {
-                  const messageId = message.__id;
-                  await axios.put(
-                    `https://portal.dev.lead.aero/api/feed/messages/${messageId}/markread`,
-                    JSON.stringify({
-                      readCount: 1,
-                      count: message.comments.length + 1
-                    }),
-                    {
-                      headers: {
-                        'Authorization': token,
-                        'Cookie': cookie,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'User-Agent': 'Mozilla/5.0',
-                        'Origin': 'https://portal.dev.lead.aero',
-                        'Referer': `https://portal.dev.lead.aero/work_orders/OrdersNew(p:item/work_orders/OrdersNew/${orderId})`,
-                      },
-                      withCredentials: true
-                    }
-                  );
-                }
-
-                // 📥 Получаем все сообщения
-                const responseAll = await axios.get(
-                  `https://portal.dev.lead.aero/api/feed/targets/work_orders/OrdersNew/${orderId}/messages`,
-                  {
-                    params: { limit: 100000, offset: 0 },
-                    headers: {
-                      'Authorization': token,
-                      'Cookie': cookie,
-                      'Accept': 'application/json',
-                      'User-Agent': 'Mozilla/5.0',
-                      'Origin': 'https://portal.dev.lead.aero',
-                      'Referer': 'https://portal.dev.lead.aero/',
-                    },
-                    withCredentials: true
-                  }
-                );
-
-                const elmaData = responseAll.data;
-                const elmaMessages = Array.isArray(elmaData) ? elmaData : elmaData?.result || [];
-
-                // 🧠 Работаем с сообщениями
-                allMessagesByOrder[order.nomer_zakaza] = elmaMessages.map((message: any) => {
-                  const previousMessages = messages?.[order.nomer_zakaza] || [];
-                  const existingMessage = previousMessages.find((el: any) => el.__id === message.__id);
-
-                  // Новое сообщение
-                  if (!existingMessage) {
-                    messagesFlag = true;
-                    console.log('ЗАШЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЛ');
-
-                    if (
-                      message.author !== clientId &&
-                      !message.author.includes('00000000-0000-0000-0000-000000000000')
-                    ) {
-                      console.log('Перед отправкой пуша:', message);
-                      sendPushNotifications(
-                        webSubscriptions,
-                        `Новое сообщение по заказу ${order.nomer_zakaza}`,
-                        `${stripHtml(message?.body)}`
-                      );
-                      console.log('После отправки пуша:')
-                    }
-
-
-                    return { ...message, isChanged: message.author !== userId && !message.author.includes('00000000-0000-0000-0000-000000000000') };
-                  }
-
-                  // Сравнение комментариев
-                  const newComments = message.comments || [];
-                  const oldComments = existingMessage.comments || [];
-
-                  const strippedNew = newComments.map((c: any) => ({
-                    body: c.body,
-                    author: c.author
-                  }));
-                  const strippedOld = oldComments.map((c: any) => ({
-                    body: c.body,
-                    author: c.author
-                  }));
-
-                  const commentsChanged = !isEqual(strippedNew, strippedOld);
-
-                  if (commentsChanged) {
-                    messagesFlag = true;
-
-                    const last = newComments.at(-1);
-                    if (
-                      last?.author !== clientId &&
-                      !last?.author.includes('00000000-0000-0000-0000-000000000000')
-                    ) {
-                      sendPushNotifications(
-                        webSubscriptions,
-                        `Новый комментарий по заказу ${order.nomer_zakaza}`,
-                        `${stripHtml(last?.body ?? 'Файл')}`
-                      );
-                    }
-
-                    return { ...message, isChanged: true };
-                  }
-
-                  // Сообщение не изменилось
-                  return existingMessage;
-                });
-
-                allMessagesByOrder[order.nomer_zakaza] ??= [{ isChanged: true }];
-
-              } catch (error) {
-                console.error(`Ошибка при обработке сообщений по заказу ${orderId}:`, error);
-              }
-            });
-
-            // 1️⃣ Сначала обрабатываем и отдаем заказы
-            // 1️⃣ Сначала обрабатываем и отдаем заказы
-
-            const allSetted: Promise<void>[] = [];
-
-            allSetted.push((async () => {
-              const ordersResult = await Promise.all(orderPromises);
-              currentOrders = sortAllTickets(ordersResult.filter(Boolean));
-
-              const latest = await loadUserData(clientId);
-              // const ordersActuallyChanged = !isEqual(latest.orders || [], currentOrders || []);
-
-
-              if (ordersFlag) {
-                const finalOrders = mergeIsChanged(latest.orders, currentOrders);
-                const finalMessages = latest.messages;
-
-                const sample = finalOrders[0];
-                const updatedAtFields = Object.entries(sample)
-                  .filter(([key]) => key.startsWith('__updatedAt'))
-                  .reduce<Record<string, any>>((acc, [key, value]) => {
-                    acc[key] = value;
-                    return acc;
-                  }, {});
-
-                console.log('[before save] updatedAt fields for sample order:', updatedAtFields);
-
-                sendToUser(email, { type: 'orders', orders: currentOrders });
-
-                await saveUserData(clientId, {
-                  orders: currentOrders,
-                  messages: finalMessages,
-                }, true);
-              }
-            })());
-
-            allSetted.push((async () => {
-              try {
-                await Promise.all(messagePromises);
-
-                const hasNewMessages = Object.keys(allMessagesByOrder).some(key => !(key in messages));
-                const hasChangedMessages = messagesFlag;
-
-                if (hasNewMessages || hasChangedMessages) {
-                  sendToUser(email, { type: 'messages', messages: allMessagesByOrder });
-
-                  const latest = await loadUserData(clientId);
-                  const finalOrders = latest.orders;
-                  const finalMessages = mergeMessagesWithIsChanged(latest.messages, allMessagesByOrder);
-
-                  await saveUserData(clientId, {
-                    orders: finalOrders,
-                    messages: finalMessages,
-                  });
-                }
-              } catch (err) {
-                console.error('Ошибка фоновой обработки сообщений:', err);
-              }
-            })());
-
-            await Promise.all(allSetted);
-
-            // 2️⃣ Параллельно обрабатываем сообщения
-          } catch (error) {
-            // // console.error("❌ Ошибка при опросе:", error);
-          }
-        } catch (err) {
-          console.error(`Ошибка при обработке пользователя ${userId}`, err);
-        }
-      })
-    );
-  } catch (error) {
-    console.error("❌ Ошибка при опросе:", error);
-  } finally {
-    setTimeout(pollNewMessages, 3000);
-  }
-}
-
-// Запуск первого вызова
-pollNewMessages();
-
 const server = http.createServer(app); // вместо app.listen
 
-initWebSocket(server); // подключаем WS поверх HTTP-сервера
+// initWebSocket(server); // подключаем WS поверх HTTP-сервера
 
 server.listen(3001, async () => {
   console.log('🚀 Сервер запущен на http://localhost:3001');

@@ -1,34 +1,19 @@
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
-const router = express.Router();
-
-router.post('/generate-preview', async (req: any, res: any) => {
-  const { name, url, type } = req.body;
-
-  if (!name || !url) {
-    return res.status(400).json({ error: 'Некорректные данные файла' });
-  }
-
-  const id = uuidv4();
-  const html = `
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta property="og:title" content="${name}" />
+  <meta property="og:title" content="SOKOLOVA_IRINA 5556139800736 (4) (2).pdf" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="${req.protocol}://${req.get('host')}/previews/${id}.html" />
-  ${['.png', '.jpeg', '.jpg', '.webp', '.tif'].some((el) => name.includes(el)) ? `<meta property="og:image" content="${url}" />` : ''}
+  <meta property="og:url" content="http://lk.lead.aero/previews/6cdb5068-3ba0-4130-8892-97ed2c887d35.html" />
+  
   <meta property="og:description" content="Файл для просмотра и скачивания" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${name}" />
+  <meta name="twitter:title" content="SOKOLOVA_IRINA 5556139800736 (4) (2).pdf" />
   <meta name="twitter:description" content="Файл для просмотра и скачивания" />
-  ${['.png', '.jpeg', '.jpg', '.webp', '.tif'].some((el) => name.includes(el)) ? `<meta name="twitter:image" content="${url}" />` : ''}
-  <title>${name}</title>
+  
+  <title>SOKOLOVA_IRINA 5556139800736 (4) (2).pdf</title>
   <style>
     body {
       margin: 0;
@@ -90,26 +75,9 @@ router.post('/generate-preview', async (req: any, res: any) => {
 </head>
 <body>
   <div class="preview-container">
-    ${
-      ['.png', '.jpeg', '.jpg', '.webp', '.tif'].some((el) => name.includes(el))
-        ? `<img src="${url}" alt="${name}" class="preview-image" />`
-        : `<div class="icon">📄</div>`
-    }
-    <div class="file-title">${name}</div>
-    <a href="${url}" download class="download-btn">Скачать</a>
+    <div class="icon">📄</div>
+    <div class="file-title">SOKOLOVA_IRINA 5556139800736 (4) (2).pdf</div>
+    <a href="https://portal.dev.lead.aero/s3elma365/0b99fac9-46b9-44b8-aa4a-cbc7a5f69764?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=PZSF73JG72Ksd955JKU1HIA%2F20250602%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250602T061722Z&X-Amz-Expires=28800&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22.pdf%22%3B%20filename%2A%3DUTF-8%27%27SOKOLOVA_IRINA%25205556139800736%2520%25284%2529%2520%25282%2529.pdf%3B&response-content-type=application%2Fpdf&X-Amz-Signature=678332f132253651f74692a44f5266cf7fbc4c20053732618a2eaddf7be597b1" download class="download-btn">Скачать</a>
   </div>
 </body>
 </html>
-`;
-
-
-  const filePath = path.join(__dirname, '..', '..', '..', 'public', 'previews', `${name.replaceAll(' ', '_').split('.')[0]}.html`);
-  fs.writeFileSync(filePath, html);
-
-  return res.json({
-    id,
-    previewUrl: `${req.protocol}://${req.get('host')}/previews/${name.replaceAll(' ', '_').split('.')[0]}.html`
-  });
-});
-
-export default router;

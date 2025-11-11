@@ -2,14 +2,14 @@ import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { RootState } from 'src/store';
-import { selectSelectedchat, selectChatData } from 'src/store/selectors/messagesSelectors.ts';
+import { selectChats, selectSelectedchat } from 'src/store/selectors/messagesSelectors.ts';
 import { updateSelectedChat } from 'src/store/slices/messageSlice.ts';
 import { useMediaQuery } from '@mui/material';
 
 export const useSyncSelectedChat = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
-  const chatData = useSelector(selectChatData);
+  const chats = useSelector(selectChats);
   const selectedChat = useSelector(selectSelectedchat);
   const didInit = useRef(false);
 
@@ -17,14 +17,14 @@ export const useSyncSelectedChat = () => {
 
   // Инициализация selectedChat
   useEffect(() => {
-    if (!chatData || chatData.length === 0 || didInit.current) return;
+    if (!chats || chats.length === 0 || didInit.current) return;
 
     const urlId = searchParams.get('item');
     const storedChatId = localStorage.getItem('lastSelectedChatId');
 
-    const chatFromUrl = chatData.find((c: any) => c.id === urlId);
-    const chatFromStorage = chatData.find((c: any) => c.id === storedChatId);
-    const fallbackChat = chatData[0];
+    const chatFromUrl = chats.find((c: any) => c.id === urlId);
+    const chatFromStorage = chats.find((c: any) => c.id === storedChatId);
+    const fallbackChat = chats[0];
 
     const selected = chatFromUrl ?? chatFromStorage ?? fallbackChat;
 
@@ -34,7 +34,7 @@ export const useSyncSelectedChat = () => {
       localStorage.setItem('lastSelectedChatId', selected.id);
       didInit.current = true;
     }
-  }, [chatData]);
+  }, [chats]);
 
   // useEffect(() => {
   //   console.log('now', window.location.pathname);
