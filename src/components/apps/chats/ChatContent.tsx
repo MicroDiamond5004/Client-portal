@@ -1172,10 +1172,8 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
                   height: open ? lgUp ? 'auto' : `auto` : 'auto',
                   wwidth: lgUp
                     ? !open
-                      ? '100%'
-                        ? `${(mainBoxRef.current?.clientWidth || 0) -
+                      ? `${(mainBoxRef.current?.clientWidth || 0) -
                         (inBoxRef.current?.clientWidth || 0)}px`
-                  : '450px'
                   : window.innerWidth > 1200 ? '500px' : '31vw'
                   : open ? window.innerWidth - 20 : window.innerWidth - 55,
                   scrollbarWidth: 'none',

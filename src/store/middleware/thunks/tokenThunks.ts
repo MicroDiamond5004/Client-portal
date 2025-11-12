@@ -46,7 +46,7 @@ export const refreshAuthToken = createAsyncThunk<string, void>(
   async (_, { rejectWithValue }) => {
     const token = localStorage.getItem("auth_token");
 
-    if (!token || isTokenExpired()) {
+    if (!token) {
       return rejectWithValue("Токен отсутствует или истек");
     }
 
@@ -80,7 +80,7 @@ export const checkAndRefreshToken = createAsyncThunk<string, void>(
   async (_, { dispatch, rejectWithValue }) => {
     const token = localStorage.getItem("auth_token");
 
-    if (!token || isTokenExpired()) {
+    if (!token) {
       try {
         return await dispatch(refreshAuthToken()).unwrap();
       } catch (err) {

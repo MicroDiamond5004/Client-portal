@@ -39,13 +39,13 @@ import {
   selectTicketsFilter, selectTicketStatus,
 } from 'src/store/selectors/ticketsSelectors';
 import { useAppDispatch, useAppSelector } from 'src/store/hooks';
-import { fetchUserOrders } from 'src/store/middleware/thunks/ordersThunks';
+import { fetchOrderData, fetchUserOrders } from 'src/store/middleware/thunks/ordersThunks';
 import api from 'src/store/api';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import 'dayjs/locale/ru';
 import { DateRange } from 'react-date-range';
-import { ru } from 'date-fns/locale';
+import { da, ru } from 'date-fns/locale';
 
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -536,12 +536,16 @@ const TicketListing = (props: TicketListingProps) => {
           }
           setCurrentTicket(ticket as any);
           setIsShowModal(true);
+
           const updateChange = async () => {
+            const data = await dispatch(fetchOrderData(ticket?.__id ?? ''));
+
+            setCurrentTicket(data.payload ?? ticket);
+
             await api.post('/updateChange', {
             type: 'order',
             id: ticket?.__id,
             })
-            dispatch(fetchUserOrders());
           }
 
           updateChange();

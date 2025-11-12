@@ -22,3 +22,16 @@ export const fetchUserOrders = createAsyncThunk<
     return data;
   }
 );
+
+export const fetchOrderData = createAsyncThunk<
+  any,                // return type (what your thunk returns)
+  string               // argument type (since you don't pass any args)
+>(
+  "tickets/fetchOrderData",
+  async (id) => {
+
+    const { data } = await api.get(`/user/order/${id}`);
+
+    return data;
+  }
+);

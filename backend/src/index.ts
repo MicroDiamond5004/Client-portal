@@ -2,7 +2,7 @@ import express from 'express';
 import webpush from 'web-push';
 import cors from 'cors';
 import { ELMATicket, MessageType, UserData } from './data/types';
-import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId, addUser, getOrdersByUserId, getMessagesByUserId, getPassportsById, getOrdersByUserIdWithLimit, updateIsChangedByType, updateUser, createMessage } from './data/mongodbStorage';
+import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId, addUser, getOrdersByUserId, getMessagesByUserId, getPassportsById, getOrdersByUserIdWithLimit, updateIsChangedByType, updateUser, createMessage, getOrderById } from './data/mongodbStorage';
 import path from 'path';
 import fs from 'fs';
 import axios from 'axios';
@@ -644,7 +644,6 @@ app.post("/api/login", async (req, res) => {
     const currentToken = auth.headers["token"];
 
     const authData = auth.data;
-    console.log("authData===>", authData);
     try {
       await updateUser(authData.userId, { email: auth_login, password, clientName: authData.userId, clientId: authData.userId, token: currentToken, cookie: cookieValue })
       console.log('Update User');
@@ -1066,7 +1065,10 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
 
   const company = req.company;
 
-  const cookie = getCookieByToken(token) ?? '';
+  await getSergeiToken();
+  const auth = await readAuth();
+  const SergeiToken = auth?.token;
+  const cookie = auth?.cookie;
 
   // // // // console.log(fullname, email, company);
   try {
@@ -1091,7 +1093,6 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
     }, {
       headers: {
         'Authorization': `${TOKEN}`,
-        'Cookie': typeof cookie === "string" ? cookie : "",
         'Content-Type': 'application/json'
       }
     })
@@ -1118,8 +1119,8 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
       JSON.stringify({ payload: contextPayload, tempData: { withEventForceCreate: false, assignExistingIndex: false } }),
       {
         headers: {
-          'Authorization': `${token}`,
-          'Cookie': typeof cookie === "string" ? cookie : "",
+          'Authorization': `${SergeiToken}`,
+          'Cookie': `${cookie}`,
           'Content-Type': 'application/json'
         }
       }
@@ -1266,7 +1267,7 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
     });
 
   } catch (err: any) {
-    // // console.error('❌ Ошибка:', err || err.message);
+    console.error('❌ Ошибка:', err || err.message);
     res.status(500).json({ error: 'Ошибка при обработке запроса' });
   }
 });
@@ -1790,6 +1791,17 @@ app.post('/api/save-subscription/:userId', authenticateToken, (req: any, res: an
   res.status(201).json({ success: true });
 });
 
+
+app.get('/api/user/order/:id', authenticateToken, async (req: any, res: any) => {
+  const clientId = req.clientId;
+
+  const {id} = req.params;
+
+  const orderRaw = await getOrderById(id);
+
+  res.json(orderRaw?.orderData);
+})
+
 // Main function for fetch orders (only initial)
 app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
   const clientId = req.clientId;
@@ -1816,6 +1828,7 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
     //   savedPassports.map((p: any) => [p.passportId ?? "", p])
     // );
 
+  
     const fetchedOrders = {
       result: {
         result: orders.map((el) => {
@@ -1840,6 +1853,18 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
             otvet_klientu_pered_oformleniem_bron_4,
             otvet_klientu_pered_oformleniem_bron_5,
             otvet_klientu_pered_oformleniem_bron_6,
+            data_vyleta,
+            taim_limit_dlya_klienta,
+            taim_limit_dlya_klienta_bron_2,
+            taim_limit_dlya_klienta_bron_3,
+            taim_limit_dlya_klienta_bron_4,
+            taim_limit_dlya_klienta_bron_5,
+            taim_limit_dlya_klienta_bron_6,
+            dopolnitelnye_fio,
+            fio_passazhira_ov_bron_3,
+            fio_passazhira_ov_bron_4,
+            fio_passazhira_ov_bron_5,
+            fio_passazhira_ov_bron_6,
           } = el.orderData;
 
           return {
@@ -1863,6 +1888,18 @@ app.get('/api/user/orders', authenticateToken, async (req: any, res: any) => {
             otvet_klientu_pered_oformleniem_bron_5,
             otvet_klientu_pered_oformleniem_bron_6,
             isChanged: el.isChanged,
+            data_vyleta,
+            taim_limit_dlya_klienta,
+            taim_limit_dlya_klienta_bron_2,
+            taim_limit_dlya_klienta_bron_3,
+            taim_limit_dlya_klienta_bron_4,
+            taim_limit_dlya_klienta_bron_5,
+            taim_limit_dlya_klienta_bron_6,
+            dopolnitelnye_fio,
+            fio_passazhira_ov_bron_3,
+            fio_passazhira_ov_bron_4,
+            fio_passazhira_ov_bron_5,
+            fio_passazhira_ov_bron_6,
           };
 
         }),

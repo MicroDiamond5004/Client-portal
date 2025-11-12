@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ELMATicket } from 'src/mocks/tickets/ticket.type';
 import { SLiceNames } from '../names/names';
-import { fetchUserOrders } from '../middleware/thunks/ordersThunks';
+import { fetchOrderData, fetchUserOrders } from '../middleware/thunks/ordersThunks';
 import { logoutAll } from '../middleware/thunks';
 import { indexOf, isEqual } from 'lodash';
 import { selectSearchTerm } from 'src/store/selectors/ticketsSelectors.ts';
@@ -25,6 +25,7 @@ interface TicketState {
   page: number;
   limit: number;
   ordersType: 'my' | 'all';
+  selectedTicket: ELMATicket | null;
 }
 
 const initialState: TicketState = {
@@ -39,6 +40,7 @@ const initialState: TicketState = {
   page: 1,
   limit: 20,
   ordersType: 'my',
+  selectedTicket: null,
 };
 
 const ticketsSlice = createSlice({
@@ -139,8 +141,25 @@ const ticketsSlice = createSlice({
         state.passporta = {};
         state.fullOrder = {result: {result: [], total: 0}, success: false, error: ''}
       })
+      .addCase(fetchOrderData.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchOrderData.fulfilled, (state, action: PayloadAction<any>) => {
+        state.status = 'succeeded';
+
+        const order = action.payload;
+
+        const orderIndex = state.tickets.findIndex((el) => el.__id === order.__id);
+        if (orderIndex !== -1) {
+          state.tickets = [
+            ...state.tickets?.slice(0, orderIndex),
+            order,
+            ...state.tickets?.slice(orderIndex + 1),
+          ]
+        }
+      })
       .addCase(fetchUserOrders.pending, (state) => {
-        // state.status = 'loading';
+        state.status = 'loading';
       })
       .addCase(fetchUserOrders.fulfilled, (state, action: PayloadAction<any>) => {
         state.status = 'succeeded';

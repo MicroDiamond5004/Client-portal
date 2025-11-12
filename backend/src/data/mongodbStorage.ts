@@ -536,6 +536,15 @@ export async function getOrdersByUserId(userId: string): Promise<IOrder[]> {
   }
 }
 
+export async function getOrderById(elmaId: string): Promise<IOrder | null> {
+  try {
+    return await Order.findOne({ elmaId });
+  } catch (error) {
+    console.error('Error getting orders by user ID:', error);
+    return null;
+  }
+}
+
 // ==================== MESSAGE OPERATIONS ====================
 export async function createMessage(userId: string, messageData: {
   __id: string;
