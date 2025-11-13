@@ -64,45 +64,41 @@ export async function getContact(clientId: string) {
         : [contactData.result[0]?.__id];
 }
 
-export async function getOrders(kontakt: string[]) {
-  if (!kontakt.filter(Boolean).length) {
+export async function getOrders(kontakt: string[]): Promise<any[]> {
+  // Если kontakt пустой или все элементы falsy — сразу выходим
+  if (!Array.isArray(kontakt) || !kontakt.filter(Boolean).length) {
     return [];
   }
 
   try {
     const elmaResponse = await axios.post(
-        "https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list",
-        {
+      "https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list",
+      {
         active: true,
-        fields: {
-            "*": true,
-        },
+        fields: { "*": true },
         filter: {
-            tf: {
-              kontakt: kontakt
-                ? (Array.isArray(kontakt) ? kontakt : [kontakt])
-                : undefined,
+          tf: {
+            kontakt,
           },
         },
         size: 10000,
-        },
-        {
-        params: {
-            limit: 10000,
-            offset: 0,
-        },
+      },
+      {
+        params: { limit: 10000, offset: 0 },
         headers: {
-            Authorization: TOKEN,
-            "Content-Type": "application/json",
+          Authorization: TOKEN,
+          "Content-Type": "application/json",
         },
-        },
+      }
     );
 
-    return elmaResponse.data?.result?.result || [];
-    } catch (err: any) {
-      console.error(err.message)
-    }
+    return elmaResponse.data?.result?.result ?? [];
+  } catch (err: any) {
+    console.error("❌ getOrders error:", err.response?.data || err.message);
+    return [];
+  }
 }
+
 
 export async function getMessages(userId: string, order: ELMATicket, token: string, cookie: string, prevMessageCount: number): Promise<{isNewMessage: boolean, messages?: any[], authors?: Record<string, string> | undefined} | undefined> {
     const orderId = order.__id;
