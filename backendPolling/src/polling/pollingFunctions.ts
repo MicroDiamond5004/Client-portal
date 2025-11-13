@@ -64,7 +64,12 @@ export async function getContact(clientId: string) {
         : [contactData.result[0]?.__id];
 }
 
-export async function getOrders(kontakt: string) {
+export async function getOrders(kontakt: string[]) {
+  if (!kontakt.filter(Boolean).length) {
+    return [];
+  }
+
+  try {
     const elmaResponse = await axios.post(
         "https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list",
         {
@@ -93,7 +98,10 @@ export async function getOrders(kontakt: string) {
         },
     );
 
-    return elmaResponse.data?.result?.result || [];
+    return elmaResponse.data?.result?.result || [];\
+    } catch (err: any) {
+      console.error(err.message)
+    }
 }
 
 export async function getMessages(userId: string, order: ELMATicket, token: string, cookie: string, prevMessageCount: number): Promise<{isNewMessage: boolean, messages?: any[], authors?: Record<string, string> | undefined} | undefined> {
