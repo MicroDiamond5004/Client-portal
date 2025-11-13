@@ -1209,7 +1209,7 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
         const nomer_zakaza = item.nomer_zakaza;
 
         // Если поле есть — возвращаем item
-        if (typeof link === 'string' && link?.trim() !== '' && nomer_zakaza) {
+        if ((typeof link === 'string') && (link?.trim() !== '') && (nomer_zakaza?.trim() !== '')) {
           return response;
         }
 
@@ -1255,10 +1255,10 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
     //   messages: finalMessages,
     // });
 
-    await saveUserData(clientId, {
-      orders: finalOrders,
-      messages: finalMessages,
-    }, true);
+    // await saveUserData(clientId, {
+    //   orders: finalOrders,
+    //   messages: finalMessages,
+    // }, true);
 
     res.json({
       message: 'Заявка отправлена',
