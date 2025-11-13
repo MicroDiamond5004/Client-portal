@@ -1205,11 +1205,10 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
         );
 
         const item = response.data.item;
-        const link = item.ssylka_na_kartochku;
         const nomer_zakaza = item.nomer_zakaza;
 
         // Если поле есть — возвращаем item
-        if ((typeof link === 'string') && (link?.trim() !== '') && (nomer_zakaza?.trim() !== '')) {
+        if ((typeof nomer_zakaza === 'string') && (nomer_zakaza?.trim() !== '')) {
           return response;
         }
 
