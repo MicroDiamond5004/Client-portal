@@ -98,7 +98,7 @@ export async function getOrders(kontakt: string[]) {
         },
     );
 
-    return elmaResponse.data?.result?.result || [];\
+    return elmaResponse.data?.result?.result || [];
     } catch (err: any) {
       console.error(err.message)
     }

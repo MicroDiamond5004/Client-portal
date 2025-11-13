@@ -60,7 +60,7 @@ export async function getContact(clientId: string) {
         : [contactData.result[0]?.__id];
 }
 
-export async function getOrders(kontakt: string) {
+export async function getOrders(kontakt: string): Promise<any[]> {
     const elmaResponse = await axios.post(
         "https://portal.dev.lead.aero/pub/v1/app/work_orders/OrdersNew/list",
         {
@@ -70,7 +70,9 @@ export async function getOrders(kontakt: string) {
         },
         filter: {
             tf: {
-            kontakt: kontakt,
+            kontakt: kontakt
+            ? (Array.isArray(kontakt) ? kontakt : [kontakt])
+            : undefined, // не добавляем вообще, если контакт не передан
             },
         },
         size: 10000,
