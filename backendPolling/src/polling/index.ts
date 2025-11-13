@@ -135,6 +135,9 @@ export default async function pollNewMessages() {
 
           // Обработка каждого заказа с лимитом ORDER_CONCURRENCY
           const orderPromises = (mergedOrders || []).map(async (order: ELMATicket) => {
+            if (!order.nomer_zakaza) {
+              return;
+            }
             // Внутри каждого заказа — локальный try/catch чтобы не ломать общий цикл
             try {
               // Подсчёт предыдущих сообщений (со счётом комментариев)

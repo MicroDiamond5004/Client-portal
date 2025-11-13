@@ -75,7 +75,7 @@ const ChatListing = ({onClose}: {onClose?: () => void}) => {
   const filteredChats = chats?.filter((chat) => {
     const nameMatch = chat.name?.toLowerCase().includes(chatSearch.toLowerCase());
     const orderMatch = String(chat.name).includes(chatSearch);
-    const fioMatch = order.result.result.find((task: ELMATicket) => task.__id === chat.taskId)?.fio2.some((fio: string) => passports[fio]?.[0]?.toLocaleLowerCase()?.includes(chatSearch.toLocaleLowerCase()));
+    const fioMatch = order.result.result.find((task: ELMATicket) => task.__id === chat.taskId)?.fio2?.some((fio: string) => passports?.[fio]?.[0]?.toLocaleLowerCase()?.includes(chatSearch?.toLocaleLowerCase()));
     return nameMatch || orderMatch || fioMatch;
   }).sort((a, b) => {
 
