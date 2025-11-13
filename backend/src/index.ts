@@ -2,7 +2,7 @@ import express from 'express';
 import webpush from 'web-push';
 import cors from 'cors';
 import { ELMATicket, MessageType, UserData } from './data/types';
-import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId, addUser, getOrdersByUserId, getMessagesByUserId, getPassportsById, getOrdersByUserIdWithLimit, updateIsChangedByType, updateUser, createMessage, getOrderById } from './data/mongodbStorage';
+import { getAllUsersData, getUserSubscriptions, changeSubscription, deleteUserSubscriptionByEndpoint, loadUserData, saveUserData, saveUserSubscription, findAuthFileByUserId, addUser, getOrdersByUserId, getMessagesByUserId, getPassportsById, getOrdersByUserIdWithLimit, updateIsChangedByType, updateUser, createMessage, getOrderById, createOrder } from './data/mongodbStorage';
 import path from 'path';
 import fs from 'fs';
 import axios from 'axios';
@@ -1225,6 +1225,8 @@ app.post('/api/orders/new', authenticateToken, upload.array('imgs'), async (req:
 
 
     const response = await pollOrder(orderId, { interval: 500, timeout: 10000 });
+
+    await createOrder(clientId, response.data);
 
     const newOrderId = response.data?.__id;
 
