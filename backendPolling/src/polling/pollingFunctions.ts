@@ -74,8 +74,10 @@ export async function getOrders(kontakt: string) {
         },
         filter: {
             tf: {
-            kontakt: Array.isArray(kontakt) ? kontakt : [],
-            },
+              kontakt: kontakt
+                ? (Array.isArray(kontakt) ? kontakt : [kontakt])
+                : undefined,
+          },
         },
         size: 10000,
         },
