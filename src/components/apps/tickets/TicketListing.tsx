@@ -538,9 +538,7 @@ const TicketListing = (props: TicketListingProps) => {
           setIsShowModal(true);
 
           const updateChange = async () => {
-            const data = await dispatch(fetchOrderData(ticket?.__id ?? ''));
-
-            setCurrentTicket(data.payload ?? ticket);
+            dispatch(fetchOrderData(ticket?.__id ?? ''));
           }
 
           updateChange();
