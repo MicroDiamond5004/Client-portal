@@ -541,11 +541,6 @@ const TicketListing = (props: TicketListingProps) => {
             const data = await dispatch(fetchOrderData(ticket?.__id ?? ''));
 
             setCurrentTicket(data.payload ?? ticket);
-
-            await api.post('/updateChange', {
-            type: 'order',
-            id: ticket?.__id,
-            })
           }
 
           updateChange();
@@ -652,7 +647,7 @@ const TicketListing = (props: TicketListingProps) => {
           // // // console.log('fff');
       }
     }
-  }, [searchParams, status])
+  }, [searchParams])
 
   const handlerCloseModal = (isOpen: boolean) => {
     setCurrentTicket(undefined);
