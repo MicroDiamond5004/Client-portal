@@ -145,7 +145,7 @@ const ModalDetails = (props: ModalTicketProps) => {
 
   useEffect(() => {
     if (!ticket?.__id) return;
-    dispatch(fetchMessages(ticket.__id));
+    // dispatch(fetchMessages(ticket.__id));
     setIsLoading(false);
   }, []);
 

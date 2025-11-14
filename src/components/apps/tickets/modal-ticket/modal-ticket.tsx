@@ -73,20 +73,20 @@ const ModalTicket = (props: ModalTicketProps) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isDisabled, setIsDisabled] = useState(true);
 
-    useEffect(() => {
-      const fetchChats = async () => {
-        if (!ticket?.__id) return;
-        try {
-          dispatch(fetchMessages(ticket.__id));
-        } catch (err) {
-          console.error('Ошибка при загрузке чатов', err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    // useEffect(() => {
+    //   const fetchChats = async () => {
+    //     if (!ticket?.__id) return;
+    //     try {
+    //       // dispatch(fetchMessages(ticket.__id));
+    //     } catch (err) {
+    //       console.error('Ошибка при загрузке чатов', err);
+    //     } finally {
+    //       setIsLoading(false);
+    //     }
+    //   };
 
-      fetchChats();
-    }, [ticket?.__id]);
+    //   fetchChats();
+    // }, [ticket?.__id]);
 
     const selectedChat: ChatsType = {
       id: ticket?.__id ?? '',

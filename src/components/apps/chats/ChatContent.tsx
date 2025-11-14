@@ -274,7 +274,7 @@ const ChatContent = ({ onReply, replyToMsg, cancelReply, needSidebar: open, repl
         id: chat.taskId,
       });
 
-      dispatch(fetchMessages(chat.taskId));
+      // dispatch(fetchMessages(chat.taskId));
     };
 
     updateChange();

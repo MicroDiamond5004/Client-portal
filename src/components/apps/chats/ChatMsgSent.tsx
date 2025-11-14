@@ -84,7 +84,7 @@ const ChatMsgSent = ({
     if (commentMessage) {
       // console.log(commentMessage); 
       // Отправка комментария к сообщению
-      dispatch(fetchMessages(chatId));
+      // dispatch(fetchMessages(chatId));
       cancelReply?.();
       dispatch(sendComment({ id: commentMessage.messageId ?? commentMessage.id, text: msg, files }));
       setFiles([]);

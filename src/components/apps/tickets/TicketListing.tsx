@@ -1028,7 +1028,7 @@ const TicketListing = (props: TicketListingProps) => {
                           type: 'order',
                           id: ticket?.__id,
                         });
-                        dispatch(fetchUserOrders());
+                        // dispatch(fetchUserOrders());
                       };
                       updateChange();
                     }
