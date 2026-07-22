@@ -1,27 +1,48 @@
-# React + TypeScript + Vite
+# Client Portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A multi-role client workspace built as a realistic admin/portal foundation — the kind of structure a small SaaS
+actually ships with, rather than a single-screen demo. Authentication, protected routing, and a UI that changes
+shape depending on who is logged in.
 
-Currently, two official plugins are available:
+Frontend single-page app (React + TypeScript + Vite); the API layer is mocked with
+[MSW](https://mswjs.io) so the whole thing runs standalone.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What's in it
 
-## Expanding the ESLint configuration
+- **Role-based access control** with [CASL](https://casl.js.org) (`@casl/ability` + `@casl/react`) — abilities
+  are defined per role and the UI reacts to them, so a user never sees an action they can't perform
+- **Authentication flow** with protected routes
+- **Dashboards** on MUI X charts and ApexCharts
+- **Data tables** on TanStack Table
+- **Drag-and-drop boards** via dnd-kit and @hello-pangea/dnd
+- **Rich-text editing** with TipTap
+- **Forms** with Formik + Yup validation
+- **Internationalization** with i18next
+- Redux Toolkit for state, React Router for navigation
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Stack
 
-- Configure the top-level `parserOptions` property like this:
+React · TypeScript · Vite · Redux Toolkit · MUI v6 + MUI X · TanStack Table · CASL · TipTap · dnd-kit ·
+ApexCharts · Formik + Yup · i18next · MSW
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
+## Running it
+
+```bash
+npm install
+npm run dev       # start the dev server
+npm run build     # type-check and build for production
+npm run preview   # preview the production build
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## Structure
+
+```
+src/
+  views/         feature screens — dashboard, tables, charts, forms, apps
+  components/    shared UI components
+  routes/        Router.tsx and route definitions
+  context/       app-level providers (incl. CASL ability)
+  layouts/       page shells
+  mocks/         MSW request handlers
+  theme/         MUI theme
+```
